@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gmail Photography Appointment Scheduler
+Gmail Photography Appointment Scheduler with CRM
 Main application entry point
 """
 
@@ -25,7 +25,7 @@ from utils.logger import setup_logging
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.pass_context
 def cli(ctx, config, verbose):
-    """Gmail Photography Appointment Scheduler"""
+    """Gmail Photography Appointment Scheduler with CRM"""
     ctx.ensure_object(dict)
     ctx.obj['config'] = config
     ctx.obj['verbose'] = verbose
@@ -54,7 +54,7 @@ def setup(ctx):
         gmail_manager = GmailManager(config_manager)
         calendar_manager = CalendarManager(config_manager)
         
-        click.echo("Setting up Gmail Photography Appointment Scheduler...")
+        click.echo("Setting up Gmail Photography Appointment Scheduler with CRM...")
         
         # Authenticate with Google
         click.echo("Authenticating with Google...")
@@ -69,8 +69,13 @@ def setup(ctx):
         click.echo("Testing calendar access...")
         calendar_manager.test_access()
         
+        # Initialize CRM database
+        click.echo("Initializing CRM database...")
+        from scheduler.crm_manager import CRMManager
+        crm_manager = CRMManager(config_manager)
+        
         click.echo("Setup completed successfully!")
-        click.echo("You can now use the scheduler to manage appointments.")
+        click.echo("You can now use the scheduler to manage appointments and clients.")
         
     except Exception as e:
         click.echo(f"Setup failed: {e}", err=True)
@@ -83,8 +88,12 @@ def setup(ctx):
 @click.argument('session_type')
 @click.option('--duration', '-d', default=None, help='Duration in minutes')
 @click.option('--notes', '-n', help='Additional notes')
+@click.option('--email', '-e', help='Client email address')
+@click.option('--fee', '-f', type=float, help='Session fee')
+@click.option('--location', '-l', help='Session location')
+@click.option('--priority', '-p', default='normal', help='Priority (low, normal, high, urgent)')
 @click.pass_context
-def schedule(ctx, client_name, datetime, session_type, duration, notes):
+def schedule(ctx, client_name, datetime, session_type, duration, notes, email, fee, location, priority):
     """Schedule a new appointment"""
     try:
         config_manager = ctx.obj['config_manager']
@@ -97,13 +106,18 @@ def schedule(ctx, client_name, datetime, session_type, duration, notes):
             datetime_str=datetime,
             session_type=session_type,
             duration=duration,
-            notes=notes
+            notes=notes or "",
+            client_email=email or "",
+            session_fee=fee or 0.0,
+            location=location or "",
+            priority=priority
         )
         
         click.echo(f"Appointment scheduled successfully!")
         click.echo(f"ID: {appointment.id}")
         click.echo(f"Date: {appointment.start_time}")
         click.echo(f"Duration: {appointment.duration} minutes")
+        click.echo(f"Client ID: {appointment.client_id}")
         
     except Exception as e:
         click.echo(f"Failed to schedule appointment: {e}", err=True)
@@ -188,12 +202,235 @@ def sync(ctx):
                     processed += 1
                     click.echo(f"Processed appointment for {appointment.client_name}")
             except Exception as e:
-                click.echo(f"Failed to process email {email.id}: {e}")
+                click.echo(f"Failed to process email {email['id']}: {e}")
         
         click.echo(f"Sync completed. Processed {processed} appointments.")
         
     except Exception as e:
         click.echo(f"Sync failed: {e}", err=True)
+        sys.exit(1)
+
+
+# CRM Commands
+@cli.group()
+def crm():
+    """Customer Relationship Management commands"""
+    pass
+
+
+@crm.command()
+@click.argument('query')
+@click.option('--limit', '-l', default=20, help='Maximum number of results')
+@click.pass_context
+def search(ctx, query, limit):
+    """Search for clients"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Searching for clients matching '{query}'...")
+        clients = scheduler.search_clients(query, limit)
+        
+        if not clients:
+            click.echo("No clients found.")
+            return
+        
+        click.echo(f"Found {len(clients)} clients:")
+        click.echo("-" * 80)
+        
+        for client in clients:
+            click.echo(f"ID: {client.id}")
+            click.echo(f"Name: {client.name}")
+            click.echo(f"Email: {client.email}")
+            click.echo(f"Phone: {client.phone}")
+            click.echo(f"Total Appointments: {client.total_appointments}")
+            click.echo(f"Total Spent: ${client.total_spent:.2f}")
+            if client.tags:
+                click.echo(f"Tags: {', '.join(client.tags)}")
+            click.echo("-" * 40)
+        
+    except Exception as e:
+        click.echo(f"Search failed: {e}", err=True)
+        sys.exit(1)
+
+
+@crm.command()
+@click.argument('client_id')
+@click.pass_context
+def client(ctx, client_id):
+    """Get detailed client information"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Getting details for client {client_id}...")
+        client = scheduler.get_client_details(client_id)
+        
+        if not client:
+            click.echo("Client not found.")
+            return
+        
+        click.echo("Client Details:")
+        click.echo("=" * 50)
+        click.echo(f"ID: {client.id}")
+        click.echo(f"Name: {client.name}")
+        click.echo(f"Email: {client.email}")
+        click.echo(f"Phone: {client.phone}")
+        click.echo(f"Address: {client.address}")
+        click.echo(f"Company: {client.company}")
+        click.echo(f"Website: {client.website}")
+        click.echo(f"Referral Source: {client.referral_source}")
+        click.echo(f"Tags: {', '.join(client.tags) if client.tags else 'None'}")
+        click.echo(f"Total Appointments: {client.total_appointments}")
+        click.echo(f"Total Spent: ${client.total_spent:.2f}")
+        click.echo(f"Average Session Value: ${client.average_session_value:.2f}")
+        click.echo(f"Customer Lifetime Value: ${client.customer_lifetime_value:.2f}")
+        click.echo(f"Created: {client.created_at.strftime('%Y-%m-%d')}")
+        click.echo(f"Last Contact: {client.last_contact.strftime('%Y-%m-%d') if client.last_contact else 'Never'}")
+        click.echo(f"Last Appointment: {client.last_appointment.strftime('%Y-%m-%d') if client.last_appointment else 'Never'}")
+        
+        if client.notes:
+            click.echo(f"\nNotes: {client.notes}")
+        
+    except Exception as e:
+        click.echo(f"Failed to get client details: {e}", err=True)
+        sys.exit(1)
+
+
+@crm.command()
+@click.argument('client_id')
+@click.argument('note_content')
+@click.option('--title', '-t', help='Note title')
+@click.option('--type', '--note-type', default='general', help='Note type (general, follow_up, marketing, internal)')
+@click.option('--author', '-a', default='System', help='Note author')
+@click.option('--internal', '-i', is_flag=True, help='Mark as internal note')
+@click.pass_context
+def add_note(ctx, client_id, note_content, title, type, author, internal):
+    """Add a note to a client"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Adding note to client {client_id}...")
+        
+        success = scheduler.add_client_note(
+            client_id=client_id,
+            note_content=note_content,
+            note_type=type,
+            title=title or "",
+            author=author,
+            internal=internal
+        )
+        
+        if success:
+            click.echo("Note added successfully!")
+        else:
+            click.echo("Failed to add note.")
+            sys.exit(1)
+        
+    except Exception as e:
+        click.echo(f"Failed to add note: {e}", err=True)
+        sys.exit(1)
+
+
+@crm.command()
+@click.pass_context
+def analytics(ctx):
+    """Get CRM analytics and insights"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo("Getting CRM analytics...")
+        analytics = scheduler.get_crm_analytics()
+        
+        if not analytics:
+            click.echo("No analytics data available.")
+            return
+        
+        click.echo("CRM Analytics:")
+        click.echo("=" * 50)
+        click.echo(f"Total Clients: {analytics.get('total_clients', 0)}")
+        click.echo(f"New Clients This Month: {analytics.get('new_clients_month', 0)}")
+        click.echo(f"Total Appointments: {analytics.get('total_appointments', 0)}")
+        click.echo(f"Appointments This Month: {analytics.get('appointments_month', 0)}")
+        click.echo(f"Total Revenue: ${analytics.get('total_revenue', 0):.2f}")
+        click.echo(f"Monthly Revenue: ${analytics.get('monthly_revenue', 0):.2f}")
+        click.echo(f"Average Session Value: ${analytics.get('average_session_value', 0):.2f}")
+        
+        if analytics.get('top_referral_sources'):
+            click.echo(f"\nTop Referral Sources:")
+            for source, count in analytics['top_referral_sources'].items():
+                click.echo(f"  {source}: {count}")
+        
+        if analytics.get('tag_distribution'):
+            click.echo(f"\nClient Tag Distribution:")
+            for tag, count in analytics['tag_distribution'].items():
+                click.echo(f"  {tag}: {count}")
+        
+        if analytics.get('payment_status_distribution'):
+            click.echo(f"\nPayment Status Distribution:")
+            for status, count in analytics['payment_status_distribution'].items():
+                click.echo(f"  {status}: {count}")
+        
+    except Exception as e:
+        click.echo(f"Failed to get analytics: {e}", err=True)
+        sys.exit(1)
+
+
+@crm.command()
+@click.pass_context
+def follow_ups(ctx):
+    """List follow-up tasks that need attention"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo("Getting follow-up tasks...")
+        follow_ups = scheduler.get_follow_up_tasks()
+        
+        if not follow_ups:
+            click.echo("No follow-up tasks found.")
+            return
+        
+        click.echo(f"Found {len(follow_ups)} follow-up tasks:")
+        click.echo("-" * 80)
+        
+        for task in follow_ups:
+            click.echo(f"Appointment ID: {task['appointment_id']}")
+            click.echo(f"Client: {task['client_name']}")
+            click.echo(f"Notes: {task['follow_up_notes']}")
+            click.echo(f"Appointment Date: {task['appointment_date']}")
+            click.echo(f"Contact: {task['client_email']} / {task['client_phone']}")
+            click.echo("-" * 40)
+        
+    except Exception as e:
+        click.echo(f"Failed to get follow-up tasks: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument('appointment_id')
+@click.argument('reason')
+@click.pass_context
+def cancel(ctx, appointment_id, reason):
+    """Cancel an appointment"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Cancelling appointment {appointment_id}...")
+        
+        success = scheduler.cancel_appointment(appointment_id, reason)
+        
+        if success:
+            click.echo("Appointment cancelled successfully!")
+        else:
+            click.echo("Failed to cancel appointment.")
+            sys.exit(1)
+        
+    except Exception as e:
+        click.echo(f"Failed to cancel appointment: {e}", err=True)
         sys.exit(1)
 
 

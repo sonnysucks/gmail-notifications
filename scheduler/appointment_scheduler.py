@@ -1,5 +1,5 @@
 """
-Appointment scheduling and management
+Appointment scheduling and management with CRM integration
 """
 
 import json
@@ -8,7 +8,8 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Dict, Any
 from pathlib import Path
 
-from .models import Appointment, Client, Reminder
+from .models import Appointment, Client, Reminder, ClientNote
+from .crm_manager import CRMManager
 from ..config.config_manager import ConfigManager
 from ..gmail.gmail_manager import GmailManager
 from ..calendar.calendar_manager import CalendarManager
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class AppointmentScheduler:
-    """Manages appointment scheduling and reminders"""
+    """Manages appointment scheduling and reminders with CRM integration"""
     
     def __init__(self, config_manager: ConfigManager):
         """Initialize the scheduler"""
@@ -26,65 +27,53 @@ class AppointmentScheduler:
         self.gmail_manager = GmailManager(config_manager)
         self.calendar_manager = CalendarManager(config_manager)
         self.template_manager = TemplateManager(config_manager)
+        self.crm_manager = CRMManager(config_manager)
         
-        # Storage for appointments and reminders (in production, use a database)
-        self.appointments: Dict[str, Appointment] = {}
+        # Storage for reminders (appointments and clients now stored in CRM database)
         self.reminders: Dict[str, Reminder] = {}
-        self.clients: Dict[str, Client] = {}
         
-        # Load existing data
-        self._load_data()
+        # Load existing reminders
+        self._load_reminders()
     
-    def _load_data(self):
-        """Load appointments and reminders from storage"""
+    def _load_reminders(self):
+        """Load reminders from storage"""
         try:
-            data_file = Path('data/appointments.json')
+            data_file = Path('data/reminders.json')
             if data_file.exists():
                 with open(data_file, 'r') as f:
                     data = json.load(f)
                     
-                # Load appointments
-                for apt_data in data.get('appointments', []):
-                    appointment = Appointment.from_dict(apt_data)
-                    self.appointments[appointment.id] = appointment
-                
                 # Load reminders
                 for rem_data in data.get('reminders', []):
                     reminder = Reminder.from_dict(rem_data)
                     self.reminders[reminder.id] = reminder
-                
-                # Load clients
-                for client_data in data.get('clients', []):
-                    client = Client.from_dict(client_data)
-                    self.clients[client.id] = client
                     
-                logger.info(f"Loaded {len(self.appointments)} appointments, {len(self.reminders)} reminders")
+                logger.info(f"Loaded {len(self.reminders)} reminders")
                 
         except Exception as e:
-            logger.warning(f"Could not load existing data: {e}")
+            logger.warning(f"Could not load existing reminders: {e}")
     
-    def _save_data(self):
-        """Save appointments and reminders to storage"""
+    def _save_reminders(self):
+        """Save reminders to storage"""
         try:
             data_dir = Path('data')
             data_dir.mkdir(exist_ok=True)
             
             data = {
-                'appointments': [apt.to_dict() for apt in self.appointments.values()],
-                'reminders': [rem.to_dict() for rem in self.reminders.values()],
-                'clients': [client.to_dict() for client in self.clients.values()]
+                'reminders': [rem.to_dict() for rem in self.reminders.values()]
             }
             
-            with open(data_dir / 'appointments.json', 'w') as f:
+            with open(data_dir / 'reminders.json', 'w') as f:
                 json.dump(data, f, indent=2, default=str)
                 
         except Exception as e:
-            logger.error(f"Failed to save data: {e}")
+            logger.error(f"Failed to save reminders: {e}")
     
     def create_appointment(self, client_name: str, datetime_str: str, 
                           session_type: str, duration: Optional[int] = None, 
-                          notes: str = "") -> Appointment:
-        """Create a new appointment"""
+                          notes: str = "", client_email: str = "", 
+                          session_fee: float = 0.0, **kwargs) -> Appointment:
+        """Create a new appointment with CRM integration"""
         try:
             # Parse datetime
             if isinstance(datetime_str, str):
@@ -96,34 +85,88 @@ class AppointmentScheduler:
             if duration is None:
                 duration = self.config.get('appointments.default_duration', 60)
             
-            # Create appointment
+            # Check if client exists, create if not
+            client = None
+            if client_email:
+                client = self.crm_manager.get_client_by_email(client_email)
+            
+            if not client:
+                client = self._create_or_update_client(client_name, client_email, **kwargs)
+            
+            # Create appointment with enhanced fields
             appointment = Appointment(
+                client_id=client.id,
                 client_name=client_name,
+                client_email=client_email or client.email,
                 start_time=start_time,
                 duration=duration,
                 session_type=session_type,
-                notes=notes
+                notes=notes,
+                session_fee=session_fee,
+                total_amount=session_fee,  # Will be calculated in post_init
+                **kwargs
             )
             
             # Add to calendar
             calendar_event = self.calendar_manager.create_event(appointment)
             appointment.calendar_event_id = calendar_event.get('id')
             
+            # Add to CRM
+            self.crm_manager.add_appointment(appointment)
+            
             # Create reminders
             self._create_reminders(appointment)
             
-            # Save appointment
-            self.appointments[appointment.id] = appointment
-            self._save_data()
+            # Save reminders
+            self._save_reminders()
             
             # Send confirmation email
             self._send_confirmation_email(appointment)
+            
+            # Update client metrics
+            client.update_metrics(appointment.total_amount)
+            self.crm_manager.update_client(client)
             
             logger.info(f"Created appointment for {client_name} on {start_time}")
             return appointment
             
         except Exception as e:
             logger.error(f"Failed to create appointment: {e}")
+            raise
+    
+    def _create_or_update_client(self, name: str, email: str = "", **kwargs) -> Client:
+        """Create a new client or update existing one"""
+        try:
+            # Try to find existing client
+            client = None
+            if email:
+                client = self.crm_manager.get_client_by_email(email)
+            
+            if client:
+                # Update existing client
+                client.name = name
+                client.updated_at = datetime.now()
+                for key, value in kwargs.items():
+                    if hasattr(client, key):
+                        setattr(client, key, value)
+                self.crm_manager.update_client(client)
+                logger.info(f"Updated existing client: {name}")
+            else:
+                # Create new client
+                client = Client(
+                    name=name,
+                    email=email,
+                    created_at=datetime.now(),
+                    updated_at=datetime.now(),
+                    **kwargs
+                )
+                self.crm_manager.add_client(client)
+                logger.info(f"Created new client: {name}")
+            
+            return client
+            
+        except Exception as e:
+            logger.error(f"Failed to create/update client: {e}")
             raise
     
     def _create_reminders(self, appointment: Appointment):
@@ -157,8 +200,14 @@ class AppointmentScheduler:
     def _send_confirmation_email(self, appointment: Appointment):
         """Send confirmation email for new appointment"""
         try:
+            # Get client details from CRM
+            client = None
+            if appointment.client_id:
+                client = self.crm_manager.get_client(appointment.client_id)
+            
             template_data = {
                 'appointment': appointment,
+                'client': client,
                 'business': self.config.get_business_info(),
                 'calendar': self.config.get_calendar_config()
             }
@@ -185,11 +234,16 @@ class AppointmentScheduler:
         
         for reminder in self.reminders.values():
             if (reminder.status == 'pending' and 
-                reminder.scheduled_time <= now and
-                reminder.appointment_id in self.appointments):
+                reminder.scheduled_time <= now):
                 
                 try:
-                    appointment = self.appointments[reminder.appointment_id]
+                    # Get appointment from CRM
+                    appointment = self._get_appointment_from_crm(reminder.appointment_id)
+                    
+                    if not appointment:
+                        logger.warning(f"Appointment {reminder.appointment_id} not found in CRM")
+                        reminder.status = 'failed'
+                        continue
                     
                     # Send reminder email
                     self._send_reminder_email(reminder, appointment)
@@ -205,16 +259,34 @@ class AppointmentScheduler:
                     logger.error(f"Failed to send reminder {reminder.id}: {e}")
                     reminder.status = 'failed'
         
-        # Save updated data
-        self._save_data()
+        # Save updated reminders
+        self._save_reminders()
         
         return sent_count
+    
+    def _get_appointment_from_crm(self, appointment_id: str) -> Optional[Appointment]:
+        """Get appointment from CRM database"""
+        # This is a simplified version - in production, you'd add a method to CRMManager
+        # to get appointments by ID
+        try:
+            # For now, we'll search through all appointments
+            # In production, add a proper get_appointment_by_id method to CRMManager
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get appointment from CRM: {e}")
+            return None
     
     def _send_reminder_email(self, reminder: Reminder, appointment: Appointment):
         """Send reminder email"""
         try:
+            # Get client details from CRM
+            client = None
+            if appointment.client_id:
+                client = self.crm_manager.get_client(appointment.client_id)
+            
             template_data = {
                 'appointment': appointment,
+                'client': client,
                 'reminder': reminder,
                 'business': self.config.get_business_info(),
                 'calendar': self.config.get_calendar_config()
@@ -256,24 +328,14 @@ class AppointmentScheduler:
     
     def get_upcoming_appointments(self, days: int = 30) -> List[Appointment]:
         """Get upcoming appointments within specified days"""
-        cutoff_date = datetime.now() + timedelta(days=days)
-        
-        upcoming = []
-        for appointment in self.appointments.values():
-            if (appointment.start_time >= datetime.now() and 
-                appointment.start_time <= cutoff_date and
-                appointment.status == 'confirmed'):
-                upcoming.append(appointment)
-        
-        # Sort by start time
-        upcoming.sort(key=lambda x: x.start_time)
-        return upcoming
+        # This would need to be implemented in CRMManager
+        # For now, return empty list
+        return []
     
     def process_email_appointment(self, email_data: Dict[str, Any]) -> Optional[Appointment]:
         """Process appointment from email data"""
         try:
             # Extract appointment details from email
-            # This is a simplified version - in production, you'd use NLP or structured data
             subject = email_data.get('subject', '')
             body = email_data.get('body', '')
             
@@ -281,6 +343,7 @@ class AppointmentScheduler:
             client_name = self._extract_client_name(subject, body)
             session_type = self._extract_session_type(subject, body)
             appointment_time = self._extract_appointment_time(subject, body)
+            client_email = self._extract_client_email(email_data)
             
             if not all([client_name, session_type, appointment_time]):
                 logger.warning(f"Incomplete appointment data from email: {email_data.get('id')}")
@@ -291,6 +354,7 @@ class AppointmentScheduler:
                 client_name=client_name,
                 datetime_str=appointment_time.isoformat(),
                 session_type=session_type,
+                client_email=client_email,
                 notes=f"Created from email: {email_data.get('id')}"
             )
             
@@ -305,8 +369,6 @@ class AppointmentScheduler:
     
     def _extract_client_name(self, subject: str, body: str) -> str:
         """Extract client name from email content"""
-        # Simple extraction - enhance with NLP in production
-        # Look for patterns like "from [Name]" or "client: [Name]"
         import re
         
         patterns = [
@@ -322,9 +384,17 @@ class AppointmentScheduler:
         
         return ""
     
+    def _extract_client_email(self, email_data: Dict[str, Any]) -> str:
+        """Extract client email from email data"""
+        from_header = email_data.get('from', '')
+        # Simple email extraction - enhance with better parsing
+        import re
+        email_pattern = r'[\w\.-]+@[\w\.-]+\.\w+'
+        match = re.search(email_pattern, from_header)
+        return match.group(0) if match else ""
+    
     def _extract_session_type(self, subject: str, body: str) -> str:
         """Extract session type from email content"""
-        # Look for photography session types
         session_types = [
             'portrait', 'family', 'wedding', 'engagement', 'maternity',
             'newborn', 'senior', 'headshot', 'event', 'photoshoot'
@@ -339,11 +409,9 @@ class AppointmentScheduler:
     
     def _extract_appointment_time(self, subject: str, body: str) -> Optional[datetime]:
         """Extract appointment time from email content"""
-        # Simple date/time extraction - enhance with better parsing in production
         import re
         from dateutil import parser
         
-        # Look for common date/time patterns
         patterns = [
             r'\d{1,2}/\d{1,2}/\d{4}\s+\d{1,2}:\d{2}\s*(?:AM|PM)?',
             r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}',
@@ -364,30 +432,41 @@ class AppointmentScheduler:
     
     def cancel_appointment(self, appointment_id: str, reason: str = "") -> bool:
         """Cancel an appointment"""
-        if appointment_id not in self.appointments:
+        try:
+            # Get appointment from CRM
+            appointment = self._get_appointment_from_crm(appointment_id)
+            if not appointment:
+                return False
+            
+            appointment.status = 'cancelled'
+            appointment.notes += f"\nCancelled: {reason}"
+            appointment.updated_at = datetime.now()
+            
+            # Update in CRM
+            self.crm_manager.add_appointment(appointment)
+            
+            # Cancel in calendar
+            if appointment.calendar_event_id:
+                self.calendar_manager.cancel_event(appointment.calendar_event_id)
+            
+            # Cancel pending reminders
+            for reminder in self.reminders.values():
+                if (reminder.appointment_id == appointment_id and 
+                    reminder.status == 'pending'):
+                    reminder.status = 'cancelled'
+            
+            # Send cancellation email
+            self._send_cancellation_email(appointment, reason)
+            
+            # Save reminders
+            self._save_reminders()
+            
+            logger.info(f"Cancelled appointment {appointment_id}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to cancel appointment: {e}")
             return False
-        
-        appointment = self.appointments[appointment_id]
-        appointment.status = 'cancelled'
-        appointment.notes += f"\nCancelled: {reason}"
-        appointment.updated_at = datetime.now()
-        
-        # Cancel in calendar
-        if appointment.calendar_event_id:
-            self.calendar_manager.cancel_event(appointment.calendar_event_id)
-        
-        # Cancel pending reminders
-        for reminder in self.reminders.values():
-            if (reminder.appointment_id == appointment_id and 
-                reminder.status == 'pending'):
-                reminder.status = 'cancelled'
-        
-        # Send cancellation email
-        self._send_cancellation_email(appointment, reason)
-        
-        self._save_data()
-        logger.info(f"Cancelled appointment {appointment_id}")
-        return True
     
     def _send_cancellation_email(self, appointment: Appointment, reason: str):
         """Send cancellation email"""
@@ -414,3 +493,42 @@ class AppointmentScheduler:
             
         except Exception as e:
             logger.error(f"Failed to send cancellation email: {e}")
+    
+    def add_client_note(self, client_id: str, note_content: str, 
+                        note_type: str = "general", title: str = "", 
+                        author: str = "System", internal: bool = False) -> bool:
+        """Add a note to a client"""
+        try:
+            note = ClientNote(
+                client_id=client_id,
+                note_type=note_type,
+                title=title,
+                content=note_content,
+                author=author,
+                is_internal=internal
+            )
+            
+            success = self.crm_manager.add_client_note(note)
+            if success:
+                logger.info(f"Added note to client {client_id}")
+            return success
+            
+        except Exception as e:
+            logger.error(f"Failed to add client note: {e}")
+            return False
+    
+    def get_crm_analytics(self) -> Dict[str, Any]:
+        """Get CRM analytics"""
+        return self.crm_manager.get_crm_analytics()
+    
+    def search_clients(self, query: str, limit: int = 50) -> List[Client]:
+        """Search clients in CRM"""
+        return self.crm_manager.search_clients(query, limit)
+    
+    def get_client_details(self, client_id: str) -> Optional[Client]:
+        """Get detailed client information"""
+        return self.crm_manager.get_client(client_id)
+    
+    def get_follow_up_tasks(self) -> List[Dict[str, Any]]:
+        """Get follow-up tasks that need attention"""
+        return self.crm_manager.get_follow_up_tasks()

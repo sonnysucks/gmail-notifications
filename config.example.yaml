@@ -8,6 +8,8 @@ business:
   phone: "+1-555-0123"
   website: "https://yourphotography.com"
   address: "123 Photography St, City, State 12345"
+  tax_id: "12-3456789"
+  business_type: "LLC"  # LLC, Corporation, Sole Proprietorship, etc.
 
 # Google Calendar Settings
 calendar:
@@ -28,6 +30,130 @@ appointments:
     - days: 3           # 3 days before
     - days: 2           # 2 days before
     - days: 1           # 1 day before
+  
+  # Session Types and Pricing
+  session_types:
+    portrait:
+      name: "Portrait Session"
+      duration: 60
+      base_price: 150.00
+      description: "Professional portrait photography session"
+    family:
+      name: "Family Session"
+      duration: 90
+      base_price: 250.00
+      description: "Family portrait photography session"
+    wedding:
+      name: "Wedding Photography"
+      duration: 480
+      base_price: 1500.00
+      description: "Full wedding day coverage"
+    engagement:
+      name: "Engagement Session"
+      duration: 90
+      base_price: 200.00
+      description: "Engagement couple photography session"
+    maternity:
+      name: "Maternity Session"
+      duration: 60
+      base_price: 180.00
+      description: "Maternity photography session"
+    newborn:
+      name: "Newborn Session"
+      duration: 120
+      base_price: 300.00
+      description: "Newborn photography session"
+    senior:
+      name: "Senior Portrait"
+      duration: 60
+      base_price: 120.00
+      description: "High school senior portrait session"
+    headshot:
+      name: "Professional Headshot"
+      duration: 45
+      base_price: 100.00
+      description: "Professional headshot for business"
+    event:
+      name: "Event Photography"
+      duration: 120
+      base_price: 400.00
+      description: "Event coverage and photography"
+    photoshoot:
+      name: "Custom Photoshoot"
+      duration: 90
+      base_price: 200.00
+      description: "Custom photography session"
+
+# CRM Settings
+crm:
+  # Client Management
+  default_tags:
+    - "New Client"
+    - "VIP"
+    - "Returning Client"
+    - "Referral"
+    - "Wedding Client"
+    - "Portrait Client"
+    - "Event Client"
+  
+  # Referral Sources
+  referral_sources:
+    - "Google Search"
+    - "Social Media"
+    - "Word of Mouth"
+    - "Wedding Wire"
+    - "The Knot"
+    - "Yelp"
+    - "Facebook"
+    - "Instagram"
+    - "Referral Program"
+    - "Other"
+  
+  # Budget Ranges
+  budget_ranges:
+    - "$100-250"
+    - "$250-500"
+    - "$500-1000"
+    - "$1000-2000"
+    - "$2000-5000"
+    - "$5000+"
+  
+  # Project Types
+  project_types:
+    - "Personal"
+    - "Business"
+    - "Wedding"
+    - "Event"
+    - "Portrait"
+    - "Commercial"
+    - "Editorial"
+    - "Other"
+  
+  # Industries (for business clients)
+  industries:
+    - "Technology"
+    - "Healthcare"
+    - "Finance"
+    - "Education"
+    - "Real Estate"
+    - "Legal"
+    - "Retail"
+    - "Restaurant"
+    - "Non-Profit"
+    - "Other"
+  
+  # Follow-up Settings
+  follow_up:
+    enabled: true
+    default_delay_days: 3
+    reminder_frequency: "daily"  # daily, weekly, monthly
+  
+  # Marketing Settings
+  marketing:
+    email_campaigns_enabled: true
+    social_media_integration: true
+    referral_program_enabled: true
+    referral_bonus: 50.00  # Amount for successful referrals
 
 # Email Templates
 email:
@@ -40,11 +166,22 @@ email:
     reminder_3days: "templates/reminder_3days.html"
     reminder_2days: "templates/reminder_2days.html"
     reminder_1day: "templates/reminder_1day.html"
+    follow_up: "templates/follow_up.html"
+    thank_you: "templates/thank_you.html"
+    referral_request: "templates/referral_request.html"
 
 # Gmail Settings
 gmail:
   label_name: "Photography Appointments"
   search_query: "subject:(appointment OR session OR photoshoot) OR body:(appointment OR session OR photoshoot)"
+
+# Database Settings
+database:
+  type: "sqlite"  # sqlite, postgresql, mysql
+  path: "data/crm.db"
+  backup_enabled: true
+  backup_frequency: "daily"  # daily, weekly, monthly
+  backup_retention: 30  # days
 
 # Logging
 logging:
@@ -52,3 +189,25 @@ logging:
   file: "logs/appointments.log"
   max_size: "10MB"
   backup_count: 5
+  
+  # Separate CRM logging
+  crm_log_file: "logs/crm.log"
+  crm_log_level: "INFO"
+
+# Reporting and Analytics
+analytics:
+  enabled: true
+  dashboard_enabled: true
+  export_formats: ["csv", "pdf", "json"]
+  scheduled_reports: true
+  report_frequency: "weekly"  # daily, weekly, monthly, quarterly
+  
+  # Key Performance Indicators
+  kpis:
+    - "Total Revenue"
+    - "New Clients per Month"
+    - "Client Retention Rate"
+    - "Average Session Value"
+    - "Referral Rate"
+    - "Customer Lifetime Value"
+    - "Appointment Conversion Rate"
