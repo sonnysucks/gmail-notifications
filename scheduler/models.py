@@ -1,5 +1,6 @@
 """
 Data models for appointments, clients, and CRM functionality
+Specialized for maternity, baby, smash cake, and birthday photography
 """
 
 from datetime import datetime, timedelta
@@ -9,8 +10,147 @@ import uuid
 
 
 @dataclass
+class BabyMilestone:
+    """Track baby development milestones for photography planning"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    client_id: str = ""
+    baby_name: str = ""
+    birth_date: Optional[datetime] = None
+    milestone_type: str = ""  # newborn, 3month, 6month, 9month, 1year, etc.
+    milestone_date: Optional[datetime] = None
+    age_in_days: int = 0
+    age_in_weeks: int = 0
+    age_in_months: int = 0
+    notes: str = ""
+    completed: bool = False
+    created_at: datetime = field(default_factory=datetime.now)
+    
+    def calculate_age(self):
+        """Calculate baby's current age"""
+        if not self.birth_date:
+            return
+        
+        now = datetime.now()
+        delta = now - self.birth_date
+        
+        self.age_in_days = delta.days
+        self.age_in_weeks = delta.days // 7
+        self.age_in_months = (delta.days // 30)
+    
+    def get_next_milestone(self) -> str:
+        """Get the next recommended milestone"""
+        if self.age_in_days < 14:
+            return "newborn"
+        elif self.age_in_days < 90:
+            return "3month"
+        elif self.age_in_days < 180:
+            return "6month"
+        elif self.age_in_days < 270:
+            return "9month"
+        elif self.age_in_days < 365:
+            return "1year"
+        elif self.age_in_days < 730:
+            return "18month"
+        else:
+            return "2year"
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert milestone to dictionary"""
+        return {
+            'id': self.id,
+            'client_id': self.client_id,
+            'baby_name': self.baby_name,
+            'birth_date': self.birth_date.isoformat() if self.birth_date else None,
+            'milestone_type': self.milestone_type,
+            'milestone_date': self.milestone_date.isoformat() if self.milestone_date else None,
+            'age_in_days': self.age_in_days,
+            'age_in_weeks': self.age_in_weeks,
+            'age_in_months': self.age_in_months,
+            'notes': self.notes,
+            'completed': self.completed,
+            'created_at': self.created_at.isoformat()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BabyMilestone':
+        """Create milestone from dictionary"""
+        return cls(
+            id=data.get('id', str(uuid.uuid4())),
+            client_id=data.get('client_id', ''),
+            baby_name=data.get('baby_name', ''),
+            birth_date=datetime.fromisoformat(data.get('birth_date')) if data.get('birth_date') else None,
+            milestone_type=data.get('milestone_type', ''),
+            milestone_date=datetime.fromisoformat(data.get('milestone_date')) if data.get('milestone_date') else None,
+            age_in_days=data.get('age_in_days', 0),
+            age_in_weeks=data.get('age_in_weeks', 0),
+            age_in_months=data.get('age_in_months', 0),
+            notes=data.get('notes', ''),
+            completed=data.get('completed', False),
+            created_at=datetime.fromisoformat(data.get('created_at', datetime.now().isoformat()))
+        )
+
+
+@dataclass
+class BirthdaySession:
+    """Specialized birthday photography session details"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    appointment_id: str = ""
+    child_name: str = ""
+    age_turning: int = 0
+    birthday_date: Optional[datetime] = None
+    session_date: Optional[datetime] = None
+    theme: str = ""  # princess, superhero, farm, etc.
+    colors: List[str] = field(default_factory=list)
+    props_needed: List[str] = field(default_factory=list)
+    cake_flavor: str = ""
+    cake_design: str = ""
+    special_requests: str = ""
+    parent_vision: str = ""
+    created_at: datetime = field(default_factory=datetime.now)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert birthday session to dictionary"""
+        return {
+            'id': self.id,
+            'appointment_id': self.appointment_id,
+            'child_name': self.child_name,
+            'age_turning': self.age_turning,
+            'birthday_date': self.birthday_date.isoformat() if self.birthday_date else None,
+            'session_date': self.session_date.isoformat() if self.session_date else None,
+            'theme': self.theme,
+            'colors': self.colors,
+            'props_needed': self.props_needed,
+            'cake_flavor': self.cake_flavor,
+            'cake_design': self.cake_design,
+            'special_requests': self.special_requests,
+            'parent_vision': self.parent_vision,
+            'created_at': self.created_at.isoformat()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'BirthdaySession':
+        """Create birthday session from dictionary"""
+        return cls(
+            id=data.get('id', str(uuid.uuid4())),
+            appointment_id=data.get('appointment_id', ''),
+            child_name=data.get('child_name', ''),
+            age_turning=data.get('age_turning', 0),
+            birthday_date=datetime.fromisoformat(data.get('birthday_date')) if data.get('birthday_date') else None,
+            session_date=datetime.fromisoformat(data.get('session_date')) if data.get('session_date') else None,
+            theme=data.get('theme', ''),
+            colors=data.get('colors', []),
+            props_needed=data.get('props_needed', []),
+            cake_flavor=data.get('cake_flavor', ''),
+            cake_design=data.get('cake_design', ''),
+            special_requests=data.get('special_requests', ''),
+            parent_vision=data.get('parent_vision', ''),
+            created_at=datetime.fromisoformat(data.get('created_at', datetime.now().isoformat()))
+        )
+
+
+@dataclass
 class Client:
-    """Client information with comprehensive CRM data"""
+    """Client information with comprehensive CRM data for baby photography"""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     name: str = ""
     email: str = ""
@@ -28,6 +168,14 @@ class Client:
     referral_source: str = ""  # How they found you
     marketing_consent: bool = False
     tags: List[str] = field(default_factory=list)  # VIP, New Client, etc.
+    
+    # Baby Photography Specific Fields
+    family_type: str = ""  # expecting, newborn, baby, toddler, multiple_children
+    due_date: Optional[datetime] = None
+    children_info: List[Dict[str, Any]] = field(default_factory=list)  # List of children details
+    family_size: int = 1
+    previous_photographer: str = ""
+    photography_experience: str = ""  # first_time, experienced, professional
     
     # Business Information
     industry: str = ""
@@ -69,6 +217,12 @@ class Client:
             'referral_source': self.referral_source,
             'marketing_consent': self.marketing_consent,
             'tags': self.tags,
+            'family_type': self.family_type,
+            'due_date': self.due_date.isoformat() if self.due_date else None,
+            'children_info': self.children_info,
+            'family_size': self.family_size,
+            'previous_photographer': self.previous_photographer,
+            'photography_experience': self.photography_experience,
             'industry': self.industry,
             'budget_range': self.budget_range,
             'project_type': self.project_type,
@@ -104,6 +258,12 @@ class Client:
             referral_source=data.get('referral_source', ''),
             marketing_consent=data.get('marketing_consent', False),
             tags=data.get('tags', []),
+            family_type=data.get('family_type', ''),
+            due_date=datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None,
+            children_info=data.get('children_info', []),
+            family_size=data.get('family_size', 1),
+            previous_photographer=data.get('previous_photographer', ''),
+            photography_experience=data.get('photography_experience', ''),
             industry=data.get('industry', ''),
             budget_range=data.get('budget_range', ''),
             project_type=data.get('project_type', ''),
@@ -152,11 +312,32 @@ class Client:
         if tag in self.tags:
             self.tags.remove(tag)
             self.updated_at = datetime.now()
+    
+    def add_child(self, child_info: Dict[str, Any]):
+        """Add child information to the client"""
+        self.children_info.append(child_info)
+        self.family_size = len(self.children_info)
+        self.updated_at = datetime.now()
+    
+    def get_children_names(self) -> List[str]:
+        """Get list of children names"""
+        return [child.get('name', '') for child in self.children_info if child.get('name')]
+    
+    def is_expecting(self) -> bool:
+        """Check if client is expecting"""
+        return self.family_type == "expecting" and self.due_date is not None
+    
+    def get_days_until_due(self) -> Optional[int]:
+        """Get days until due date"""
+        if not self.due_date:
+            return None
+        delta = self.due_date.date() - datetime.now().date()
+        return delta.days
 
 
 @dataclass
 class Appointment:
-    """Appointment information with enhanced CRM tracking"""
+    """Appointment information with enhanced CRM tracking for baby photography"""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     client_id: str = ""  # Reference to Client
     client_name: str = ""
@@ -165,6 +346,17 @@ class Appointment:
     end_time: datetime = field(default_factory=datetime.now)
     duration: int = 60  # minutes
     session_type: str = ""
+    
+    # Baby Photography Specific Fields
+    baby_age_days: Optional[int] = None
+    baby_age_weeks: Optional[int] = None
+    baby_age_months: Optional[int] = None
+    milestone_type: str = ""  # newborn, 3month, 6month, 9month, 1year, etc.
+    is_milestone_session: bool = False
+    baby_name: str = ""
+    parent_names: List[str] = field(default_factory=list)
+    siblings_included: bool = False
+    sibling_names: List[str] = field(default_factory=list)
     
     # CRM and Business Fields
     status: str = "confirmed"  # confirmed, cancelled, completed, rescheduled
@@ -250,6 +442,16 @@ class Appointment:
             return 0.0
         return self.total_amount
     
+    @property
+    def is_newborn_session(self) -> bool:
+        """Check if this is a newborn session"""
+        return self.milestone_type == "newborn" or (self.baby_age_days and self.baby_age_days <= 14)
+    
+    @property
+    def is_milestone_session(self) -> bool:
+        """Check if this is a milestone session"""
+        return self.milestone_type in ["3month", "6month", "9month", "1year", "18month", "2year"]
+    
     def to_dict(self) -> Dict[str, Any]:
         """Convert appointment to dictionary"""
         return {
@@ -261,6 +463,15 @@ class Appointment:
             'end_time': self.end_time.isoformat(),
             'duration': self.duration,
             'session_type': self.session_type,
+            'baby_age_days': self.baby_age_days,
+            'baby_age_weeks': self.baby_age_weeks,
+            'baby_age_months': self.baby_age_months,
+            'milestone_type': self.milestone_type,
+            'is_milestone_session': self.is_milestone_session,
+            'baby_name': self.baby_name,
+            'parent_names': self.parent_names,
+            'siblings_included': self.siblings_included,
+            'sibling_names': self.sibling_names,
             'status': self.status,
             'priority': self.priority,
             'location': self.location,
@@ -296,6 +507,15 @@ class Appointment:
             end_time=datetime.fromisoformat(data.get('end_time', datetime.now().isoformat())),
             duration=data.get('duration', 60),
             session_type=data.get('session_type', ''),
+            baby_age_days=data.get('baby_age_days'),
+            baby_age_weeks=data.get('baby_age_weeks'),
+            baby_age_months=data.get('baby_age_months'),
+            milestone_type=data.get('milestone_type', ''),
+            is_milestone_session=data.get('is_milestone_session', False),
+            baby_name=data.get('baby_name', ''),
+            parent_names=data.get('parent_names', []),
+            siblings_included=data.get('siblings_included', False),
+            sibling_names=data.get('sibling_names', []),
             status=data.get('status', 'confirmed'),
             priority=data.get('priority', 'normal'),
             location=data.get('location', ''),
@@ -339,6 +559,16 @@ class Appointment:
             self.payment_status = "partial"
         else:
             self.payment_status = "pending"
+    
+    def calculate_baby_age(self, birth_date: datetime):
+        """Calculate baby's age for the appointment"""
+        if not birth_date:
+            return
+        
+        delta = self.start_time - birth_date
+        self.baby_age_days = delta.days
+        self.baby_age_weeks = delta.days // 7
+        self.baby_age_months = (delta.days // 30)
 
 
 @dataclass
@@ -413,7 +643,6 @@ class ClientNote:
         """Create client note from dictionary"""
         return cls(
             id=data.get('id', str(uuid.uuid4())),
-            client_id=data.get('client_id', ''),
             note_type=data.get('note_type', 'general'),
             title=data.get('title', ''),
             content=data.get('content', ''),

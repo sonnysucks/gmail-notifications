@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
 Gmail Photography Appointment Scheduler with CRM
+Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
 Main application entry point
 """
 
@@ -25,7 +26,7 @@ from utils.logger import setup_logging
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.pass_context
 def cli(ctx, config, verbose):
-    """Gmail Photography Appointment Scheduler with CRM"""
+    """Gmail Photography Appointment Scheduler with CRM - Specialized for Baby Photography"""
     ctx.ensure_object(dict)
     ctx.obj['config'] = config
     ctx.obj['verbose'] = verbose
@@ -54,7 +55,7 @@ def setup(ctx):
         gmail_manager = GmailManager(config_manager)
         calendar_manager = CalendarManager(config_manager)
         
-        click.echo("Setting up Gmail Photography Appointment Scheduler with CRM...")
+        click.echo("Setting up Gmail Baby Photography Appointment Scheduler with CRM...")
         
         # Authenticate with Google
         click.echo("Authenticating with Google...")
@@ -75,7 +76,7 @@ def setup(ctx):
         crm_manager = CRMManager(config_manager)
         
         click.echo("Setup completed successfully!")
-        click.echo("You can now use the scheduler to manage appointments and clients.")
+        click.echo("You can now use the scheduler to manage baby photography appointments and clients.")
         
     except Exception as e:
         click.echo(f"Setup failed: {e}", err=True)
@@ -92,14 +93,23 @@ def setup(ctx):
 @click.option('--fee', '-f', type=float, help='Session fee')
 @click.option('--location', '-l', help='Session location')
 @click.option('--priority', '-p', default='normal', help='Priority (low, normal, high, urgent)')
+@click.option('--baby-name', help='Baby/child name for the session')
+@click.option('--baby-age-days', type=int, help='Baby age in days')
+@click.option('--milestone-type', help='Milestone type (newborn, 3month, 6month, etc.)')
+@click.option('--parent-names', help='Parent names (comma-separated)')
+@click.option('--siblings', help='Sibling names (comma-separated)')
 @click.pass_context
-def schedule(ctx, client_name, datetime, session_type, duration, notes, email, fee, location, priority):
-    """Schedule a new appointment"""
+def schedule(ctx, client_name, datetime, session_type, duration, notes, email, fee, location, priority, baby_name, baby_age_days, milestone_type, parent_names, siblings):
+    """Schedule a new baby photography appointment"""
     try:
         config_manager = ctx.obj['config_manager']
         scheduler = AppointmentScheduler(config_manager)
         
-        click.echo(f"Scheduling appointment for {client_name}...")
+        click.echo(f"Scheduling {session_type} appointment for {client_name}...")
+        
+        # Parse additional fields
+        parent_list = [p.strip() for p in parent_names.split(',')] if parent_names else []
+        sibling_list = [s.strip() for s in siblings.split(',')] if siblings else []
         
         appointment = scheduler.create_appointment(
             client_name=client_name,
@@ -110,7 +120,13 @@ def schedule(ctx, client_name, datetime, session_type, duration, notes, email, f
             client_email=email or "",
             session_fee=fee or 0.0,
             location=location or "",
-            priority=priority
+            priority=priority,
+            baby_name=baby_name or "",
+            baby_age_days=baby_age_days,
+            milestone_type=milestone_type or "",
+            parent_names=parent_list,
+            siblings_included=len(sibling_list) > 0,
+            sibling_names=sibling_list
         )
         
         click.echo(f"Appointment scheduled successfully!")
@@ -118,6 +134,10 @@ def schedule(ctx, client_name, datetime, session_type, duration, notes, email, f
         click.echo(f"Date: {appointment.start_time}")
         click.echo(f"Duration: {appointment.duration} minutes")
         click.echo(f"Client ID: {appointment.client_id}")
+        if baby_name:
+            click.echo(f"Baby/Child: {baby_name}")
+        if milestone_type:
+            click.echo(f"Milestone: {milestone_type}")
         
     except Exception as e:
         click.echo(f"Failed to schedule appointment: {e}", err=True)
@@ -164,6 +184,10 @@ def list(ctx, days):
             click.echo(f"{apt.start_time.strftime('%Y-%m-%d %H:%M')} - {apt.client_name}")
             click.echo(f"  Session: {apt.session_type}")
             click.echo(f"  Duration: {apt.duration} minutes")
+            if apt.baby_name:
+                click.echo(f"  Baby/Child: {apt.baby_name}")
+            if apt.milestone_type:
+                click.echo(f"  Milestone: {apt.milestone_type}")
             if apt.notes:
                 click.echo(f"  Notes: {apt.notes}")
             click.echo()
@@ -243,6 +267,13 @@ def search(ctx, query, limit):
             click.echo(f"Name: {client.name}")
             click.echo(f"Email: {client.email}")
             click.echo(f"Phone: {client.phone}")
+            click.echo(f"Family Type: {client.family_type}")
+            if client.due_date:
+                days_until = client.get_days_until_due()
+                if days_until:
+                    click.echo(f"Due Date: {client.due_date.strftime('%Y-%m-%d')} ({days_until} days)")
+                else:
+                    click.echo(f"Due Date: {client.due_date.strftime('%Y-%m-%d')} (Overdue)")
             click.echo(f"Total Appointments: {client.total_appointments}")
             click.echo(f"Total Spent: ${client.total_spent:.2f}")
             if client.tags:
@@ -279,6 +310,18 @@ def client(ctx, client_id):
         click.echo(f"Address: {client.address}")
         click.echo(f"Company: {client.company}")
         click.echo(f"Website: {client.website}")
+        click.echo(f"Family Type: {client.family_type}")
+        if client.due_date:
+            days_until = client.get_days_until_due()
+            if days_until:
+                click.echo(f"Due Date: {client.due_date.strftime('%Y-%m-%d')} ({days_until} days)")
+            else:
+                click.echo(f"Due Date: {client.due_date.strftime('%Y-%m-%d')} (Overdue)")
+        click.echo(f"Family Size: {client.family_size}")
+        if client.children_info:
+            click.echo(f"Children: {', '.join(client.get_children_names())}")
+        click.echo(f"Previous Photographer: {client.previous_photographer}")
+        click.echo(f"Photography Experience: {client.photography_experience}")
         click.echo(f"Referral Source: {client.referral_source}")
         click.echo(f"Tags: {', '.join(client.tags) if client.tags else 'None'}")
         click.echo(f"Total Appointments: {client.total_appointments}")
@@ -406,6 +449,183 @@ def follow_ups(ctx):
         
     except Exception as e:
         click.echo(f"Failed to get follow-up tasks: {e}", err=True)
+        sys.exit(1)
+
+
+# Baby Photography Specific Commands
+@cli.group()
+def baby():
+    """Baby photography specific commands"""
+    pass
+
+
+@baby.command()
+@click.argument('client_id')
+@click.argument('baby_name')
+@click.argument('birth_date')
+@click.option('--notes', '-n', help='Additional notes about the baby')
+@click.pass_context
+def add_baby(ctx, client_id, baby_name, birth_date, notes):
+    """Add baby information to a client"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        # Parse birth date
+        from datetime import datetime
+        try:
+            parsed_birth_date = datetime.strptime(birth_date, '%Y-%m-%d')
+        except ValueError:
+            click.echo("Invalid date format. Use YYYY-MM-DD")
+            sys.exit(1)
+        
+        click.echo(f"Adding baby {baby_name} to client {client_id}...")
+        
+        # Get client details
+        client = scheduler.get_client_details(client_id)
+        if not client:
+            click.echo("Client not found.")
+            sys.exit(1)
+        
+        # Add baby to client
+        baby_info = {
+            'name': baby_name,
+            'birth_date': parsed_birth_date.isoformat(),
+            'notes': notes or "",
+            'added_at': datetime.now().isoformat()
+        }
+        
+        client.add_child(baby_info)
+        success = scheduler.crm_manager.update_client(client)
+        
+        if success:
+            click.echo(f"Baby {baby_name} added successfully!")
+            click.echo(f"Birth Date: {parsed_birth_date.strftime('%Y-%m-%d')}")
+            click.echo(f"Family Size: {client.family_size}")
+        else:
+            click.echo("Failed to add baby.")
+            sys.exit(1)
+        
+    except Exception as e:
+        click.echo(f"Failed to add baby: {e}", err=True)
+        sys.exit(1)
+
+
+@baby.command()
+@click.argument('client_id')
+@click.pass_context
+def milestones(ctx, client_id):
+    """List upcoming milestones for a client's babies"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Getting milestones for client {client_id}...")
+        
+        # Get client details
+        client = scheduler.get_client_details(client_id)
+        if not client:
+            click.echo("Client not found.")
+            sys.exit(1)
+        
+        if not client.children_info:
+            click.echo("No children found for this client.")
+            return
+        
+        click.echo(f"Milestones for {client.name}:")
+        click.echo("=" * 50)
+        
+        for child in client.children_info:
+            if 'birth_date' in child and child['birth_date']:
+                from datetime import datetime
+                birth_date = datetime.fromisoformat(child['birth_date'])
+                now = datetime.now()
+                age_days = (now - birth_date).days
+                
+                click.echo(f"\nChild: {child.get('name', 'Unknown')}")
+                click.echo(f"Birth Date: {birth_date.strftime('%Y-%m-%d')}")
+                click.echo(f"Current Age: {age_days} days ({age_days // 7} weeks, {age_days // 30} months)")
+                
+                # Calculate next milestone
+                if age_days < 14:
+                    next_milestone = "Newborn (0-14 days)"
+                    days_until = 14 - age_days
+                elif age_days < 90:
+                    next_milestone = "3 Month (90 days)"
+                    days_until = 90 - age_days
+                elif age_days < 180:
+                    next_milestone = "6 Month (180 days)"
+                    days_until = 180 - age_days
+                elif age_days < 270:
+                    next_milestone = "9 Month (270 days)"
+                    days_until = 270 - age_days
+                elif age_days < 365:
+                    next_milestone = "1 Year (365 days)"
+                    days_until = 365 - age_days
+                else:
+                    next_milestone = "Older than 1 year"
+                    days_until = 0
+                
+                if days_until > 0:
+                    click.echo(f"Next Milestone: {next_milestone} (in {days_until} days)")
+                else:
+                    click.echo(f"Next Milestone: {next_milestone}")
+        
+    except Exception as e:
+        click.echo(f"Failed to get milestones: {e}", err=True)
+        sys.exit(1)
+
+
+@baby.command()
+@click.argument('client_id')
+@click.option('--due-date', help='Due date (YYYY-MM-DD)')
+@click.option('--family-type', help='Family type (expecting, newborn, baby, toddler)')
+@click.option('--photography-experience', help='Photography experience level')
+@click.pass_context
+def update_family(ctx, client_id, due_date, family_type, photography_experience):
+    """Update family information for a client"""
+    try:
+        config_manager = ctx.obj['config_manager']
+        scheduler = AppointmentScheduler(config_manager)
+        
+        click.echo(f"Updating family information for client {client_id}...")
+        
+        # Get client details
+        client = scheduler.get_client_details(client_id)
+        if not client:
+            click.echo("Client not found.")
+            sys.exit(1)
+        
+        # Update fields
+        if due_date:
+            from datetime import datetime
+            try:
+                parsed_due_date = datetime.strptime(due_date, '%Y-%m-%d')
+                client.due_date = parsed_due_date
+                click.echo(f"Due date updated to: {parsed_due_date.strftime('%Y-%m-%d')}")
+            except ValueError:
+                click.echo("Invalid date format. Use YYYY-MM-DD")
+                sys.exit(1)
+        
+        if family_type:
+            client.family_type = family_type
+            click.echo(f"Family type updated to: {family_type}")
+        
+        if photography_experience:
+            client.photography_experience = photography_experience
+            click.echo(f"Photography experience updated to: {photography_experience}")
+        
+        # Save changes
+        success = scheduler.crm_manager.update_client(client)
+        
+        if success:
+            click.echo("Family information updated successfully!")
+        else:
+            click.echo("Failed to update family information.")
+            sys.exit(1)
+        
+    except Exception as e:
+        click.echo(f"Failed to update family information: {e}", err=True)
         sys.exit(1)
 
 

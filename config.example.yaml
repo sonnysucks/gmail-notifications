@@ -1,15 +1,23 @@
 # Gmail Photography Appointment Scheduler Configuration
+# Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
 # Copy this file to config.yaml and customize for your business
 
 # Business Information
 business:
-  name: "Your Photography Business"
+  name: "Your Baby Photography Studio"
   email: "your-email@example.com"
   phone: "+1-555-0123"
-  website: "https://yourphotography.com"
+  website: "https://yourbabyphotography.com"
   address: "123 Photography St, City, State 12345"
   tax_id: "12-3456789"
   business_type: "LLC"  # LLC, Corporation, Sole Proprietorship, etc.
+  specialties:
+    - "Maternity Photography"
+    - "Newborn Photography"
+    - "Baby Milestone Sessions"
+    - "Smash Cake Photography"
+    - "Birthday Photography"
+    - "Family Portraits"
 
 # Google Calendar Settings
 calendar:
@@ -31,58 +39,174 @@ appointments:
     - days: 2           # 2 days before
     - days: 1           # 1 day before
   
-  # Session Types and Pricing
+  # Specialized Session Types and Pricing for Baby Photography
   session_types:
-    portrait:
-      name: "Portrait Session"
-      duration: 60
-      base_price: 150.00
-      description: "Professional portrait photography session"
-    family:
-      name: "Family Session"
-      duration: 90
-      base_price: 250.00
-      description: "Family portrait photography session"
-    wedding:
-      name: "Wedding Photography"
-      duration: 480
-      base_price: 1500.00
-      description: "Full wedding day coverage"
-    engagement:
-      name: "Engagement Session"
-      duration: 90
-      base_price: 200.00
-      description: "Engagement couple photography session"
+    # Maternity Sessions
     maternity:
       name: "Maternity Session"
-      duration: 60
-      base_price: 180.00
-      description: "Maternity photography session"
+      duration: 90
+      base_price: 250.00
+      description: "Beautiful maternity photography session"
+      recommended_weeks: "28-36"
+      includes: ["30 edited images", "Online gallery", "Print release"]
+    
+    # Newborn Sessions
     newborn:
       name: "Newborn Session"
-      duration: 120
-      base_price: 300.00
-      description: "Newborn photography session"
-    senior:
-      name: "Senior Portrait"
+      duration: 180
+      base_price: 350.00
+      description: "Newborn photography within first 14 days"
+      recommended_age: "5-14 days"
+      includes: ["25 edited images", "Online gallery", "Print release", "Props included"]
+    
+    # Milestone Sessions
+    milestone_3month:
+      name: "3 Month Milestone"
       duration: 60
-      base_price: 120.00
-      description: "High school senior portrait session"
-    headshot:
-      name: "Professional Headshot"
-      duration: 45
-      base_price: 100.00
-      description: "Professional headshot for business"
-    event:
-      name: "Event Photography"
-      duration: 120
-      base_price: 400.00
-      description: "Event coverage and photography"
-    photoshoot:
-      name: "Custom Photoshoot"
-      duration: 90
       base_price: 200.00
-      description: "Custom photography session"
+      description: "3 month baby milestone session"
+      recommended_age: "12-16 weeks"
+      includes: ["20 edited images", "Online gallery", "Print release"]
+    
+    milestone_6month:
+      name: "6 Month Milestone"
+      duration: 75
+      base_price: 225.00
+      description: "6 month baby milestone session"
+      recommended_age: "24-28 weeks"
+      includes: ["25 edited images", "Online gallery", "Print release"]
+    
+    milestone_9month:
+      name: "9 Month Milestone"
+      duration: 75
+      base_price: 225.00
+      description: "9 month baby milestone session"
+      recommended_age: "36-40 weeks"
+      includes: ["25 edited images", "Online gallery", "Print release"]
+    
+    milestone_1year:
+      name: "1 Year Milestone"
+      duration: 90
+      base_price: 250.00
+      description: "1 year birthday milestone session"
+      recommended_age: "11-13 months"
+      includes: ["30 edited images", "Online gallery", "Print release"]
+    
+    # Smash Cake Sessions
+    smash_cake:
+      name: "Smash Cake Session"
+      duration: 90
+      base_price: 275.00
+      description: "1st birthday smash cake photography"
+      recommended_age: "11-13 months"
+      includes: ["30 edited images", "Online gallery", "Print release", "Cake included"]
+    
+    # Birthday Sessions
+    birthday_session:
+      name: "Birthday Photography"
+      duration: 60
+      base_price: 200.00
+      description: "Birthday celebration photography"
+      includes: ["25 edited images", "Online gallery", "Print release"]
+    
+    # Family Sessions
+    family_portrait:
+      name: "Family Portrait"
+      duration: 90
+      base_price: 300.00
+      description: "Family portrait session"
+      includes: ["35 edited images", "Online gallery", "Print release"]
+    
+    # Mini Sessions
+    mini_session:
+      name: "Mini Session"
+      duration: 30
+      base_price: 125.00
+      description: "Quick 30-minute session"
+      includes: ["15 edited images", "Online gallery", "Print release"]
+    
+    # Package Deals
+    milestone_package:
+      name: "Milestone Package (3, 6, 9, 12 months)"
+      duration: 0  # Multiple sessions
+      base_price: 800.00
+      description: "Complete first year milestone package"
+      includes: ["4 milestone sessions", "100+ edited images", "Online galleries", "Print releases", "10% discount"]
+    
+    newborn_package:
+      name: "Newborn + Milestone Package"
+      duration: 0  # Multiple sessions
+      base_price: 1100.00
+      description: "Newborn + 3 milestone sessions"
+      includes: ["Newborn session", "3 milestone sessions", "125+ edited images", "Online galleries", "Print releases", "15% discount"]
+
+# Baby Photography Specific Settings
+baby_photography:
+  # Milestone Tracking
+  milestones:
+    enabled: true
+    auto_reminders: true
+    reminder_days_before: 30
+    
+    # Milestone Ages (in days)
+    milestone_ages:
+      newborn: 14
+      three_month: 90
+      six_month: 180
+      nine_month: 270
+      one_year: 365
+      eighteen_month: 730
+      two_year: 1095
+  
+  # Newborn Session Settings
+  newborn:
+    max_age_days: 14
+    preferred_age_days: "5-10"
+    requires_consultation: true
+    props_included: true
+    backup_dates: true  # Allow rescheduling for baby's mood
+  
+  # Smash Cake Settings
+  smash_cake:
+    cake_included: true
+    cake_flavors: ["Vanilla", "Chocolate", "Strawberry", "Red Velvet"]
+    cake_designs: ["Simple", "Decorated", "Themed", "Custom"]
+    props_included: true
+    cleanup_service: true
+  
+  # Birthday Session Settings
+  birthday:
+    themes_available:
+      - "Princess"
+      - "Superhero"
+      - "Farm"
+      - "Space"
+      - "Ocean"
+      - "Jungle"
+      - "Sports"
+      - "Custom"
+    
+    colors_available:
+      - "Pink"
+      - "Blue"
+      - "Purple"
+      - "Green"
+      - "Yellow"
+      - "Orange"
+      - "Red"
+      - "Rainbow"
+      - "Neutral"
+    
+    props_available:
+      - "Balloons"
+      - "Banners"
+      - "Crowns"
+      - "Tiaras"
+      - "Capes"
+      - "Hats"
+      - "Stuffed Animals"
+      - "Books"
+      - "Musical Instruments"
 
 # CRM Settings
 crm:
@@ -92,20 +216,26 @@ crm:
     - "VIP"
     - "Returning Client"
     - "Referral"
-    - "Wedding Client"
-    - "Portrait Client"
-    - "Event Client"
+    - "Maternity Client"
+    - "Newborn Client"
+    - "Milestone Client"
+    - "Birthday Client"
+    - "Smash Cake Client"
+    - "Family Client"
+    - "Package Client"
   
   # Referral Sources
   referral_sources:
     - "Google Search"
     - "Social Media"
     - "Word of Mouth"
-    - "Wedding Wire"
-    - "The Knot"
-    - "Yelp"
-    - "Facebook"
+    - "Facebook Groups"
     - "Instagram"
+    - "Pinterest"
+    - "Local Moms Groups"
+    - "Pediatrician Referral"
+    - "Hospital Referral"
+    - "Daycare Referral"
     - "Referral Program"
     - "Other"
   
@@ -115,31 +245,36 @@ crm:
     - "$250-500"
     - "$500-1000"
     - "$1000-2000"
-    - "$2000-5000"
-    - "$5000+"
+    - "$2000+"
   
   # Project Types
   project_types:
-    - "Personal"
-    - "Business"
-    - "Wedding"
-    - "Event"
-    - "Portrait"
-    - "Commercial"
-    - "Editorial"
+    - "Maternity"
+    - "Newborn"
+    - "Milestone"
+    - "Birthday"
+    - "Smash Cake"
+    - "Family Portrait"
+    - "Package Deal"
     - "Other"
   
-  # Industries (for business clients)
-  industries:
-    - "Technology"
-    - "Healthcare"
-    - "Finance"
-    - "Education"
-    - "Real Estate"
-    - "Legal"
-    - "Retail"
-    - "Restaurant"
-    - "Non-Profit"
+  # Family Types
+  family_types:
+    - "Expecting"
+    - "Newborn"
+    - "Baby (0-1 year)"
+    - "Toddler (1-3 years)"
+    - "Multiple Children"
+    - "Adoption"
+    - "Surrogacy"
+    - "Other"
+  
+  # Photography Experience Levels
+  experience_levels:
+    - "First Time"
+    - "Some Experience"
+    - "Experienced"
+    - "Professional"
     - "Other"
   
   # Follow-up Settings
@@ -147,6 +282,15 @@ crm:
     enabled: true
     default_delay_days: 3
     reminder_frequency: "daily"  # daily, weekly, monthly
+    
+    # Special follow-up triggers
+    triggers:
+      - "After maternity session"
+      - "Before newborn session"
+      - "Milestone reminders"
+      - "Birthday session planning"
+      - "Package completion"
+      - "Gallery delivery"
   
   # Marketing Settings
   marketing:
@@ -154,10 +298,19 @@ crm:
     social_media_integration: true
     referral_program_enabled: true
     referral_bonus: 50.00  # Amount for successful referrals
+    
+    # Special marketing campaigns
+    campaigns:
+      - "Maternity Announcement"
+      - "Newborn Welcome"
+      - "Milestone Reminders"
+      - "Birthday Planning"
+      - "Holiday Specials"
+      - "Seasonal Promotions"
 
 # Email Templates
 email:
-  from_name: "Your Photography Business"
+  from_name: "Your Baby Photography Studio"
   reply_to: "your-email@example.com"
   templates:
     confirmation: "templates/confirmation.html"
@@ -169,11 +322,19 @@ email:
     follow_up: "templates/follow_up.html"
     thank_you: "templates/thank_you.html"
     referral_request: "templates/referral_request.html"
+    
+    # Specialized templates for baby photography
+    maternity_reminder: "templates/maternity_reminder.html"
+    newborn_prep: "templates/newborn_prep.html"
+    milestone_reminder: "templates/milestone_reminder.html"
+    birthday_planning: "templates/birthday_planning.html"
+    smash_cake_prep: "templates/smash_cake_prep.html"
+    gallery_ready: "templates/gallery_ready.html"
 
 # Gmail Settings
 gmail:
-  label_name: "Photography Appointments"
-  search_query: "subject:(appointment OR session OR photoshoot) OR body:(appointment OR session OR photoshoot)"
+  label_name: "Baby Photography Appointments"
+  search_query: "subject:(appointment OR session OR photoshoot OR maternity OR newborn OR milestone OR birthday) OR body:(appointment OR session OR photoshoot OR maternity OR newborn OR milestone OR birthday)"
 
 # Database Settings
 database:
@@ -202,7 +363,7 @@ analytics:
   scheduled_reports: true
   report_frequency: "weekly"  # daily, weekly, monthly, quarterly
   
-  # Key Performance Indicators
+  # Key Performance Indicators for Baby Photography
   kpis:
     - "Total Revenue"
     - "New Clients per Month"
@@ -211,3 +372,8 @@ analytics:
     - "Referral Rate"
     - "Customer Lifetime Value"
     - "Appointment Conversion Rate"
+    - "Milestone Package Sales"
+    - "Newborn Session Bookings"
+    - "Birthday Session Bookings"
+    - "Smash Cake Session Bookings"
+    - "Package Deal Conversion Rate"

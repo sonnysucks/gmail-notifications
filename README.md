@@ -1,24 +1,54 @@
 # Gmail Photography Appointment Scheduler with CRM
+## Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
 
-A comprehensive appointment scheduling and Customer Relationship Management (CRM) system for photography businesses that integrates with Gmail and Google Calendar to automatically manage client appointments, send reminder notifications, and track customer relationships.
+A comprehensive appointment scheduling and Customer Relationship Management (CRM) system **specifically designed for baby photography businesses** that integrates with Gmail and Google Calendar to automatically manage client appointments, send reminder notifications, and track customer relationships through every precious milestone.
 
-## 🚀 **New CRM Features**
+## 🍼 **Baby Photography Specialization**
 
-- **Complete Customer Database**: Store comprehensive client information including contact details, preferences, and history
-- **Appointment History Tracking**: Full appointment lifecycle management with financial tracking
-- **Advanced Notes System**: Organized client notes with internal/external visibility controls
-- **Business Intelligence**: Analytics dashboard with revenue tracking, client metrics, and performance insights
-- **Marketing Campaign Management**: Track campaigns, referral sources, and client acquisition
-- **Follow-up Task Management**: Automated follow-up reminders and task tracking
-- **Client Segmentation**: Tag-based client organization and filtering
-- **Financial Management**: Session pricing, payment tracking, and revenue analytics
+This system is **tailor-made** for photographers specializing in:
+- **Maternity Photography** - Beautiful pregnancy sessions (28-36 weeks)
+- **Newborn Photography** - Precious first 14 days of life
+- **Baby Milestone Sessions** - 3, 6, 9, 12, 18, 24 months
+- **Smash Cake Photography** - 1st birthday celebrations
+- **Birthday Photography** - Themed sessions for all ages
+- **Family Portraits** - Growing family memories
+
+## 🚀 **Specialized Baby Photography Features**
+
+### **Milestone Tracking & Automation**
+- **Automatic Age Calculations**: Track baby age in days, weeks, and months
+- **Milestone Reminders**: Automated notifications for upcoming milestones
+- **Session Planning**: Age-appropriate session recommendations
+- **Package Management**: Complete first-year milestone packages
+
+### **Baby-Specific Client Management**
+- **Family Type Tracking**: Expecting, newborn, baby, toddler, multiple children
+- **Due Date Management**: Countdown to baby's arrival
+- **Children Database**: Track multiple children per family
+- **Photography Experience**: First-time vs. experienced parents
+- **Referral Sources**: Pediatrician, hospital, daycare referrals
+
+### **Specialized Session Types**
+- **Maternity Sessions**: 90-minute sessions with props included
+- **Newborn Sessions**: 3-hour sessions with backup date flexibility
+- **Milestone Sessions**: Age-specific timing and duration
+- **Smash Cake Sessions**: Cake included with cleanup service
+- **Birthday Sessions**: Theme selection with props and colors
+- **Package Deals**: Discounted milestone packages
+
+### **Advanced Baby Photography Tools**
+- **Theme Management**: Princess, superhero, farm, space, ocean themes
+- **Color Coordination**: Predefined color palettes for sessions
+- **Props Tracking**: Balloons, banners, crowns, capes, stuffed animals
+- **Cake Management**: Flavors, designs, and dietary preferences
+- **Sibling Integration**: Include siblings in milestone sessions
 
 ## ✨ **Core Features**
 
 - **Automatic Appointment Scheduling**: Create appointments directly from Gmail
 - **Smart Reminder System**: Automated notifications at 2 weeks, 1 week, 3 days, 2 days, and 1 day before appointments
 - **Google Calendar Integration**: Works with any Google Calendar as the target
-- **Professional Email Templates**: Photography-specific email templates for confirmations and reminders
+- **Professional Email Templates**: Baby photography-specific email templates for all communications
 - **Time Zone Handling**: Automatic time zone detection and conversion
 - **Gmail Integration**: Scan emails for appointment requests and manage communication
 
@@ -28,29 +58,29 @@ A comprehensive appointment scheduling and Customer Relationship Management (CRM
 - **Modular Design**: Clean separation of concerns (Gmail, Calendar, Scheduler, CRM, Templates)
 - **RESTful API Ready**: Designed for easy web interface integration
 - **Scalable**: Can be upgraded to PostgreSQL or MySQL for production use
+- **Baby Photography Focused**: Built specifically for baby photography workflows
 
-## 📊 **CRM Capabilities**
+## 📊 **CRM Capabilities for Baby Photography**
 
 ### **Client Management**
-- Comprehensive client profiles with contact information
-- Business details and industry classification
-- Social media integration and website tracking
-- Referral source tracking and analysis
-- Client tags and categorization system
-- Budget range and project type classification
+- Comprehensive client profiles with family information
+- Baby tracking with birth dates and milestone planning
+- Family size and composition management
+- Previous photographer and experience level tracking
+- Referral source analysis for marketing optimization
 
 ### **Appointment Tracking**
 - Full appointment lifecycle management
-- Financial tracking (session fees, additional charges, discounts)
+- Financial tracking with session-specific pricing
 - Payment status monitoring
-- Equipment and location requirements
+- Equipment and prop requirements
 - Priority levels and special instructions
 - Follow-up task automation
 
 ### **Business Intelligence**
-- Revenue analytics and forecasting
+- Revenue analytics by session type
 - Client acquisition and retention metrics
-- Session type performance analysis
+- Milestone package performance analysis
 - Referral source effectiveness
 - Customer lifetime value calculations
 - Monthly and quarterly reporting
@@ -92,56 +122,67 @@ pip install -r requirements.txt
 4. **Configure the application**:
 ```bash
 cp config.example.yaml config.yaml
-# Edit config.yaml with your business settings
+# Edit config.yaml with your baby photography business settings
 ```
 
-## ⚙️ **Configuration**
+## ⚙️ **Configuration for Baby Photography**
 
 Edit `config.yaml` to configure:
-- **Business Information**: Company details, contact info, tax information
-- **Session Types & Pricing**: Predefined session types with durations and pricing
-- **CRM Settings**: Client tags, referral sources, budget ranges, industries
+- **Business Information**: Studio details, contact info, tax information
+- **Session Types & Pricing**: Predefined baby photography services with pricing
+- **Baby Photography Settings**: Milestone tracking, newborn preferences, smash cake options
+- **CRM Settings**: Client tags, referral sources, family types, experience levels
 - **Calendar Settings**: Target calendar, business hours, timezone
-- **Email Templates**: Customizable email templates for all communications
+- **Email Templates**: Customizable templates for all baby photography communications
 - **Analytics**: KPI tracking and reporting preferences
 
-## 🎯 **Usage**
+## 🎯 **Usage for Baby Photography**
 
 ### **Basic Setup**
 ```bash
 python main.py --setup
 ```
 
-### **Appointment Management**
+### **Baby Photography Appointment Management**
 ```bash
-# Schedule appointment with CRM integration
-python main.py --schedule "Client Name" "2024-01-15 14:00" "Portrait Session" \
-  --email "client@example.com" --fee 150.00 --location "Studio"
+# Schedule newborn session with baby details
+python main.py --schedule "Sarah Johnson" "2024-01-15 10:00" "Newborn Session" \
+  --baby-name "Baby Emma" --baby-age-days 7 --milestone-type "newborn" \
+  --parent-names "Sarah, Mike" --email "sarah@email.com" --fee 350.00
 
-# List upcoming appointments
-python main.py --list --days 30
+# Schedule milestone session
+python main.py --schedule "Lisa Smith" "2024-02-01 14:00" "6 Month Milestone" \
+  --baby-name "Baby Liam" --baby-age-days 180 --milestone-type "6month" \
+  --email "lisa@email.com" --fee 225.00
 
-# Cancel appointment
-python main.py --cancel "appointment_id" "Client requested reschedule"
+# Schedule smash cake session
+python main.py --schedule "Jennifer Davis" "2024-03-15 11:00" "Smash Cake Session" \
+  --baby-name "Baby Ava" --baby-age-days 365 --milestone-type "1year" \
+  --email "jennifer@email.com" --fee 275.00
 ```
 
-### **CRM Operations**
+### **Baby Photography CRM Operations**
 ```bash
-# Search for clients
-python main.py crm search "John Doe"
+# Add baby information to client
+python main.py baby add-baby "client_id" "Baby Emma" "2024-01-08" \
+  --notes "First baby, very excited parents"
 
-# Get client details
+# Check upcoming milestones
+python main.py baby milestones "client_id"
+
+# Update family information
+python main.py baby update-family "client_id" --due-date "2024-06-15" \
+  --family-type "expecting" --photography-experience "first_time"
+
+# Search for maternity clients
+python main.py crm search "maternity"
+
+# View client details with baby information
 python main.py crm client "client_id"
 
-# Add client note
-python main.py crm add-note "client_id" "Client prefers outdoor sessions" \
-  --title "Session Preferences" --type "follow_up"
-
-# View CRM analytics
-python main.py crm analytics
-
-# Check follow-up tasks
-python main.py crm follow-ups
+# Add client note about baby preferences
+python main.py crm add-note "client_id" "Baby prefers natural lighting" \
+  --title "Lighting Preferences" --type "follow_up"
 ```
 
 ### **Reminder Service**
@@ -153,7 +194,7 @@ python main.py --reminders
 python main.py --sync
 ```
 
-## 🧪 **Testing**
+## 🧪 **Testing Baby Photography Features**
 
 ### **Test Basic Functionality**
 ```bash
@@ -165,51 +206,57 @@ python test_scheduler.py
 python test_crm.py
 ```
 
+### **Test Baby Photography Features**
+```bash
+python test_baby_photography.py
+```
+
 ## 📁 **Project Structure**
 
 ```
 gmail-notifications/
-├── main.py                 # Main CLI application
+├── main.py                 # Main CLI application with baby photography commands
 ├── config/                 # Configuration management
-├── scheduler/              # Appointment scheduling + CRM
-│   ├── models.py          # Data models (Client, Appointment, etc.)
+├── scheduler/              # Appointment scheduling + CRM + Baby photography
+│   ├── models.py          # Data models (Client, Appointment, BabyMilestone, BirthdaySession)
 │   ├── crm_manager.py     # CRM database operations
-│   └── appointment_scheduler.py  # Scheduling logic
+│   └── appointment_scheduler.py  # Scheduling logic with baby photography
 ├── gmail/                  # Gmail API integration
 ├── calendar/               # Google Calendar operations
-├── templates/              # Email templates
+├── templates/              # Email templates (baby photography specific)
 ├── utils/                  # Utility functions
 ├── data/                   # CRM database and data storage
 ├── logs/                   # Application logs
-├── config.example.yaml     # Example configuration
+├── config.example.yaml     # Example configuration for baby photography
 ├── requirements.txt        # Python dependencies
 ├── test_scheduler.py       # Basic functionality tests
 ├── test_crm.py            # CRM system tests
+├── test_baby_photography.py # Baby photography specific tests
 └── README.md              # This file
 ```
 
-## 🔧 **Advanced Features**
+## 🔧 **Advanced Baby Photography Features**
 
 ### **Database Management**
-- SQLite database with proper indexing
+- SQLite database with proper indexing for baby photography data
 - Automatic backup and recovery
 - Data export capabilities
 - Migration tools for future upgrades
 
 ### **API Integration Ready**
-- RESTful API structure
+- RESTful API structure for baby photography workflows
 - JSON data exchange
 - Webhook support for external integrations
 - Third-party service connectors
 
-### **Reporting & Analytics**
-- Automated report generation
+### **Reporting & Analytics for Baby Photography**
+- Automated report generation by session type
 - Multiple export formats (CSV, PDF, JSON)
 - Scheduled reporting
-- Custom KPI tracking
+- Custom KPI tracking for baby photography business
 
-### **Marketing Tools**
-- Email campaign management
+### **Marketing Tools for Baby Photography**
+- Email campaign management for milestone reminders
 - Referral program tracking
 - Social media integration
 - Client segmentation for targeted marketing
@@ -222,7 +269,7 @@ gmail-notifications/
 - Environment variable support
 - Role-based access control ready
 
-## 🚀 **Production Deployment**
+## 🚀 **Production Deployment for Baby Photography**
 
 For production use:
 1. **Database**: Upgrade to PostgreSQL or MySQL
@@ -232,14 +279,16 @@ For production use:
 5. **Backup**: Set up automated backup procedures
 6. **SSL**: Enable HTTPS for web interface
 
-## 📈 **Business Benefits**
+## 📈 **Business Benefits for Baby Photography**
 
-- **Increased Efficiency**: Automate appointment scheduling and reminders
-- **Better Client Relationships**: Track all interactions and preferences
-- **Revenue Optimization**: Analyze session performance and pricing
+- **Increased Efficiency**: Automate milestone tracking and session scheduling
+- **Better Client Relationships**: Track baby development and family preferences
+- **Revenue Optimization**: Analyze session performance and package sales
 - **Marketing Insights**: Track referral sources and campaign effectiveness
 - **Professional Image**: Automated, consistent communication
 - **Data-Driven Decisions**: Comprehensive analytics and reporting
+- **Milestone Package Sales**: Increase revenue with bundled services
+- **Client Retention**: Keep families coming back for each milestone
 
 ## 🤝 **Contributing**
 
@@ -261,16 +310,19 @@ For support and questions:
 3. Test with the provided test scripts
 4. Open an issue in the repository
 
-## 🔮 **Roadmap**
+## 🔮 **Roadmap for Baby Photography**
 
 - **Web Interface**: React/Vue.js web application
 - **Mobile App**: iOS/Android mobile applications
-- **Advanced Analytics**: Machine learning insights
+- **Advanced Analytics**: Machine learning insights for milestone timing
 - **Payment Integration**: Stripe/PayPal integration
 - **Multi-location Support**: Multiple studio locations
 - **API Marketplace**: Third-party integrations
-- **White-label Solution**: Resell to other photographers
+- **White-label Solution**: Resell to other baby photographers
+- **Milestone Photography Guides**: Built-in session planning tools
+- **Baby Development Tracking**: Integration with pediatric apps
+- **Family Photo Sharing**: Secure gallery sharing for families
 
 ---
 
-**Transform your photography business with professional appointment scheduling and comprehensive CRM management!** 🎯📸
+**Transform your baby photography business with professional appointment scheduling and comprehensive CRM management designed specifically for capturing life's precious moments!** 🎯📸👶
