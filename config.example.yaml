@@ -4,13 +4,38 @@
 
 # Business Information
 business:
-  name: "Your Baby Photography Studio"
-  email: "your-email@example.com"
-  phone: "+1-555-0123"
-  website: "https://yourbabyphotography.com"
-  address: "123 Photography St, City, State 12345"
+  name: "Sass and Whimsy Photography"
+  email: "sassandwhimsyphotography@gmail.com"
+  phone: "+1-724-200-0000"
+  website: "https://sassandwhimsyphotography.com"
+  address: "Butler, PA 16002"
   tax_id: "12-3456789"
   business_type: "LLC"  # LLC, Corporation, Sole Proprietorship, etc.
+  
+  # Business Operations
+  operations:
+    # Extended working hours (9 AM to 8 PM daily)
+    working_hours:
+      daily_start: "09:00"
+      daily_end: "20:00"
+      timezone: "America/New_York"
+      days_open: 7  # All 7 days of the week
+    
+    # Contact and availability
+    availability:
+      response_time_hours: 4        # Respond to inquiries within 4 hours
+      emergency_contact: true       # Available for urgent scheduling
+      after_hours_support: true    # Support available outside business hours
+    
+    # Studio information
+    studio:
+      location_type: "Home Studio"  # Home Studio, Commercial Studio, On-location
+      parking_available: true
+      wheelchair_accessible: true
+      private_bathroom: true
+      changing_room: true
+      waiting_area: true
+  
   specialties:
     - "Maternity Photography"
     - "Newborn Photography"
@@ -23,15 +48,201 @@ business:
 calendar:
   target_calendar_id: "primary"  # Use "primary" for main calendar or specific calendar ID
   timezone: "America/New_York"    # Your business timezone
+  
+  # Timezone and scheduling considerations
+  timezone_settings:
+    # Primary business timezone
+    primary: "America/New_York"
+    
+    # Handle daylight saving time automatically
+    dst_handling: "automatic"
+    
+    # Client timezone handling
+    client_timezone_detection: true
+    show_client_local_time: true
+    
+    # International client support
+    international_clients: false  # Set to true if serving international clients
+    supported_timezones:
+      - "America/New_York"
+      - "America/Chicago"
+      - "America/Denver"
+      - "America/Los_Angeles"
+  
+  # Business Hours Configuration
   business_hours:
-    start: "09:00"
-    end: "17:00"
-    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+    # Daily working hours (9 AM to 8 PM)
+    daily:
+      start: "09:00"
+      end: "20:00"
+      timezone: "America/New_York"
+    
+    # Weekly schedule - all days enabled for 9 AM to 8 PM
+    weekly:
+      Monday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []  # No breaks during the day
+      Tuesday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+      Wednesday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+      Thursday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+      Friday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+      Saturday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+      Sunday:
+        enabled: true
+        start: "09:00"
+        end: "20:00"
+        breaks: []
+    
+    # Advanced scheduling options
+    scheduling:
+      # Minimum notice required for appointments
+      min_notice_hours: 24
+      
+      # Maximum advance booking (in days)
+      max_advance_booking_days: 365
+      
+      # Buffer time between appointments (in minutes)
+      buffer_between_appointments: 15
+      
+      # Allow same-day appointments
+      allow_same_day: false
+      
+      # Allow weekend appointments
+      allow_weekends: true
+      
+      # Allow evening appointments (after 5 PM)
+      allow_evening: true
+      
+      # Preferred appointment times (for auto-scheduling)
+      preferred_times:
+        - "09:00"
+        - "10:00"
+        - "11:00"
+        - "12:00"
+        - "13:00"
+        - "14:00"
+        - "15:00"
+        - "16:00"
+        - "17:00"
+        - "18:00"
+        - "19:00"
+      
+      # Blackout dates (holidays, vacation, etc.)
+      blackout_dates: []
+      
+      # Special hours for specific dates
+      special_hours: {}
+      
+      # Appointment availability windows
+      availability_windows:
+        # Morning sessions (9 AM - 12 PM)
+        morning:
+          start: "09:00"
+          end: "12:00"
+          max_appointments: 3
+          preferred_sessions: ["newborn", "milestone", "mini"]
+        
+        # Afternoon sessions (12 PM - 5 PM)
+        afternoon:
+          start: "12:00"
+          end: "17:00"
+          max_appointments: 4
+          preferred_sessions: ["maternity", "milestone", "smash_cake", "birthday"]
+        
+        # Evening sessions (5 PM - 8 PM)
+        evening:
+          start: "17:00"
+          end: "20:00"
+          max_appointments: 3
+          preferred_sessions: ["family", "maternity", "mini"]
+      
+      # Booking policies
+      booking_policies:
+        # Minimum notice for different session types
+        min_notice:
+          maternity: 48      # 48 hours for maternity sessions
+          newborn: 24        # 24 hours for newborn sessions
+          milestone: 24      # 24 hours for milestone sessions
+          smash_cake: 48     # 48 hours for smash cake sessions
+          birthday: 72       # 72 hours for birthday sessions
+          family: 48         # 48 hours for family sessions
+          mini: 24           # 24 hours for mini sessions
+        
+        # Cancellation policies
+        cancellation:
+          free_cancellation_hours: 24
+          late_cancellation_fee: 25.00
+          no_show_fee: 50.00
+        
+        # Rescheduling policies
+        rescheduling:
+          free_reschedule_hours: 48
+          reschedule_fee: 15.00
+          max_reschedules: 2
 
 # Appointment Settings
 appointments:
+  # Default appointment configuration
   default_duration: 60  # minutes
   buffer_time: 15       # minutes between appointments
+  
+  # Working hours for appointments (9 AM to 8 PM)
+  working_hours:
+    start: "09:00"
+    end: "20:00"
+    timezone: "America/New_York"
+  
+  # Scheduling flexibility
+  scheduling:
+    # Allow appointments during these time ranges
+    allowed_times:
+      morning: ["09:00", "12:00"]      # 9 AM to 12 PM
+      afternoon: ["12:00", "17:00"]    # 12 PM to 5 PM
+      evening: ["17:00", "20:00"]      # 5 PM to 8 PM
+    
+    # Preferred time slots for different session types
+    preferred_times:
+      maternity: ["10:00", "14:00", "16:00"]      # Mid-morning to late afternoon
+      newborn: ["10:00", "11:00", "14:00"]        # Mid-morning and early afternoon
+      milestone: ["09:00", "10:00", "15:00", "16:00"]  # Morning and late afternoon
+      smash_cake: ["10:00", "11:00", "14:00", "15:00"] # Mid-morning and early afternoon
+      birthday: ["09:00", "10:00", "15:00", "16:00"]   # Morning and late afternoon
+      family: ["16:00", "17:00", "18:00", "19:00"]     # Late afternoon and evening
+      mini: ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"]  # Throughout the day
+    
+    # Buffer times between different session types
+    buffer_times:
+      maternity: 30      # 30 minutes after maternity sessions
+      newborn: 45        # 45 minutes after newborn sessions (cleanup time)
+      milestone: 15      # 15 minutes after milestone sessions
+      smash_cake: 30     # 30 minutes after smash cake sessions (cleanup time)
+      birthday: 15       # 15 minutes after birthday sessions
+      family: 20         # 20 minutes after family sessions
+      mini: 10           # 10 minutes after mini sessions
+  
+  # Reminder schedule
   reminder_schedule:
     - weeks: 2          # 2 weeks before
     - weeks: 1          # 1 week before
