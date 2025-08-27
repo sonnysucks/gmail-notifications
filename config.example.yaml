@@ -1,0 +1,54 @@
+# Gmail Photography Appointment Scheduler Configuration
+# Copy this file to config.yaml and customize for your business
+
+# Business Information
+business:
+  name: "Your Photography Business"
+  email: "your-email@example.com"
+  phone: "+1-555-0123"
+  website: "https://yourphotography.com"
+  address: "123 Photography St, City, State 12345"
+
+# Google Calendar Settings
+calendar:
+  target_calendar_id: "primary"  # Use "primary" for main calendar or specific calendar ID
+  timezone: "America/New_York"    # Your business timezone
+  business_hours:
+    start: "09:00"
+    end: "17:00"
+    days: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+
+# Appointment Settings
+appointments:
+  default_duration: 60  # minutes
+  buffer_time: 15       # minutes between appointments
+  reminder_schedule:
+    - weeks: 2          # 2 weeks before
+    - weeks: 1          # 1 week before
+    - days: 3           # 3 days before
+    - days: 2           # 2 days before
+    - days: 1           # 1 day before
+
+# Email Templates
+email:
+  from_name: "Your Photography Business"
+  reply_to: "your-email@example.com"
+  templates:
+    confirmation: "templates/confirmation.html"
+    reminder_2weeks: "templates/reminder_2weeks.html"
+    reminder_1week: "templates/reminder_1week.html"
+    reminder_3days: "templates/reminder_3days.html"
+    reminder_2days: "templates/reminder_2days.html"
+    reminder_1day: "templates/reminder_1day.html"
+
+# Gmail Settings
+gmail:
+  label_name: "Photography Appointments"
+  search_query: "subject:(appointment OR session OR photoshoot) OR body:(appointment OR session OR photoshoot)"
+
+# Logging
+logging:
+  level: "INFO"
+  file: "logs/appointments.log"
+  max_size: "10MB"
+  backup_count: 5
