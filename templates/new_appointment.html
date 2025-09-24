@@ -1,0 +1,565 @@
+{% extends "base.html" %}
+
+{% block title %}New Appointment - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Schedule New Appointment</h1>
+            <p class="text-muted mb-0">Create a new photography session with comprehensive {{ business.business_type or 'photography' }} options</p>
+        </div>
+        <a href="{{ url_for('appointments') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Appointments
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-plus me-2"></i>
+                        Appointment Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="appointmentForm">
+                        <!-- Basic Appointment Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="clientSelect" class="form-label">Client *</label>
+                                <select class="form-select" id="clientSelect" required>
+                                    <option value="">Select a client...</option>
+                                    {% for client in clients %}
+                                    <option value="{{ client.id }}" data-email="{{ client.email }}" data-family-type="{{ client.family_type }}">
+                                        {{ client.name }} {% if client.family_type %}({{ client.family_type.title() }}){% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sessionType" class="form-label">Session Type *</label>
+                                <select class="form-select" id="sessionType" required onchange="updateSessionDetails()">
+                                    <option value="">Select session type...</option>
+                                    {% for key, session in session_types.items() %}
+                                    <option value="{{ key }}" data-duration="{{ session.duration }}" data-price="{{ session.base_price }}">
+                                        {{ session.name }} - ${{ session.base_price }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="appointmentDate" class="form-label">Date *</label>
+                                <input type="date" class="form-control" id="appointmentDate" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="appointmentTime" class="form-label">Time *</label>
+                                <input type="time" class="form-control" id="appointmentTime" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="duration" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="sessionFee" class="form-label">Session Fee ($)</label>
+                                <input type="number" class="form-control" id="sessionFee" step="0.01" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Baby Photography Specific Fields -->
+                        <div id="babyPhotographyFields" style="display: none;">
+                            <h6 class="mb-3 text-primary">
+                                <i class="fas fa-baby me-2"></i>
+                                Baby Photography Details
+                            </h6>
+                            
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-6">
+                                    <label for="babyName" class="form-label">Baby/Child Name</label>
+                                    <input type="text" class="form-control" id="babyName" placeholder="Enter baby or child's name">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Birth Date</label>
+                                    <div class="form-control-plaintext">Birth date is stored in client profile</div>
+                                    <small class="form-text text-muted">Baby's birth date and age are automatically calculated from the client's profile</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="babyAgeDays" class="form-label">Age (days)</label>
+                                    <input type="number" class="form-control" id="babyAgeDays" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="babyAgeWeeks" class="form-label">Age (weeks)</label>
+                                    <input type="number" class="form-control" id="babyAgeWeeks" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="babyAgeMonths" class="form-label">Age (months)</label>
+                                    <input type="number" class="form-control" id="babyAgeMonths" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="milestoneType" class="form-label">Milestone Type</label>
+                                    <select class="form-select" id="milestoneType">
+                                        <option value="">Select milestone...</option>
+                                        <option value="newborn">Newborn (0-14 days)</option>
+                                        <option value="3month">3 Month</option>
+                                        <option value="6month">6 Month</option>
+                                        <option value="9month">9 Month</option>
+                                        <option value="1year">1 Year</option>
+                                        <option value="18month">18 Month</option>
+                                        <option value="2year">2 Year</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="parentNames" class="form-label">Parent Names</label>
+                                    <input type="text" class="form-control" id="parentNames" placeholder="e.g., Sarah, Mike">
+                                </div>
+                            </div>
+
+                            <!-- Birthday Session Specific Fields -->
+                            <div id="birthdayFields" style="display: none;">
+                                <h6 class="mb-3 text-warning">
+                                    <i class="fas fa-birthday-cake me-2"></i>
+                                    Birthday Session Details
+                                </h6>
+                                
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-6">
+                                        <label for="ageTurning" class="form-label">Age Turning</label>
+                                        <input type="number" class="form-control" id="ageTurning" min="1" max="18">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="birthdayTheme" class="form-label">Theme</label>
+                                        <select class="form-select" id="birthdayTheme">
+                                            <option value="">Select theme...</option>
+                                            <option value="princess">Princess</option>
+                                            <option value="superhero">Superhero</option>
+                                            <option value="farm">Farm</option>
+                                            <option value="space">Space</option>
+                                            <option value="ocean">Ocean</option>
+                                            <option value="jungle">Jungle</option>
+                                            <option value="sports">Sports</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cakeFlavor" class="form-label">Cake Flavor</label>
+                                        <select class="form-select" id="cakeFlavor">
+                                            <option value="">Select flavor...</option>
+                                            <option value="vanilla">Vanilla</option>
+                                            <option value="chocolate">Chocolate</option>
+                                            <option value="strawberry">Strawberry</option>
+                                            <option value="red_velvet">Red Velvet</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cakeDesign" class="form-label">Cake Design</label>
+                                        <select class="form-select" id="cakeDesign">
+                                            <option value="">Select design...</option>
+                                            <option value="simple">Simple</option>
+                                            <option value="decorated">Decorated</option>
+                                            <option value="themed">Themed</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label for="parentVision" class="form-label">Parent's Vision</label>
+                                        <textarea class="form-control" id="parentVision" rows="3" placeholder="Describe the parent's vision for the session..."></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sibling Information -->
+                            <div class="row g-3 mb-4">
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="siblingsIncluded">
+                                        <label class="form-check-label" for="siblingsIncluded">
+                                            Include Siblings in Session
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12" id="siblingNamesField" style="display: none;">
+                                    <label for="siblingNames" class="form-label">Sibling Names</label>
+                                    <input type="text" class="form-control" id="siblingNames" placeholder="e.g., Emma (5), Liam (3)">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">Location</label>
+                                <select class="form-select" id="location">
+                                    <option value="studio">Studio</option>
+                                    <option value="outdoor">Outdoor</option>
+                                    <option value="client_home">Client's Home</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="priority" class="form-label">Priority</label>
+                                <select class="form-select" id="priority">
+                                    <option value="normal">Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label for="specialInstructions" class="form-label">Special Instructions</label>
+                                <textarea class="form-control" id="specialInstructions" rows="3" placeholder="Any special instructions or requests..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="clientRequests" class="form-label">Client Requests</label>
+                                <textarea class="form-control" id="clientRequests" rows="3" placeholder="Specific requests from the client..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Financial Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label for="additionalCharges" class="form-label">Additional Charges ($)</label>
+                                <input type="number" class="form-control" id="additionalCharges" step="0.01" value="0.00" onchange="calculateTotal()">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="discount" class="form-label">Discount ($)</label>
+                                <input type="number" class="form-control" id="discount" step="0.01" value="0.00" onchange="calculateTotal()">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="totalAmount" class="form-label">Total Amount ($)</label>
+                                <input type="number" class="form-control" id="totalAmount" step="0.01" readonly>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check me-2"></i>
+                                Schedule Appointment
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo me-2"></i>
+                                Reset Form
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with Help and Information -->
+        <div class="col-lg-4">
+            <!-- Session Type Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Session Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="sessionInfo">
+                        <p class="text-muted">Select a session type to see details</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Baby Age Calculator -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>
+                        Baby Age Calculator
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="calcBirthDate" class="form-label">Birth Date</label>
+                        <input type="date" class="form-control" id="calcBirthDate" onchange="calculateAge()">
+                    </div>
+                    <div id="ageResults" style="display: none;">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="bg-primary bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold text-primary" id="calcDays">0</div>
+                                    <small>Days</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-success bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold text-success" id="calcWeeks">0</div>
+                                    <small>Weeks</small>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="bg-warning bg-opacity-10 rounded p-2">
+                                    <div class="fw-bold text-warning" id="calcMonths">0</div>
+                                    <small>Months</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <small class="text-muted">
+                                <strong>Recommended Session:</strong><br>
+                                <span id="recommendedSession">-</span>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Quick Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Newborn sessions work best within 5-14 days</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Milestone sessions at 3, 6, 9, and 12 months</small>
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Schedule maternity sessions at 28-36 weeks</small>
+                        </li>
+                        <li class="mb-0">
+                            <i class="fas fa-check text-success me-2"></i>
+                            <small>Allow buffer time between appointments</small>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Set minimum date to today
+    const today = new Date().toISOString().split('T')[0];
+    document.getElementById('appointmentDate').min = today;
+    
+    // Initialize form
+    updateSessionDetails();
+    calculateTotal();
+    
+    // Handle client selection to populate birth date from client profile
+    document.getElementById('clientSelect').addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value) {
+            // Clear baby age fields when client changes
+            document.getElementById('babyAgeDays').value = '';
+            document.getElementById('babyAgeWeeks').value = '';
+            document.getElementById('babyAgeMonths').value = '';
+        }
+    });
+});
+
+function updateSessionDetails() {
+    const sessionSelect = document.getElementById('sessionType');
+    const selectedOption = sessionSelect.options[sessionSelect.selectedIndex];
+    
+    if (selectedOption.value) {
+        const duration = selectedOption.dataset.duration;
+        const price = selectedOption.dataset.price;
+        
+        document.getElementById('duration').value = duration;
+        document.getElementById('sessionFee').value = price;
+        
+        // Show/hide baby photography fields based on session type
+        const babyFields = document.getElementById('babyPhotographyFields');
+        const sessionType = selectedOption.value;
+        
+        if (['maternity', 'newborn', 'milestone', 'smash_cake', 'birthday', 'family'].includes(sessionType)) {
+            babyFields.style.display = 'block';
+            
+            // Show birthday fields for specific session types
+            const birthdayFields = document.getElementById('birthdayFields');
+            if (['smash_cake', 'birthday'].includes(sessionType)) {
+                birthdayFields.style.display = 'block';
+            } else {
+                birthdayFields.style.display = 'none';
+            }
+        } else {
+            babyFields.style.display = 'none';
+        }
+        
+        // Update session info sidebar
+        updateSessionInfo(selectedOption);
+        
+        calculateTotal();
+    }
+}
+
+function updateSessionInfo(selectedOption) {
+    const sessionInfo = document.getElementById('sessionInfo');
+    const sessionType = selectedOption.value;
+    
+    let infoHTML = `
+        <h6 class="text-primary">${selectedOption.text}</h6>
+        <p class="mb-2"><strong>Duration:</strong> ${selectedOption.dataset.duration} minutes</p>
+        <p class="mb-2"><strong>Price:</strong> $${selectedOption.dataset.price}</p>
+    `;
+    
+    // Add session-specific information
+    if (sessionType === 'newborn') {
+        infoHTML += `
+            <div class="alert alert-warning alert-sm">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Newborn Session:</strong><br>
+                                • Best within 5-14 days<br>
+                                • 3-hour session recommended<br>
+                                • Backup date flexibility
+                            </div>
+        `;
+    } else if (sessionType === 'maternity') {
+        infoHTML += `
+            <div class="alert alert-info alert-sm">
+                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Maternity Session:</strong><br>
+                                • Recommended at 28-36 weeks<br>
+                                • 90-minute session<br>
+                                • Props included
+                            </div>
+        `;
+    } else if (sessionType === 'smash_cake') {
+        infoHTML += `
+            <div class="alert alert-danger alert-sm">
+                <i class="fas fa-birthday-cake me-2"></i>
+                                <strong>Smash Cake Session:</strong><br>
+                                • Cake included<br>
+                                • Cleanup service<br>
+                                • 90-minute session
+                            </div>
+        `;
+    }
+    
+    sessionInfo.innerHTML = infoHTML;
+}
+
+// Baby age calculation is now handled by the backend using client profile data
+
+function calculateAge() {
+    const birthDate = document.getElementById('calcBirthDate').value;
+    if (!birthDate) return;
+    
+    const birth = new Date(birthDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - birth);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    document.getElementById('calcDays').textContent = diffDays;
+    document.getElementById('calcWeeks').textContent = Math.floor(diffDays / 7);
+    document.getElementById('calcMonths').textContent = Math.floor(diffDays / 30);
+    
+    // Recommend session type
+    let recommendedSession = '';
+    if (diffDays <= 14) recommendedSession = 'Newborn Session (5-14 days)';
+    else if (diffDays <= 90) recommendedSession = '3 Month Milestone';
+    else if (diffDays <= 180) recommendedSession = '6 Month Milestone';
+    else if (diffDays <= 270) recommendedSession = '9 Month Milestone';
+    else if (diffDays <= 365) recommendedSession = '1 Year Milestone';
+    else if (diffDays <= 730) recommendedSession = '18 Month Milestone';
+    else recommendedSession = '2 Year Milestone';
+    
+    document.getElementById('recommendedSession').textContent = recommendedSession;
+    document.getElementById('ageResults').style.display = 'block';
+}
+
+function calculateTotal() {
+    const sessionFee = parseFloat(document.getElementById('sessionFee').value) || 0;
+    const additionalCharges = parseFloat(document.getElementById('additionalCharges').value) || 0;
+    const discount = parseFloat(document.getElementById('discount').value) || 0;
+    
+    const total = sessionFee + additionalCharges - discount;
+    document.getElementById('totalAmount').value = total.toFixed(2);
+}
+
+// Sibling checkbox handler
+document.getElementById('siblingsIncluded').addEventListener('change', function() {
+    const siblingField = document.getElementById('siblingNamesField');
+    siblingField.style.display = this.checked ? 'block' : 'none';
+});
+
+// Form submission
+document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = {
+        client_id: document.getElementById('clientSelect').value,
+        session_type: document.getElementById('sessionType').value,
+        start_time: document.getElementById('appointmentDate').value + 'T' + document.getElementById('appointmentTime').value,
+        duration: parseInt(document.getElementById('duration').value),
+        session_fee: parseFloat(document.getElementById('sessionFee').value),
+        location: document.getElementById('location').value,
+        priority: document.getElementById('priority').value,
+        special_instructions: document.getElementById('specialInstructions').value,
+        client_requests: document.getElementById('clientRequests').value,
+        additional_charges: parseFloat(document.getElementById('additionalCharges').value) || 0,
+        discount: parseFloat(document.getElementById('discount').value) || 0,
+        total_amount: parseFloat(document.getElementById('totalAmount').value),
+        
+        // Baby photography fields
+        baby_name: document.getElementById('babyName').value,
+        // baby_birth_date: document.getElementById('babyBirthDate').value, // Removed - stored in client profile
+        baby_age_days: parseInt(document.getElementById('babyAgeDays').value) || null,
+        baby_age_weeks: parseInt(document.getElementById('babyAgeWeeks').value) || null,
+        baby_age_months: parseInt(document.getElementById('babyAgeMonths').value) || null,
+        milestone_type: document.getElementById('milestoneType').value,
+        parent_names: document.getElementById('parentNames').value.split(',').map(name => name.trim()).filter(name => name),
+        siblings_included: document.getElementById('siblingsIncluded').checked,
+        sibling_names: document.getElementById('siblingNames').value.split(',').map(name => name.trim()).filter(name => name),
+        
+        // Birthday session fields
+        age_turning: parseInt(document.getElementById('ageTurning').value) || null,
+        theme: document.getElementById('birthdayTheme').value,
+        cake_flavor: document.getElementById('cakeFlavor').value,
+        cake_design: document.getElementById('cakeDesign').value,
+        parent_vision: document.getElementById('parentVision').value
+    };
+    
+    // Submit the form
+    fetch('{{ url_for("new_appointment") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Appointment scheduled successfully!');
+            window.location.href = '{{ url_for("appointments") }}';
+        } else {
+            alert('Error scheduling appointment: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error scheduling appointment');
+    });
+});
+
+function resetForm() {
+    document.getElementById('appointmentForm').reset();
+    document.getElementById('babyPhotographyFields').style.display = 'none';
+    document.getElementById('birthdayFields').style.display = 'none';
+    document.getElementById('siblingNamesField').style.display = 'none';
+    document.getElementById('sessionInfo').innerHTML = '<p class="text-muted">Select a session type to see details</p>';
+    updateSessionDetails();
+    calculateTotal();
+}
+</script>
+{% endblock %}

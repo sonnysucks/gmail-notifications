@@ -1,0 +1,982 @@
+{% extends "base.html" %}
+
+{% block title %}Setup & Configuration - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Setup & Configuration</h1>
+            <p class="text-muted mb-0">Configure your {{ business.business_type or 'photography' }} business settings and preferences</p>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="saveAllSettings()">
+            <i class="fas fa-save me-2"></i>
+            Save All Settings
+        </button>
+    </div>
+
+    <!-- Setup Tabs -->
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="setupTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">
+                        <i class="fas fa-building me-2"></i>
+                        Business Info
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sessions-tab" data-bs-toggle="tab" data-bs-target="#sessions" type="button" role="tab">
+                        <i class="fas fa-camera me-2"></i>
+                        Session Types
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button" role="tab">
+                        <i class="fas fa-calendar me-2"></i>
+                        Calendar & Hours
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="baby-tab" data-bs-toggle="tab" data-bs-target="#baby" type="button" role="tab">
+                        <i class="fas fa-baby me-2"></i>
+                        {{ business.business_type or 'Photography' }}
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="crm-tab" data-bs-toggle="tab" data-bs-target="#crm" type="button" role="tab">
+                        <i class="fas fa-users me-2"></i>
+                        CRM Settings
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="email-tab" data-bs-toggle="tab" data-bs-target="#email" type="button" role="tab">
+                        <i class="fas fa-envelope me-2"></i>
+                        Email & Templates
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab">
+                        <i class="fas fa-palette me-2"></i>
+                        Themes & Design
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body">
+            <div class="tab-content" id="setupTabsContent">
+                <!-- Business Information Tab -->
+                <div class="tab-pane fade show active" id="business" role="tabpanel">
+                    <h5 class="mb-4">Business Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="businessName" class="form-label">Business Name</label>
+                            <input type="text" class="form-control" id="businessName" value="{{ config.business.name if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessEmail" class="form-label">Business Email</label>
+                            <input type="email" class="form-control" id="businessEmail" value="{{ config.business.email if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessPhone" class="form-label">Business Phone</label>
+                            <input type="tel" class="form-control" id="businessPhone" value="{{ config.business.phone if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessWebsite" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="businessWebsite" value="{{ config.business.website if config.business else '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="businessAddress" class="form-label">Business Address</label>
+                            <input type="text" class="form-control" id="businessAddress" value="{{ config.business.address if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessType" class="form-label">Business Type</label>
+                            <select class="form-select" id="businessType">
+                                <option value="LLC" {{ 'selected' if config.business and config.business.business_type == 'LLC' else '' }}>LLC</option>
+                                <option value="Corporation" {{ 'selected' if config.business and config.business.business_type == 'Corporation' else '' }}>Corporation</option>
+                                <option value="Sole Proprietorship" {{ 'selected' if config.business and config.business.business_type == 'Sole Proprietorship' else '' }}>Sole Proprietorship</option>
+                                <option value="Partnership" {{ 'selected' if config.business and config.business.business_type == 'Partnership' else '' }}>Partnership</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="taxId" class="form-label">Tax ID</label>
+                            <input type="text" class="form-control" id="taxId" value="{{ config.business.tax_id if config.business else '' }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Session Types Tab -->
+                <div class="tab-pane fade" id="sessions" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="mb-0">Session Types & Pricing</h5>
+                        <button type="button" class="btn btn-success btn-sm" onclick="addSessionType()">
+                            <i class="fas fa-plus me-2"></i>
+                            Add Session Type
+                        </button>
+                    </div>
+                    
+                    <div id="sessionTypesContainer">
+                        <!-- Session types will be dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Calendar & Hours Tab -->
+                <div class="tab-pane fade" id="calendar" role="tabpanel">
+                    <h5 class="mb-4">Calendar & Business Hours</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="timezone" class="form-label">Business Timezone</label>
+                            <select class="form-select" id="timezone">
+                                <option value="America/New_York" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/New_York' else '' }}>Eastern Time</option>
+                                <option value="America/Chicago" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Chicago' else '' }}>Central Time</option>
+                                <option value="America/Denver" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Denver' else '' }}>Mountain Time</option>
+                                <option value="America/Los_Angeles" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Los_Angeles' else '' }}>Pacific Time</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="targetCalendar" class="form-label">Target Google Calendar</label>
+                            <input type="text" class="form-control" id="targetCalendar" value="{{ config.calendar.target_calendar_id if config.calendar else 'primary' }}" placeholder="primary">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dailyStart" class="form-label">Daily Start Time</label>
+                            <input type="time" class="form-control" id="dailyStart" value="{{ config.calendar.business_hours.start if config.calendar and config.calendar.business_hours else '09:00' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dailyEnd" class="form-label">Daily End Time</label>
+                            <input type="time" class="form-control" id="dailyEnd" value="{{ config.calendar.business_hours.end if config.calendar and config.calendar.business_hours else '17:00' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Working Days</label>
+                            <div class="row g-2">
+                                {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                {% for day in days %}
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="day{{ loop.index }}" 
+                                               {{ 'checked' if config.calendar and config.calendar.business_hours.weekly and config.calendar.business_hours.weekly[day].enabled else '' }}>
+                                        <label class="form-check-label" for="day{{ loop.index }}">
+                                            {{ day }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Baby Photography Tab -->
+                <div class="tab-pane fade" id="baby" role="tabpanel">
+                    <h5 class="mb-4">{{ business.business_type or 'Photography' }} Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="milestonesEnabled" 
+                                       {{ 'checked' if config.baby_photography and config.baby_photography.milestones.enabled else '' }}>
+                                <label class="form-check-label" for="milestonesEnabled">
+                                    Enable Milestone Tracking
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoReminders" 
+                                       {{ 'checked' if config.baby_photography and config.baby_photography.milestones.auto_reminders else '' }}>
+                                <label class="form-check-label" for="autoReminders">
+                                    Automatic Milestone Reminders
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newbornMaxAge" class="form-label">Newborn Max Age (days)</label>
+                            <input type="number" class="form-control" id="newbornMaxAge" 
+                                   value="{{ config.baby_photography.newborn.max_age_days if config.baby_photography and config.baby_photography.newborn else 14 }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="milestoneReminderDays" class="form-label">Milestone Reminder (days before)</label>
+                            <input type="number" class="form-control" id="milestoneReminderDays" 
+                                   value="{{ config.baby_photography.milestones.reminder_days_before if config.baby_photography and config.baby_photography.milestones else 30 }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Available Birthday Themes</label>
+                            <div class="row g-2">
+                                {% set themes = ['Princess', 'Superhero', 'Farm', 'Space', 'Ocean', 'Jungle', 'Sports', 'Custom'] %}
+                                {% for theme in themes %}
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="theme{{ loop.index }}" 
+                                               value="{{ theme }}" {{ 'checked' if config.baby_photography and config.baby_photography.birthday and theme in config.baby_photography.birthday.themes_available else '' }}>
+                                        <label class="form-check-label" for="theme{{ loop.index }}">
+                                            {{ theme }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CRM Settings Tab -->
+                <div class="tab-pane fade" id="crm" role="tabpanel">
+                    <h5 class="mb-4">CRM Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="followUpEnabled" 
+                                       {{ 'checked' if config.crm and config.crm.follow_up.enabled else '' }}>
+                                <label class="form-check-label" for="followUpEnabled">
+                                    Enable Follow-up System
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="referralProgram" 
+                                       {{ 'checked' if config.crm and config.crm.marketing.referral_program_enabled else '' }}>
+                                <label class="form-check-label" for="referralProgram">
+                                    Enable Referral Program
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="referralBonus" class="form-label">Referral Bonus Amount ($)</label>
+                            <input type="number" class="form-control" id="referralBonus" step="0.01" 
+                                   value="{{ config.crm.marketing.referral_bonus if config.crm and config.crm.marketing else 50.00 }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="defaultFollowUpDays" class="form-label">Default Follow-up Delay (days)</label>
+                            <input type="number" class="form-control" id="defaultFollowUpDays" 
+                                   value="{{ config.crm.follow_up.default_delay_days if config.crm and config.crm.follow_up else 3 }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email & Templates Tab -->
+                <div class="tab-pane fade" id="email" role="tabpanel">
+                    <h5 class="mb-4">Email & Template Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="fromName" class="form-label">From Name</label>
+                            <input type="text" class="form-control" id="fromName" 
+                                   value="{{ config.email.from_name if config.email else business.name }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="replyTo" class="form-label">Reply-to Email</label>
+                            <input type="email" class="form-control" id="replyTo" 
+                                   value="{{ config.email.reply_to if config.email else '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Email Templates</label>
+                            <div class="row g-2">
+                                {% set templates = ['confirmation', 'reminder_2weeks', 'reminder_1week', 'reminder_3days', 'reminder_2days', 'reminder_1day', 'follow_up', 'thank_you'] %}
+                                {% for template in templates %}
+                                <div class="col-md-6">
+                                    <label for="template{{ loop.index }}" class="form-label">{{ template.replace('_', ' ').title() }}</label>
+                                    <input type="text" class="form-control" id="template{{ loop.index }}" 
+                                           value="{{ config.email.templates[template] if config.email and config.email.templates and template in config.email.templates else 'templates/' + template + '.html' }}">
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Themes & Design Tab -->
+                <div class="tab-pane fade" id="theme" role="tabpanel">
+                    <h5 class="mb-4">Themes & Design Settings</h5>
+                    
+                    <!-- Current Theme Preview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">Current Theme Preview</h6>
+                            <div class="theme-preview p-3 rounded border" id="themePreview">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Primary Color</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--secondary-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Secondary Color</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--accent-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Accent Color</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme Selection -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="themeSelect" class="form-label">Choose Theme</label>
+                            <select class="form-select" id="themeSelect" onchange="changeTheme(this.value)">
+                                <option value="default" {{ 'selected' if not config.theme or config.theme.name == 'default' else '' }}>Default Professional</option>
+                                <option value="soft-pastels" {{ 'selected' if config.theme and config.theme.name == 'soft-pastels' else '' }}>Soft Pastels</option>
+                                <option value="modern-dark" {{ 'selected' if config.theme and config.theme.name == 'modern-dark' else '' }}>Modern Dark</option>
+                                <option value="nature-inspired" {{ 'selected' if config.theme and config.theme.name == 'nature-inspired' else '' }}>Nature Inspired</option>
+                                <option value="halloween" {{ 'selected' if config.theme and config.theme.name == 'halloween' else '' }}>🎃 Halloween</option>
+                                <option value="thanksgiving" {{ 'selected' if config.theme and config.theme.name == 'thanksgiving' else '' }}>🦃 Thanksgiving</option>
+                                <option value="christmas" {{ 'selected' if config.theme and config.theme.name == 'christmas' else '' }}>🎄 Christmas</option>
+                                <option value="valentine" {{ 'selected' if config.theme and config.theme.name == 'valentine' else '' }}>💕 Valentine's Day</option>
+                                <option value="easter" {{ 'selected' if config.theme and config.theme.name == 'easter' else '' }}>🐰 Easter</option>
+                                <option value="summer" {{ 'selected' if config.theme and config.theme.name == 'summer' else '' }}>☀️ Summer</option>
+                            </select>
+                        </div>
+
+
+                        <!-- Custom Color Overrides -->
+                        <div class="col-12">
+                            <h6 class="mb-3">Custom Color Overrides (Optional)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="customPrimary" class="form-label">Primary Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customPrimary" 
+                                           value="{{ config.theme.custom_primary if config.theme and config.theme.custom_primary else '#6366f1' }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="customSecondary" class="form-label">Secondary Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customSecondary" 
+                                           value="{{ config.theme.custom_secondary if config.theme and config.theme.custom_secondary else '#8b5cf6' }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="customAccent" class="form-label">Accent Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customAccent" 
+                                           value="{{ config.theme.custom_accent if config.theme and config.theme.custom_accent else '#f59e0b' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme Options -->
+                        <div class="col-12">
+                            <h6 class="mb-3">Theme Options</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableCustomColors" 
+                                               {{ 'checked' if config.theme and config.theme.enable_custom_colors else '' }}>
+                                        <label class="form-check-label" for="enableCustomColors">
+                                            Enable Custom Color Overrides
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableAnimations" 
+                                               {{ 'checked' if config.theme and config.theme.enable_animations else '' }}>
+                                        <label class="form-check-label" for="enableAnimations">
+                                            Enable Smooth Animations
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableHolidayEffects" 
+                                               {{ 'checked' if config.theme and config.theme.enable_holiday_effects else '' }}>
+                                        <label class="form-check-label" for="enableHolidayEffects">
+                                            Enable Holiday Effects (Snow, Confetti, etc.)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableDarkMode" 
+                                               {{ 'checked' if config.theme and config.theme.enable_dark_mode else '' }}>
+                                        <label class="form-check-label" for="enableDarkMode">
+                                            Enable Dark Mode Support
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme Preview Cards -->
+                        <div class="col-12">
+                            <h6 class="mb-3">Theme Gallery</h6>
+                            <div class="row g-3" id="themeGallery">
+                                <!-- Theme cards will be populated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Session Type Modal -->
+<div class="modal fade" id="sessionTypeModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add/Edit Session Type</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sessionTypeForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="sessionName" class="form-label">Session Name</label>
+                            <input type="text" class="form-control" id="sessionName" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sessionDuration" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="sessionDuration" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sessionPrice" class="form-label">Base Price ($)</label>
+                            <input type="number" class="form-control" id="sessionPrice" step="0.01" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="sessionType" class="form-label">Session Type</label>
+                            <select class="form-select" id="sessionType" required>
+                                <option value="maternity">Maternity</option>
+                                <option value="newborn">Newborn</option>
+                                <option value="milestone">Milestone</option>
+                                <option value="smash_cake">Smash Cake</option>
+                                <option value="birthday">Birthday</option>
+                                <option value="family">Family Portrait</option>
+                                <option value="mini">Mini Session</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="sessionDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="sessionDescription" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="sessionIncludes" class="form-label">What's Included</label>
+                            <textarea class="form-control" id="sessionIncludes" rows="3" placeholder="e.g., 25 edited images, Online gallery, Print release"></textarea>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveSessionType()">Save Session Type</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+console.log('🚀 Setup page JavaScript loading...');
+console.log('🚀 Testing basic JavaScript functionality...');
+alert('JavaScript is loading!');
+
+let currentSessionType = null;
+
+// Load session types on page load
+
+function loadSessionTypes() {
+    fetch('/api/session-types')
+        .then(response => response.json())
+        .then(data => {
+            displaySessionTypes(data);
+        })
+        .catch(error => console.error('Error loading session types:', error));
+}
+
+function displaySessionTypes(sessionTypes) {
+    const container = document.getElementById('sessionTypesContainer');
+    container.innerHTML = '';
+    
+    Object.entries(sessionTypes).forEach(([key, session]) => {
+        const sessionCard = createSessionTypeCard(key, session);
+        container.appendChild(sessionCard);
+    });
+}
+
+function createSessionTypeCard(key, session) {
+    const card = document.createElement('div');
+    card.className = 'card mb-3';
+    card.innerHTML = 
+        '<div class="card-body">' +
+            '<div class="row align-items-center">' +
+                '<div class="col-md-3">' +
+                    '<h6 class="mb-1">' + session.name + '</h6>' +
+                    '<small class="text-muted">' + session.duration + ' minutes</small>' +
+                '</div>' +
+                '<div class="col-md-3">' +
+                    '<strong class="text-success">$' + session.base_price + '</strong>' +
+                '</div>' +
+                '<div class="col-md-3">' +
+                    '<span class="badge bg-primary">' + (session.session_type || key) + '</span>' +
+                '</div>' +
+                '<div class="col-md-3 text-end">' +
+                    '<button class="btn btn-sm btn-outline-primary me-2" onclick="editSessionType(\'' + key + '\')">' +
+                        '<i class="fas fa-edit"></i>' +
+                    '</button>' +
+                    '<button class="btn btn-sm btn-outline-danger" onclick="deleteSessionType(\'' + key + '\')">' +
+                        '<i class="fas fa-trash"></i>' +
+                    '</button>' +
+                '</div>' +
+            '</div>' +
+        '</div>';
+    return card;
+}
+
+function addSessionType() {
+    currentSessionType = null;
+    document.getElementById('sessionTypeForm').reset();
+    document.getElementById('sessionName').value = '';
+    document.getElementById('sessionDuration').value = '';
+    document.getElementById('sessionPrice').value = '';
+    document.getElementById('sessionDescription').value = '';
+    document.getElementById('sessionIncludes').value = '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('sessionTypeModal'));
+    modal.show();
+}
+
+function editSessionType(key, session) {
+    currentSessionType = key;
+    document.getElementById('sessionName').value = session.name || '';
+    document.getElementById('sessionDuration').value = session.duration || '';
+    document.getElementById('sessionPrice').value = session.base_price || '';
+    document.getElementById('sessionDescription').value = session.description || '';
+    document.getElementById('sessionIncludes').value = session.includes ? session.includes.join(', ') : '';
+    document.getElementById('sessionType').value = session.session_type || key;
+    
+    const modal = new bootstrap.Modal(document.getElementById('sessionTypeModal'));
+    modal.show();
+}
+
+function saveSessionType() {
+    const formData = {
+        name: document.getElementById('sessionName').value,
+        duration: parseInt(document.getElementById('sessionDuration').value),
+        base_price: parseFloat(document.getElementById('sessionPrice').value),
+        description: document.getElementById('sessionDescription').value,
+        includes: document.getElementById('sessionIncludes').value.split(',').map(item => item.trim()).filter(item => item),
+        session_type: document.getElementById('sessionType').value
+    };
+    
+    // Here you would save to the configuration
+    console.log('Saving session type:', formData);
+    
+    const modal = bootstrap.Modal.getInstance(document.getElementById('sessionTypeModal'));
+    modal.hide();
+    
+    // Reload session types
+    loadSessionTypes();
+}
+
+function deleteSessionType(key) {
+    if (confirm('Are you sure you want to delete the session type "' + key + '"?')) {
+        // Here you would delete from the configuration
+        console.log('Deleting session type:', key);
+        
+        // Reload session types
+        loadSessionTypes();
+    }
+}
+
+function saveAllSettings() {
+    const config = {
+        business: {
+            name: document.getElementById('businessName').value,
+            email: document.getElementById('businessEmail').value,
+            phone: document.getElementById('businessPhone').value,
+            website: document.getElementById('businessWebsite').value,
+            address: document.getElementById('businessAddress').value,
+            business_type: document.getElementById('businessType').value,
+            tax_id: document.getElementById('taxId').value
+        },
+        calendar: {
+            timezone: document.getElementById('timezone').value,
+            target_calendar_id: document.getElementById('targetCalendar').value,
+            business_hours: {
+                start: document.getElementById('dailyStart').value,
+                end: document.getElementById('dailyEnd').value
+            }
+        },
+        baby_photography: {
+            milestones: {
+                enabled: document.getElementById('milestonesEnabled').checked,
+                auto_reminders: document.getElementById('autoReminders').checked,
+                reminder_days_before: parseInt(document.getElementById('milestoneReminderDays').value)
+            },
+            newborn: {
+                max_age_days: parseInt(document.getElementById('newbornMaxAge').value)
+            }
+        },
+        crm: {
+            follow_up: {
+                enabled: document.getElementById('followUpEnabled').checked,
+                default_delay_days: parseInt(document.getElementById('defaultFollowUpDays').value)
+            },
+            marketing: {
+                referral_program_enabled: document.getElementById('referralProgram').checked,
+                referral_bonus: parseFloat(document.getElementById('referralBonus').value)
+            }
+        },
+        email: {
+            from_name: document.getElementById('fromName').value,
+            reply_to: document.getElementById('replyTo').value
+        },
+        theme: {
+            name: document.getElementById('themeSelect').value,
+            custom_primary: document.getElementById('customPrimary').value,
+            custom_secondary: document.getElementById('customSecondary').value,
+            custom_accent: document.getElementById('customAccent').value,
+            enable_custom_colors: document.getElementById('enableCustomColors').checked,
+            enable_animations: document.getElementById('enableAnimations').checked,
+            enable_holiday_effects: document.getElementById('enableHolidayEffects').checked,
+            enable_dark_mode: document.getElementById('enableDarkMode').checked
+        }
+    };
+    
+    fetch('/setup/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Settings saved successfully!');
+            // Theme is already applied globally when selected, no need to reapply
+        } else {
+            alert('Error saving settings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving settings');
+    });
+}
+
+// Theme Management Functions
+const themes = {
+    'default': {
+        name: 'Default Professional',
+        primary: '#6366f1',
+        secondary: '#8b5cf6',
+        accent: '#f59e0b',
+        description: 'Clean, professional design perfect for business use'
+    },
+    'soft-pastels': {
+        name: 'Soft Pastels',
+        primary: '#f8b5d1',
+        secondary: '#a8e6cf',
+        accent: '#ffd3a5',
+        description: 'Gentle pastel colors ideal for baby photography'
+    },
+    'modern-dark': {
+        name: 'Modern Dark',
+        primary: '#1f2937',
+        secondary: '#374151',
+        accent: '#10b981',
+        description: 'Sleek dark theme with modern aesthetics'
+    },
+    'nature-inspired': {
+        name: 'Nature Inspired',
+        primary: '#059669',
+        secondary: '#0d9488',
+        accent: '#f59e0b',
+        description: 'Earth tones inspired by natural beauty'
+    },
+    'halloween': {
+        name: '🎃 Halloween',
+        primary: '#f97316',
+        secondary: '#7c2d12',
+        accent: '#fbbf24',
+        description: 'Spooky orange and black theme for Halloween sessions'
+    },
+    'thanksgiving': {
+        name: '🦃 Thanksgiving',
+        primary: '#dc2626',
+        secondary: '#f59e0b',
+        accent: '#16a34a',
+        description: 'Warm autumn colors for Thanksgiving celebrations'
+    },
+    'christmas': {
+        name: '🎄 Christmas',
+        primary: '#dc2626',
+        secondary: '#16a34a',
+        accent: '#fbbf24',
+        description: 'Classic red, green, and gold Christmas theme'
+    },
+    'valentine': {
+        name: '💕 Valentine\'s Day',
+        primary: '#ec4899',
+        secondary: '#f8b5d1',
+        accent: '#fbbf24',
+        description: 'Romantic pink and red theme for Valentine\'s Day'
+    },
+    'easter': {
+        name: '🐰 Easter',
+        primary: '#8b5cf6',
+        secondary: '#a8e6cf',
+        accent: '#fbbf24',
+        description: 'Fresh spring colors perfect for Easter sessions'
+    },
+    'summer': {
+        name: '☀️ Summer',
+        primary: '#0ea5e9',
+        secondary: '#f59e0b',
+        accent: '#10b981',
+        description: 'Bright, sunny colors for summer photography'
+    }
+};
+
+function previewTheme(themeName) {
+    try {
+        console.log('previewTheme called with:', themeName);
+        const theme = themes[themeName];
+        if (!theme) {
+            console.error('Theme not found:', themeName);
+            return;
+        }
+        
+        console.log('Applying theme globally:', themeName, theme);
+        
+        // Apply theme colors globally immediately
+        document.documentElement.style.setProperty('--primary-color', theme.primary);
+        document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+        document.documentElement.style.setProperty('--accent-color', theme.accent);
+        
+        console.log('CSS variables set to:', {
+            primary: theme.primary,
+            secondary: theme.secondary,
+            accent: theme.accent
+        });
+        
+        // Update color inputs
+        const customPrimary = document.getElementById('customPrimary');
+        const customSecondary = document.getElementById('customSecondary');
+        const customAccent = document.getElementById('customAccent');
+        
+        if (customPrimary) customPrimary.value = theme.primary;
+        if (customSecondary) customSecondary.value = theme.secondary;
+        if (customAccent) customAccent.value = theme.accent;
+        
+        // Update preview
+        updateThemePreview();
+        
+        console.log('✅ Theme preview completed successfully');
+    } catch (error) {
+        console.error('❌ Error in previewTheme:', error);
+    }
+}
+
+function updateThemePreview() {
+    try {
+        const preview = document.getElementById('themePreview');
+        if (!preview) {
+            console.error('❌ Could not find themePreview element');
+            return;
+        }
+        
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        
+        console.log('🎨 Updating preview with colors:', { primaryColor, secondaryColor, accentColor });
+        
+        const swatches = preview.querySelectorAll('.theme-color-swatch');
+        console.log('🎨 Found', swatches.length, 'color swatches');
+        
+        if (swatches.length >= 3) {
+            swatches[0].style.backgroundColor = primaryColor;
+            swatches[1].style.backgroundColor = secondaryColor;
+            swatches[2].style.backgroundColor = accentColor;
+            console.log('✅ Color swatches updated');
+        } else {
+            console.error('❌ Not enough color swatches found');
+        }
+    } catch (error) {
+        console.error('❌ Error in updateThemePreview:', error);
+    }
+}
+
+function populateThemeGallery() {
+    const gallery = document.getElementById('themeGallery');
+    gallery.innerHTML = '';
+    
+    Object.entries(themes).forEach(([key, theme]) => {
+        const card = document.createElement('div');
+        card.className = 'col-md-6 col-lg-4';
+        card.innerHTML = 
+            '<div class="card theme-card h-100" onclick="selectTheme(\'' + key + '\')">' +
+                '<div class="card-body text-center">' +
+                    '<div class="theme-preview-mini mb-3">' +
+                        '<div class="color-bar" style="background: ' + theme.primary + '; height: 20px; border-radius: 4px 4px 0 0;"></div>' +
+                        '<div class="color-bar" style="background: ' + theme.secondary + '; height: 20px;"></div>' +
+                        '<div class="color-bar" style="background: ' + theme.accent + '; height: 20px; border-radius: 0 0 4px 4px;"></div>' +
+                    '</div>' +
+                    '<h6 class="card-title">' + theme.name + '</h6>' +
+                    '<p class="card-text small text-muted">' + theme.description + '</p>' +
+                '</div>' +
+            '</div>';
+        gallery.appendChild(card);
+    });
+}
+
+function selectTheme(themeName) {
+    document.getElementById('themeSelect').value = themeName;
+    previewTheme(themeName);
+}
+
+// Apply theme globally across the application
+function applyThemeGlobally(themeName, customColors = null) {
+    const theme = themes[themeName];
+    if (!theme) return;
+    
+    // Apply theme colors
+    if (customColors && customColors.enabled) {
+        document.documentElement.style.setProperty('--primary-color', customColors.primary);
+        document.documentElement.style.setProperty('--secondary-color', customColors.secondary);
+        document.documentElement.style.setProperty('--accent-color', customColors.accent);
+    } else {
+        document.documentElement.style.setProperty('--primary-color', theme.primary);
+        document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+        document.documentElement.style.setProperty('--accent-color', theme.accent);
+    }
+    
+    // Apply dark mode if it's a dark theme
+    if (themeName === 'modern-dark') {
+        document.body.setAttribute('data-theme', 'dark');
+    } else {
+        document.body.removeAttribute('data-theme');
+    }
+}
+
+// Initialize theme gallery on page load
+// Load session types on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🎯 DOMContentLoaded fired - setting up theme listeners');
+    loadSessionTypes();
+    
+    // Theme setup
+    populateThemeGallery();
+    updateThemePreview();
+    
+    // Apply current theme on page load
+    const currentTheme = document.getElementById('themeSelect').value;
+    if (currentTheme) {
+        previewTheme(currentTheme);
+    }
+    
+    // Add event listener for theme selection
+    const themeSelect = document.getElementById('themeSelect');
+    if (themeSelect) {
+        console.log('🎨 Found themeSelect element, adding event listener');
+        themeSelect.addEventListener('change', function() {
+            console.log('🎨 Theme dropdown changed to:', this.value);
+            previewTheme(this.value);
+        });
+    } else {
+        console.error('🎨 Could not find themeSelect element!');
+    }
+    
+    // Add event listeners for custom color changes
+    document.getElementById('customPrimary').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--primary-color', this.value);
+        updateThemePreview();
+    });
+    
+    document.getElementById('customSecondary').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--secondary-color', this.value);
+        updateThemePreview();
+    });
+    
+    document.getElementById('customAccent').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--accent-color', this.value);
+        updateThemePreview();
+    });
+    
+    // Add event listener for custom colors checkbox
+    document.getElementById('enableCustomColors').addEventListener('change', function() {
+        if (this.checked) {
+            // Use custom colors
+            document.documentElement.style.setProperty('--primary-color', document.getElementById('customPrimary').value);
+            document.documentElement.style.setProperty('--secondary-color', document.getElementById('customSecondary').value);
+            document.documentElement.style.setProperty('--accent-color', document.getElementById('customAccent').value);
+        } else {
+            // Use theme default colors
+            const currentTheme = document.getElementById('themeSelect').value;
+            previewTheme(currentTheme);
+        }
+        updateThemePreview();
+    });
+});
+
+// Test functions for debugging
+function testThemeChange() {
+    try {
+        console.log('🧪 Test button clicked - testing theme change...');
+        document.documentElement.style.setProperty('--primary-color', '#ff0000');
+        document.documentElement.style.setProperty('--secondary-color', '#00ff00');
+        document.documentElement.style.setProperty('--accent-color', '#0000ff');
+        console.log('🧪 Direct CSS variable change applied - should see red/green/blue now');
+        
+        // Try to update preview without calling updateThemePreview
+        const preview = document.getElementById('themePreview');
+        if (preview) {
+            console.log('🧪 Found themePreview element');
+            const swatches = preview.querySelectorAll('.theme-color-swatch');
+            console.log('🧪 Found', swatches.length, 'color swatches');
+            if (swatches.length >= 3) {
+                swatches[0].style.backgroundColor = '#ff0000';
+                swatches[1].style.backgroundColor = '#00ff00';
+                swatches[2].style.backgroundColor = '#0000ff';
+                console.log('🧪 Updated color swatches');
+            }
+        } else {
+            console.error('🧪 Could not find themePreview element');
+        }
+        
+        alert('Test completed! Check console for details.');
+    } catch (error) {
+        console.error('🧪 Error in testThemeChange:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+function showCurrentColors() {
+    try {
+        const primary = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+        const secondary = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+        const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        
+        console.log('🔍 Current CSS Variables:', { primary, secondary, accent });
+        alert('Current Colors:\nPrimary: ' + primary + '\nSecondary: ' + secondary + '\nAccent: ' + accent);
+    } catch (error) {
+        console.error('🔍 Error in showCurrentColors:', error);
+        alert('Error: ' + error.message);
+    }
+}
+
+function testFunctionExists() {
+    try {
+        console.log('🔍 Testing if functions exist...');
+        
+        const functions = ['previewTheme', 'updateThemePreview', 'testThemeChange', 'showCurrentColors'];
+        const results = {};
+        
+        functions.forEach(funcName => {
+            results[funcName] = typeof window[funcName] === 'function';
+            console.log(funcName + ': ' + (results[funcName] ? '✅ EXISTS' : '❌ MISSING'));
+        });
+        
+        console.log('🔍 Themes object exists:', typeof themes !== 'undefined');
+        if (typeof themes !== 'undefined') {
+            console.log('🔍 Themes object keys:', Object.keys(themes));
+        }
+        
+        alert('Function Test Results:\n' + Object.entries(results).map(([name, exists]) => name + ': ' + (exists ? 'EXISTS' : 'MISSING')).join('\n') + '\n\nThemes object: ' + (typeof themes !== 'undefined' ? 'EXISTS' : 'MISSING'));
+    } catch (error) {
+        console.error('🔍 Error in testFunctionExists:', error);
+        alert('Error: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

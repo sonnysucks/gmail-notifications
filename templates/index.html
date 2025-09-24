@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block title %}{{ business.name }} - Home{% endblock %}
+
+{% block public_content %}
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="row align-items-center min-vh-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="col-lg-6 text-center text-lg-start text-white p-5">
+            <h1 class="display-3 fw-bold mb-4">
+                <i class="fas fa-camera text-warning"></i><br>
+                {{ business.name }}<br>
+                <span class="text-warning">Scheduler</span>
+            </h1>
+            <p class="lead mb-4">
+                The ultimate appointment scheduling and CRM system designed specifically for {{ business.business_type or 'photography' }} businesses. 
+                Manage maternity, newborn, milestone, and birthday sessions with ease.
+            </p>
+            <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg px-5 py-3">
+                    <i class="fas fa-sign-in-alt me-2"></i>
+                    Get Started
+                </a>
+                <a href="#features" class="btn btn-outline-light btn-lg px-5 py-3">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Learn More
+                </a>
+            </div>
+        </div>
+        <div class="col-lg-6 text-center p-5">
+            <div class="position-relative">
+                <div class="bg-white bg-opacity-10 rounded-4 p-4 backdrop-blur">
+                    <i class="fas fa-calendar-alt text-white" style="font-size: 8rem; opacity: 0.8;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div id="features" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold text-dark mb-3">Specialized for {{ business.business_type or 'Photography' }}</h2>
+                <p class="lead text-muted">Everything you need to run your {{ business.business_type or 'photography' }} business efficiently</p>
+            </div>
+            
+            <div class="row g-4">
+                <!-- Maternity Photography -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-baby text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">Maternity Photography</h5>
+                            <p class="card-text text-muted">
+                                Beautiful pregnancy sessions with automatic milestone tracking and due date management.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Newborn Photography -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-star text-success" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">Newborn Sessions</h5>
+                            <p class="card-text text-muted">
+                                Precious first 14 days with flexible scheduling and backup date options.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Milestone Tracking -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-warning bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-chart-line text-warning" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">Milestone Tracking</h5>
+                            <p class="card-text text-muted">
+                                Automatic age calculations and milestone reminders for 3, 6, 9, and 12 months.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Smash Cake -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-danger bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-birthday-cake text-danger" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">Smash Cake Sessions</h5>
+                            <p class="card-text text-muted">
+                                1st birthday celebrations with cake included and cleanup service.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- CRM Management -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-info bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-users text-info" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">CRM Management</h5>
+                            <p class="card-text text-muted">
+                                Complete client relationship management with family tracking and preferences.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Analytics -->
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-secondary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                                <i class="fas fa-chart-bar text-secondary" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">Business Analytics</h5>
+                            <p class="card-text text-muted">
+                                Revenue tracking, client acquisition metrics, and milestone package performance.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="display-5 fw-bold text-dark mb-3">How It Works</h2>
+                <p class="lead text-muted">Simple, efficient workflow for your {{ business.business_type or 'photography' }} business</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-3 text-center">
+                    <div class="position-relative">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">1</span>
+                        </div>
+                        <h6 class="fw-bold">Setup & Configure</h6>
+                        <p class="text-muted small">Configure your business settings, session types, and pricing</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 text-center">
+                    <div class="position-relative">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">2</span>
+                        </div>
+                        <h6 class="fw-bold">Add Clients</h6>
+                        <p class="text-muted small">Create client profiles with family information and baby details</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 text-center">
+                    <div class="position-relative">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">3</span>
+                        </div>
+                        <h6 class="fw-bold">Schedule Sessions</h6>
+                        <p class="text-muted small">Book appointments with automatic milestone tracking</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-3 text-center">
+                    <div class="position-relative">
+                        <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                            <span class="text-white fw-bold">4</span>
+                        </div>
+                        <h6 class="fw-bold">Manage & Grow</h6>
+                        <p class="text-muted small">Track performance, manage clients, and grow your business</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="py-5" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+        <div class="container text-center text-white">
+            <h2 class="display-5 fw-bold mb-4">Ready to Transform Your {{ business.business_type or 'Photography' }} Business?</h2>
+            <p class="lead mb-4">
+                Join photographers who are already using our system to streamline their workflows and grow their businesses.
+            </p>
+            <a href="{{ url_for('login') }}" class="btn btn-warning btn-lg px-5 py-3">
+                <i class="fas fa-rocket me-2"></i>
+                Start Free Trial
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

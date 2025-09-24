@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Appointment - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Edit Appointment</h1>
+            <p class="text-muted mb-0">Update session details and information</p>
+        </div>
+        <a href="{{ url_for('appointments') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Back to Appointments
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Appointment Edit Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Edit Appointment Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="editAppointmentForm">
+                        <!-- Basic Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="client_id" class="form-label">Client *</label>
+                                <select class="form-select" id="client_id" name="client_id" required>
+                                    <option value="">Select client</option>
+                                    {% for client in clients %}
+                                    <option value="{{ client.id }}" {% if client.id == appointment.client_id %}selected{% endif %}>
+                                        {{ client.name }} {% if client.baby_name %}({{ client.baby_name }}){% endif %}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="session_type" class="form-label">Session Type *</label>
+                                <select class="form-select" id="session_type" name="session_type" required>
+                                    <option value="">Select session type</option>
+                                    {% for key, session in session_types.items() %}
+                                    <option value="{{ key }}" {% if key == appointment.session_type %}selected{% endif %}>
+                                        {{ session.name }} - ${{ session.base_price }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="start_time" class="form-label">Date & Time *</label>
+                                <input type="datetime-local" class="form-control" id="start_time" name="start_time" 
+                                       value="{{ appointment.start_time.strftime('%Y-%m-%dT%H:%M') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="duration" class="form-label">Duration</label>
+                                <select class="form-select" id="duration" name="duration">
+                                    <option value="">Select duration</option>
+                                    <option value="30 minutes" {% if appointment.duration == '30 minutes' %}selected{% endif %}>30 minutes</option>
+                                    <option value="1 hour" {% if appointment.duration == '1 hour' %}selected{% endif %}>1 hour</option>
+                                    <option value="1.5 hours" {% if appointment.duration == '1.5 hours' %}selected{% endif %}>1.5 hours</option>
+                                    <option value="2 hours" {% if appointment.duration == '2 hours' %}selected{% endif %}>2 hours</option>
+                                    <option value="2.5 hours" {% if appointment.duration == '2.5 hours' %}selected{% endif %}>2.5 hours</option>
+                                    <option value="3 hours" {% if appointment.duration == '3 hours' %}selected{% endif %}>3 hours</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="fee" class="form-label">Session Fee</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input type="number" class="form-control" id="fee" name="fee" 
+                                           value="{{ appointment.fee or '' }}" step="0.01" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="status" class="form-label">Status</label>
+                                <select class="form-select" id="status" name="status">
+                                    <option value="pending" {% if appointment.status == 'pending' %}selected{% endif %}>Pending</option>
+                                    <option value="confirmed" {% if appointment.status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                    <option value="completed" {% if appointment.status == 'completed' %}selected{% endif %}>Completed</option>
+                                    <option value="cancelled" {% if appointment.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                                    <option value="rescheduled" {% if appointment.status == 'rescheduled' %}selected{% endif %}>Rescheduled</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Baby Photography Details -->
+                        <div class="card mb-4">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-baby me-2"></i>
+                                    Baby Photography Details
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="baby_name" class="form-label">Baby/Child Name</label>
+                                        <input type="text" class="form-control" id="baby_name" name="baby_name" 
+                                               value="{{ appointment.baby_name or '' }}">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="baby_birth_date" class="form-label">Baby/Child Birth Date</label>
+                                        <input type="date" class="form-control" id="baby_birth_date" name="baby_birth_date" 
+                                               value="{{ appointment.baby_birth_date or '' }}">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label for="milestone_type" class="form-label">Milestone Type</label>
+                                        <select class="form-select" id="milestone_type" name="milestone_type">
+                                            <option value="">Select milestone</option>
+                                            <option value="newborn" {% if appointment.milestone_type == 'newborn' %}selected{% endif %}>Newborn (5-14 days)</option>
+                                            <option value="3_month" {% if appointment.milestone_type == '3_month' %}selected{% endif %}>3 Month</option>
+                                            <option value="6_month" {% if appointment.milestone_type == '6_month' %}selected{% endif %}>6 Month</option>
+                                            <option value="9_month" {% if appointment.milestone_type == '9_month' %}selected{% endif %}>9 Month</option>
+                                            <option value="12_month" {% if appointment.milestone_type == '12_month' %}selected{% endif %}>12 Month</option>
+                                            <option value="18_month" {% if appointment.milestone_type == '18_month' %}selected{% endif %}>18 Month</option>
+                                            <option value="2_year" {% if appointment.milestone_type == '2_year' %}selected{% endif %}>2 Year</option>
+                                            <option value="other" {% if appointment.milestone_type == 'other' %}selected{% endif %}>Other</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="parent_names" class="form-label">Parent Names</label>
+                                        <input type="text" class="form-control" id="parent_names" name="parent_names" 
+                                               value="{{ appointment.parent_names or '' }}" placeholder="e.g., Sarah & John">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Birthday Session Details -->
+                        <div class="card mb-4" id="birthdayDetails" style="display: none;">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-birthday-cake me-2"></i>
+                                    Birthday Session Details
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="age_turning" class="form-label">Age Turning</label>
+                                        <input type="number" class="form-control" id="age_turning" name="age_turning" 
+                                               value="{{ appointment.age_turning or '' }}" min="1" max="10">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="theme" class="form-label">Theme</label>
+                                        <input type="text" class="form-control" id="theme" name="theme" 
+                                               value="{{ appointment.theme or '' }}" placeholder="e.g., Princess, Superhero, Farm">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2">
+                                    <div class="col-md-6">
+                                        <label for="cake_flavor" class="form-label">Cake Flavor</label>
+                                        <input type="text" class="form-control" id="cake_flavor" name="cake_flavor" 
+                                               value="{{ appointment.cake_flavor or '' }}" placeholder="e.g., Vanilla, Chocolate">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="cake_design" class="form-label">Cake Design</label>
+                                        <input type="text" class="form-control" id="cake_design" name="cake_design" 
+                                               value="{{ appointment.cake_design or '' }}" placeholder="e.g., Simple, Decorated">
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mt-2">
+                                    <div class="col-12">
+                                        <label for="parent_vision" class="form-label">Parent's Vision</label>
+                                        <textarea class="form-control" id="parent_vision" name="parent_vision" rows="2" 
+                                                  placeholder="Any specific ideas or requests for the session...">{{ appointment.parent_vision or '' }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="location" name="location" 
+                                       value="{{ appointment.location or '' }}" placeholder="Studio, outdoor location, etc.">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="siblings" class="form-label">Siblings</label>
+                                <input type="text" class="form-control" id="siblings" name="siblings" 
+                                       value="{{ appointment.siblings or '' }}" placeholder="Names and ages of siblings">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label for="notes" class="form-label">Additional Notes</label>
+                                <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                          placeholder="Any additional information, special requests, or notes...">{{ appointment.notes or '' }}</textarea>
+                            </div>
+                        </div>
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Update Appointment
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="resetForm()">
+                                <i class="fas fa-undo me-2"></i>
+                                Reset Changes
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                                <i class="fas fa-trash me-2"></i>
+                                Delete Appointment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Appointment Summary -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Appointment Summary
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-camera text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ appointment.session_type }}</h6>
+                            <small class="text-muted">{{ appointment.start_time.strftime('%B %d, %Y') }}</small>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Client:</strong> {{ appointment.client_name }}
+                    </div>
+                    
+                    {% if appointment.baby_name %}
+                    <div class="mb-2">
+                        <strong>Baby/Child:</strong> {{ appointment.baby_name }}
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mb-2">
+                        <strong>Status:</strong> 
+                        <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                            {{ appointment.status.title() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Session Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Session Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-2">
+                        <strong>Duration:</strong> {{ appointment.duration or 'Not specified' }}
+                    </div>
+                    
+                    <div class="mb-2">
+                        <strong>Fee:</strong> ${{ appointment.fee or 'Not specified' }}
+                    </div>
+                    
+                    {% if appointment.location %}
+                    <div class="mb-2">
+                        <strong>Location:</strong> {{ appointment.location }}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('view_appointment', appointment_id=appointment.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye me-2"></i>
+                            View Details
+                        </a>
+                        <a href="{{ url_for('appointments') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Appointments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('editAppointmentForm');
+    const sessionTypeSelect = document.getElementById('session_type');
+    const birthdayDetails = document.getElementById('birthdayDetails');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        updateAppointment();
+    });
+    
+    // Show/hide birthday details based on session type
+    sessionTypeSelect.addEventListener('change', function() {
+        if (this.value === 'birthday') {
+            birthdayDetails.style.display = 'block';
+        } else {
+            birthdayDetails.style.display = 'none';
+        }
+    });
+    
+    // Initialize birthday details visibility
+    if (sessionTypeSelect.value === 'birthday') {
+        birthdayDetails.style.display = 'block';
+    }
+});
+
+function updateAppointment() {
+    const formData = new FormData(document.getElementById('editAppointmentForm'));
+    const appointmentData = {};
+    
+    // Convert FormData to object
+    for (let [key, value] of formData.entries()) {
+        if (value.trim() !== '') {
+            appointmentData[key] = value.trim();
+        }
+    }
+    
+    // Show loading state
+    const submitBtn = document.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Updating...';
+    submitBtn.disabled = true;
+    
+    // Send request
+    fetch('/appointments/{{ appointment.id }}/edit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(appointmentData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showAlert('Appointment updated successfully!', 'success');
+            
+            // Redirect to appointments list after a short delay
+            setTimeout(() => {
+                window.location.href = '/appointments';
+            }, 1500);
+        } else {
+            showAlert('Error updating appointment: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error updating appointment. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Reset button state
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function resetForm() {
+    // Reset form to original values
+    document.getElementById('editAppointmentForm').reset();
+    
+    // Reset birthday details visibility
+    const sessionType = document.getElementById('session_type').value;
+    const birthdayDetails = document.getElementById('birthdayDetails');
+    if (sessionType === 'birthday') {
+        birthdayDetails.style.display = 'block';
+    } else {
+        birthdayDetails.style.display = 'none';
+    }
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at top of form
+    const form = document.getElementById('editAppointmentForm');
+    form.parentNode.insertBefore(alertDiv, form);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Delete Appointment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+                
+                <p>You are about to permanently delete this appointment:</p>
+                
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ appointment.client_name }}</h6>
+                        <p class="card-text mb-1">
+                            <strong>Date:</strong> {{ appointment.start_time.strftime('%B %d, %Y at %I:%M %p') }}
+                        </p>
+                        <p class="card-text mb-1">
+                            <strong>Session:</strong> {{ appointment.session_type }}
+                        </p>
+                        {% if appointment.baby_name %}
+                        <p class="card-text mb-0">
+                            <strong>Baby/Child:</strong> {{ appointment.baby_name }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <label for="confirmDelete" class="form-label">
+                        <strong>To confirm deletion, type "DELETE" below:</strong>
+                    </label>
+                    <input type="text" class="form-control" id="confirmDelete" placeholder="Type DELETE to confirm">
+                    <div class="form-text">This helps prevent accidental deletions.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmDeleteInput = document.getElementById('confirmDelete');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    // Enable/disable delete button based on input
+    confirmDeleteInput.addEventListener('input', function() {
+        if (this.value.trim().toUpperCase() === 'DELETE') {
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.classList.remove('btn-secondary');
+            confirmDeleteBtn.classList.add('btn-danger');
+        } else {
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.classList.remove('btn-danger');
+            confirmDeleteBtn.classList.add('btn-secondary');
+        }
+    });
+    
+    // Handle delete confirmation
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (confirmDeleteInput.value.trim().toUpperCase() === 'DELETE') {
+            deleteAppointment();
+        }
+    });
+    
+    // Reset modal when closed
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('hidden.bs.modal', function() {
+        confirmDeleteInput.value = '';
+        confirmDeleteBtn.disabled = true;
+        confirmDeleteBtn.classList.remove('btn-danger');
+        confirmDeleteBtn.classList.add('btn-secondary');
+    });
+});
+
+function deleteAppointment() {
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const originalText = confirmBtn.innerHTML;
+    
+    // Show loading state
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Deleting...';
+    confirmBtn.disabled = true;
+    
+    // Send delete request
+    fetch('/api/appointments/{{ appointment.id }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showAlert('Appointment deleted successfully!', 'success');
+            
+            // Close modal
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            deleteModal.hide();
+            
+            // Redirect to appointments list after a short delay
+            setTimeout(() => {
+                window.location.href = '/appointments';
+            }, 1500);
+        } else {
+            showAlert('Error deleting appointment: ' + (data.error || 'Unknown error'), 'error');
+            // Reset button
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error deleting appointment. Please try again.', 'error');
+        // Reset button
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    });
+}
+</script>
+{% endblock %}

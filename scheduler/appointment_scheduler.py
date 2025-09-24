@@ -10,10 +10,10 @@ from pathlib import Path
 
 from .models import Appointment, Client, Reminder, ClientNote
 from .crm_manager import CRMManager
-from ..config.config_manager import ConfigManager
-from ..gmail.gmail_manager import GmailManager
-from ..calendar.calendar_manager import CalendarManager
-from ..utils.template_manager import TemplateManager
+from config.config_manager import ConfigManager
+from gmail.gmail_manager import GmailManager
+from calendar_integration.calendar_manager import CalendarManager
+from utils.template_manager import TemplateManager
 
 logger = logging.getLogger(__name__)
 
@@ -107,9 +107,17 @@ class AppointmentScheduler:
                 **kwargs
             )
             
-            # Add to calendar
-            calendar_event = self.calendar_manager.create_event(appointment)
-            appointment.calendar_event_id = calendar_event.get('id')
+            # Add to calendar (if available)
+            try:
+                if hasattr(self.calendar_manager, 'service') and self.calendar_manager.service:
+                    calendar_event = self.calendar_manager.create_event(appointment)
+                    appointment.calendar_event_id = calendar_event.get('id')
+                    logger.info(f"Added appointment to Google Calendar: {appointment.calendar_event_id}")
+                else:
+                    logger.info("Google Calendar not available - appointment created without calendar integration")
+            except Exception as calendar_error:
+                logger.warning(f"Could not add appointment to calendar: {calendar_error}")
+                # Continue without calendar integration
             
             # Add to CRM
             self.crm_manager.add_appointment(appointment)
@@ -120,8 +128,12 @@ class AppointmentScheduler:
             # Save reminders
             self._save_reminders()
             
-            # Send confirmation email
-            self._send_confirmation_email(appointment)
+            # Send confirmation email (if available)
+            try:
+                self._send_confirmation_email(appointment)
+            except Exception as email_error:
+                logger.warning(f"Could not send confirmation email: {email_error}")
+                # Continue without email
             
             # Update client metrics
             client.update_metrics(appointment.total_amount)
@@ -174,16 +186,25 @@ class AppointmentScheduler:
         reminder_schedule = self.config.get_reminder_schedule()
         
         for schedule_item in reminder_schedule:
-            if 'weeks' in schedule_item:
-                days_before = schedule_item['weeks'] * 7
-                reminder_type = f"reminder_{schedule_item['weeks']}weeks"
-            elif 'days' in schedule_item:
-                days_before = schedule_item['days']
-                reminder_type = f"reminder_{schedule_item['days']}days"
+            # Handle both old format (integers) and new format (dictionaries)
+            if isinstance(schedule_item, int):
+                # Old format: integers represent hours before appointment
+                hours_before = schedule_item
+                reminder_type = f"reminder_{hours_before}h"
+                reminder_time = appointment.start_time - timedelta(hours=hours_before)
+            elif isinstance(schedule_item, dict):
+                # New format: dictionaries with 'weeks' or 'days' keys
+                if 'weeks' in schedule_item:
+                    days_before = schedule_item['weeks'] * 7
+                    reminder_type = f"reminder_{schedule_item['weeks']}weeks"
+                elif 'days' in schedule_item:
+                    days_before = schedule_item['days']
+                    reminder_type = f"reminder_{schedule_item['days']}days"
+                else:
+                    continue
+                reminder_time = appointment.start_time - timedelta(days=days_before)
             else:
                 continue
-            
-            reminder_time = appointment.start_time - timedelta(days=days_before)
             
             # Only create reminders for future times
             if reminder_time > datetime.now():
@@ -326,11 +347,45 @@ class AppointmentScheduler:
         else:
             return f"{days // 7} weeks"
     
-    def get_upcoming_appointments(self, days: int = 30) -> List[Appointment]:
+    def get_upcoming_appointments(self, limit: int = 10) -> List[Appointment]:
         """Get upcoming appointments within specified days"""
-        # This would need to be implemented in CRMManager
-        # For now, return empty list
-        return []
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            now = datetime.now()
+            
+            # Filter upcoming appointments and sort by date
+            upcoming = []
+            for apt in all_appointments:
+                if apt.start_time > now:
+                    upcoming.append(apt)
+            
+            # Sort by start time and limit results
+            upcoming.sort(key=lambda x: x.start_time)
+            return upcoming[:limit]
+            
+        except Exception as e:
+            logger.error(f"Failed to get upcoming appointments: {e}")
+            return []
+    
+    def get_next_appointment(self) -> Optional[Appointment]:
+        """Get the next scheduled appointment chronologically"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            now = datetime.now()
+            
+            # Filter upcoming appointments and sort by date
+            upcoming = []
+            for apt in all_appointments:
+                if apt.start_time > now and apt.status in ['confirmed', 'pending']:
+                    upcoming.append(apt)
+            
+            # Sort by start time and return the first one
+            upcoming.sort(key=lambda x: x.start_time)
+            return upcoming[0] if upcoming else None
+            
+        except Exception as e:
+            logger.error(f"Failed to get next appointment: {e}")
+            return None
     
     def process_email_appointment(self, email_data: Dict[str, Any]) -> Optional[Appointment]:
         """Process appointment from email data"""
@@ -430,6 +485,45 @@ class AppointmentScheduler:
         
         return None
     
+    def delete_appointment(self, appointment_id: str) -> bool:
+        """Delete an appointment permanently"""
+        try:
+            # Get appointment from CRM
+            appointment = self._get_appointment_from_crm(appointment_id)
+            if not appointment:
+                logger.warning(f"Appointment {appointment_id} not found for deletion")
+                return False
+            
+            # Delete from calendar if it exists
+            if appointment.calendar_event_id:
+                try:
+                    self.calendar_manager.cancel_event(appointment.calendar_event_id)
+                except Exception as e:
+                    logger.warning(f"Failed to delete calendar event {appointment.calendar_event_id}: {e}")
+            
+            # Cancel pending reminders
+            for reminder in self.reminders.values():
+                if (reminder.appointment_id == appointment_id and 
+                    reminder.status == 'pending'):
+                    reminder.status = 'cancelled'
+            
+            # Save reminders
+            self._save_reminders()
+            
+            # Delete from CRM database
+            success = self.crm_manager.delete_appointment(appointment_id)
+            
+            if success:
+                logger.info(f"Deleted appointment {appointment_id}")
+                return True
+            else:
+                logger.error(f"Failed to delete appointment {appointment_id} from database")
+                return False
+            
+        except Exception as e:
+            logger.error(f"Failed to delete appointment: {e}")
+            return False
+
     def cancel_appointment(self, appointment_id: str, reason: str = "") -> bool:
         """Cancel an appointment"""
         try:
@@ -532,3 +626,212 @@ class AppointmentScheduler:
     def get_follow_up_tasks(self) -> List[Dict[str, Any]]:
         """Get follow-up tasks that need attention"""
         return self.crm_manager.get_follow_up_tasks()
+    
+    def get_appointments_by_date(self, date) -> List[Appointment]:
+        """Get appointments for a specific date"""
+        try:
+            # Convert date to string format for database query
+            if hasattr(date, 'strftime'):
+                date_str = date.strftime('%Y-%m-%d')
+            else:
+                date_str = str(date)
+            
+            # Get appointments from CRM that match the date
+            all_appointments = self._get_all_appointments_from_crm()
+            date_appointments = []
+            
+            for apt in all_appointments:
+                if apt.start_time.strftime('%Y-%m-%d') == date_str:
+                    date_appointments.append(apt)
+            
+            return date_appointments
+            
+        except Exception as e:
+            logger.error(f"Failed to get appointments by date: {e}")
+            return []
+    
+    def get_total_appointments(self) -> int:
+        """Get total number of appointments"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            return len(all_appointments)
+        except Exception as e:
+            logger.error(f"Failed to get total appointments: {e}")
+            return 0
+    
+    def get_monthly_revenue(self) -> float:
+        """Get total revenue for current month"""
+        try:
+            current_month = datetime.now().strftime('%Y-%m')
+            all_appointments = self._get_all_appointments_from_crm()
+            
+            monthly_revenue = 0.0
+            for apt in all_appointments:
+                if apt.start_time.strftime('%Y-%m') == current_month:
+                    monthly_revenue += apt.total_amount or 0.0
+            
+            return monthly_revenue
+            
+        except Exception as e:
+            logger.error(f"Failed to get monthly revenue: {e}")
+            return 0.0
+    
+    def get_all_appointments(self) -> List[Appointment]:
+        """Get all appointments"""
+        return self._get_all_appointments_from_crm()
+    
+    def get_appointment(self, appointment_id: str) -> Optional[Appointment]:
+        """Get appointment by ID"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            for apt in all_appointments:
+                if apt.id == appointment_id:
+                    return apt
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get appointment {appointment_id}: {e}")
+            return None
+    
+    def update_appointment(self, appointment_id: str, appointment_data: Dict[str, Any]) -> Optional[Appointment]:
+        """Update an existing appointment"""
+        try:
+            appointment = self.get_appointment(appointment_id)
+            if not appointment:
+                return None
+            
+            # Update appointment fields
+            for key, value in appointment_data.items():
+                if hasattr(appointment, key):
+                    setattr(appointment, key, value)
+            
+            appointment.updated_at = datetime.now()
+            
+            # Update in CRM
+            self.crm_manager.add_appointment(appointment)
+            
+            # Update in calendar if needed
+            if appointment.calendar_event_id:
+                self.calendar_manager.update_event(appointment.calendar_event_id, appointment)
+            
+            logger.info(f"Updated appointment {appointment_id}")
+            return appointment
+            
+        except Exception as e:
+            logger.error(f"Failed to update appointment {appointment_id}: {e}")
+            return None
+    
+    def get_client_appointments(self, client_id: str) -> List[Appointment]:
+        """Get all appointments for a specific client"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            client_appointments = []
+            
+            for apt in all_appointments:
+                if apt.client_id == client_id:
+                    client_appointments.append(apt)
+            
+            return client_appointments
+            
+        except Exception as e:
+            logger.error(f"Failed to get client appointments: {e}")
+            return []
+    
+    def get_appointments_in_range(self, start_date, end_date) -> List[Appointment]:
+        """Get appointments within a date range"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            range_appointments = []
+            
+            for apt in all_appointments:
+                if start_date <= apt.start_time.date() <= end_date:
+                    range_appointments.append(apt)
+            
+            return range_appointments
+            
+        except Exception as e:
+            logger.error(f"Failed to get appointments in range: {e}")
+            return []
+    
+    def get_monthly_revenue_data(self) -> Dict[str, Any]:
+        """Get detailed monthly revenue data"""
+        try:
+            current_month = datetime.now().strftime('%Y-%m')
+            all_appointments = self._get_all_appointments_from_crm()
+            
+            monthly_data = {}
+            for apt in all_appointments:
+                month = apt.start_time.strftime('%Y-%m')
+                if month not in monthly_data:
+                    monthly_data[month] = {'revenue': 0.0, 'count': 0}
+                
+                monthly_data[month]['revenue'] += apt.total_amount or 0.0
+                monthly_data[month]['count'] += 1
+            
+            return monthly_data
+            
+        except Exception as e:
+            logger.error(f"Failed to get monthly revenue data: {e}")
+            return {}
+    
+    def get_session_type_statistics(self) -> Dict[str, Any]:
+        """Get statistics by session type"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            session_stats = {}
+            
+            for apt in all_appointments:
+                session_type = apt.session_type
+                if session_type not in session_stats:
+                    session_stats[session_type] = {'count': 0, 'revenue': 0.0}
+                
+                session_stats[session_type]['count'] += 1
+                session_stats[session_type]['revenue'] += apt.total_amount or 0.0
+            
+            # Calculate average values
+            total_sessions = sum(stats['count'] for stats in session_stats.values())
+            total_revenue = sum(stats['revenue'] for stats in session_stats.values())
+            
+            return {
+                'total_sessions': total_sessions,
+                'total_revenue': total_revenue,
+                'avg_session_value': total_revenue / total_sessions if total_sessions > 0 else 0,
+                'by_type': session_stats
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to get session type statistics: {e}")
+            return {
+                'total_sessions': 0,
+                'total_revenue': 0,
+                'avg_session_value': 0,
+                'by_type': {}
+            }
+    
+    def get_milestone_package_data(self) -> Dict[str, Any]:
+        """Get milestone package analytics"""
+        try:
+            all_appointments = self._get_all_appointments_from_crm()
+            milestone_data = {}
+            
+            for apt in all_appointments:
+                if 'milestone' in apt.session_type.lower():
+                    month = apt.start_time.strftime('%Y-%m')
+                    if month not in milestone_data:
+                        milestone_data[month] = {'count': 0, 'revenue': 0.0}
+                    
+                    milestone_data[month]['count'] += 1
+                    milestone_data[month]['revenue'] += apt.total_amount or 0.0
+            
+            return milestone_data
+            
+        except Exception as e:
+            logger.error(f"Failed to get milestone package data: {e}")
+            return {}
+    
+    def _get_all_appointments_from_crm(self) -> List[Appointment]:
+        """Helper method to get all appointments from CRM"""
+        try:
+            return self.crm_manager.get_all_appointments()
+        except Exception as e:
+            logger.error(f"Failed to get appointments from CRM: {e}")
+            return []

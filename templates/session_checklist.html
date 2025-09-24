@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Session Checklist</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 16px;
+            color: #666;
+        }
+        .section {
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .section-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 18px;
+        }
+        .section-content {
+            padding: 20px;
+        }
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .checkbox {
+            width: 20px;
+            height: 20px;
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+        .item-content {
+            flex: 1;
+        }
+        .item-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .item-description {
+            color: #666;
+            font-size: 14px;
+        }
+        .important {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        .urgent {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        .tips {
+            background: #d1ecf1;
+            border-left: 4px solid #17a2b8;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+        }
+        .print-button:hover {
+            background: #0056b3;
+        }
+        @media print {
+            .print-button {
+                display: none;
+            }
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print Checklist</button>
+    
+    <div class="container">
+        <div class="header">
+            <div class="title">📸 PHOTO SESSION CHECKLIST</div>
+            <div class="subtitle">Everything you need to prepare for your perfect photography session</div>
+        </div>
+
+        <!-- Pre-Session Preparation -->
+        <div class="section">
+            <div class="section-header">📋 PRE-SESSION PREPARATION</div>
+            <div class="section-content">
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Review and sign contract</div>
+                        <div class="item-description">Ensure all terms are understood and contract is completed</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item important">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Pay $99 non-refundable deposit</div>
+                        <div class="item-description">Required to secure your appointment date and time</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Confirm session date and time</div>
+                        <div class="item-description">Double-check your appointment details</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Review session type details</div>
+                        <div class="item-description">Understand what's included and what to expect</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Plan your route to studio</div>
+                        <div class="item-description">Know how long it takes to get there</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- What to Bring -->
+        <div class="section">
+            <div class="section-header">🎒 WHAT TO BRING</div>
+            <div class="section-content">
+                <div class="checklist-item urgent">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">$100 cash payment (preferred)</div>
+                        <div class="item-description">Due on the day of your session</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Signed contract (if not completed online)</div>
+                        <div class="item-description">Required before session begins</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Valid ID</div>
+                        <div class="item-description">For verification purposes</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Any special props or items</div>
+                        <div class="item-description">Personal items you'd like included in photos</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- For Babies & Children -->
+        <div class="section">
+            <div class="section-header">👶 FOR BABIES & CHILDREN</div>
+            <div class="section-content">
+                <div class="checklist-item important">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Extra diapers and wipes</div>
+                        <div class="item-description">Bring more than you think you'll need</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Formula, bottles, pacifiers</div>
+                        <div class="item-description">For feeding and comfort during session</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Favorite toys or blankets</div>
+                        <div class="item-description">Items that make them feel comfortable</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Change of clothes</div>
+                        <div class="item-description">In case of accidents or outfit changes</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Snacks and drinks</div>
+                        <div class="item-description">For older children during breaks</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session Day Preparation -->
+        <div class="section">
+            <div class="section-header">🌅 SESSION DAY PREPARATION</div>
+            <div class="section-content">
+                <div class="checklist-item important">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Plan to arrive 10-15 minutes early</div>
+                        <div class="item-description">Allows time for parking and getting settled</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Dress appropriately for weather</div>
+                        <div class="item-description">Consider outdoor sessions and travel</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Ensure everyone is well-rested</div>
+                        <div class="item-description">Especially important for babies and children</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Have backup plan for weather</div>
+                        <div class="item-description">If outdoor session, have indoor alternative</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Newborn Session Specific -->
+        <div class="section">
+            <div class="section-header">👶 NEWBORN SESSION SPECIFIC</div>
+            <div class="section-content">
+                <div class="checklist-item urgent">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Schedule within 5-14 days of birth</div>
+                        <div class="item-description">Optimal time for newborn photography</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item important">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Keep baby awake 1-2 hours before</div>
+                        <div class="item-description">Helps ensure baby sleeps during session</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Feed baby right before arrival</div>
+                        <div class="item-description">Full belly helps with sleep and comfort</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Bring backup outfit for baby</div>
+                        <div class="item-description">In case of accidents during session</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Milestone Session Specific -->
+        <div class="section">
+            <div class="section-header">📅 MILESTONE SESSION SPECIFIC</div>
+            <div class="section-content">
+                <div class="checklist-item important">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Schedule at exact milestone age</div>
+                        <div class="item-description">3, 6, 9, 12, 18, or 24 months</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Plan around nap schedules</div>
+                        <div class="item-description">Choose time when child is most alert</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Bring favorite toys or blankets</div>
+                        <div class="item-description">Items that make them happy and comfortable</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Consider including siblings</div>
+                        <div class="item-description">Family photos are always special</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Birthday Session Specific -->
+        <div class="section">
+            <div class="section-header">🎂 BIRTHDAY SESSION SPECIFIC</div>
+            <div class="section-content">
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Choose theme and colors in advance</div>
+                        <div class="item-description">Coordinate with photographer for best results</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Bring special outfits or props</div>
+                        <div class="item-description">Theme-appropriate clothing and accessories</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Plan for cake smash timing</div>
+                        <div class="item-description">Consider when child is most energetic</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Bring cleanup supplies</div>
+                        <div class="item-description">Wipes, towels, change of clothes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Important Reminders -->
+        <div class="tips">
+            <h4>💡 IMPORTANT REMINDERS</h4>
+            <ul>
+                <li><strong>Arrive on time:</strong> Late arrivals may result in shortened sessions</li>
+                <li><strong>Be patient:</strong> Photography sessions take time, especially with children</li>
+                <li><strong>Trust the photographer:</strong> They know how to get the best shots</li>
+                <li><strong>Have fun:</strong> Relaxed, happy subjects make the best photos</li>
+                <li><strong>Ask questions:</strong> Don't hesitate to ask about anything unclear</li>
+            </ul>
+        </div>
+
+        <!-- After Session -->
+        <div class="section">
+            <div class="section-header">📸 AFTER YOUR SESSION</div>
+            <div class="section-content">
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Complete payment if not already done</div>
+                        <div class="item-description">Ensure all financial obligations are met</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Ask about next steps</div>
+                        <div class="item-description">Understand timeline for receiving images</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Schedule follow-up if needed</div>
+                        <div class="item-description">For additional sessions or products</div>
+                    </div>
+                </div>
+                
+                <div class="checklist-item">
+                    <input type="checkbox" class="checkbox">
+                    <div class="item-content">
+                        <div class="item-title">Leave a review</div>
+                        <div class="item-description">Share your experience with others</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="section">
+            <div class="section-header">📞 CONTACT INFORMATION</div>
+            <div class="section-content">
+                <p><strong>Studio:</strong> Sass and Whimsy Photography</p>
+                <p><strong>Address:</strong> Butler, PA 16002</p>
+                <p><strong>Phone:</strong> (724) 200-0000</p>
+                <p><strong>Email:</strong> sassandwhimsyphotography@gmail.com</p>
+                <p><strong>Website:</strong> https://sassandwhimsyphotography.com</p>
+                
+                <div class="tips">
+                    <p><strong>Need to reschedule?</strong> Contact us at least 48 hours before your session.</p>
+                    <p><strong>Questions?</strong> Don't hesitate to reach out - we're here to help!</p>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; padding: 20px; border-top: 2px solid #e9ecef;">
+            <p style="color: #666; font-size: 14px;">
+                <strong>Thank you for choosing Sass and Whimsy Photography!</strong><br>
+                We can't wait to capture your precious moments and create beautiful memories together.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Add functionality to checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            const checkboxes = document.querySelectorAll('.checkbox');
+            
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        this.parentElement.style.opacity = '0.6';
+                        this.parentElement.style.textDecoration = 'line-through';
+                    } else {
+                        this.parentElement.style.opacity = '1';
+                        this.parentElement.style.textDecoration = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,364 @@
+{
+  "reminders": [
+    {
+      "id": "dbed8734-4430-4622-b858-29ca529745c8",
+      "appointment_id": "a4125b81-35b6-4aa4-89cd-3cb9ba27b89c",
+      "reminder_type": "reminder_24h",
+      "scheduled_time": "2025-09-14T10:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:14:52.139296"
+    },
+    {
+      "id": "9da98a5d-1000-4ba6-bfcc-8e765954c533",
+      "appointment_id": "a4125b81-35b6-4aa4-89cd-3cb9ba27b89c",
+      "reminder_type": "reminder_2h",
+      "scheduled_time": "2025-09-15T08:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:14:52.139335"
+    },
+    {
+      "id": "84cc7a06-1e5e-4797-b0c5-722441e753de",
+      "appointment_id": "a4125b81-35b6-4aa4-89cd-3cb9ba27b89c",
+      "reminder_type": "reminder_1h",
+      "scheduled_time": "2025-09-15T09:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:14:52.139363"
+    },
+    {
+      "id": "7fe5f32c-0c2a-442f-940b-96fcb48dd67e",
+      "appointment_id": "12d5fa85-04b6-4fdd-b059-d8ccaa8513a7",
+      "reminder_type": "reminder_24h",
+      "scheduled_time": "2025-10-30T14:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:15:55.266915"
+    },
+    {
+      "id": "78c67d9a-d83c-4241-ba39-c93086039348",
+      "appointment_id": "12d5fa85-04b6-4fdd-b059-d8ccaa8513a7",
+      "reminder_type": "reminder_2h",
+      "scheduled_time": "2025-10-31T12:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:15:55.266979"
+    },
+    {
+      "id": "9d9f92ad-1211-4ce1-ac7b-fd33c1f4e114",
+      "appointment_id": "12d5fa85-04b6-4fdd-b059-d8ccaa8513a7",
+      "reminder_type": "reminder_1h",
+      "scheduled_time": "2025-10-31T13:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-04T20:15:55.267004"
+    },
+    {
+      "id": "32c0ddde-2a06-4b75-b2dd-b1ad44df1bfe",
+      "appointment_id": "98f57d79-0d60-4907-919f-9361acf489d5",
+      "reminder_type": "reminder_2weeks",
+      "scheduled_time": "2025-09-13T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T16:23:43.727619"
+    },
+    {
+      "id": "96424af0-24f7-4ab0-a60b-7b5a4349a53d",
+      "appointment_id": "98f57d79-0d60-4907-919f-9361acf489d5",
+      "reminder_type": "reminder_1weeks",
+      "scheduled_time": "2025-09-20T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T16:23:43.727677"
+    },
+    {
+      "id": "f0362102-8726-4288-8aec-44c483aaa192",
+      "appointment_id": "98f57d79-0d60-4907-919f-9361acf489d5",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-24T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T16:23:43.727753"
+    },
+    {
+      "id": "7fcaff69-7260-45f8-87af-f8bfe0981de8",
+      "appointment_id": "98f57d79-0d60-4907-919f-9361acf489d5",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-25T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T16:23:43.727829"
+    },
+    {
+      "id": "6c643155-fc0f-4ca1-ae45-894a324ea548",
+      "appointment_id": "98f57d79-0d60-4907-919f-9361acf489d5",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-26T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T16:23:43.727858"
+    },
+    {
+      "id": "fae5b1d1-05b3-4eef-bc80-6a88e104cbf0",
+      "appointment_id": "be0fe12a-9f1f-4e68-aa0f-a94418e44867",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:07:25.769012",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:25.772214"
+    },
+    {
+      "id": "36694c3a-6096-4e1a-9a92-2602bf36d8d4",
+      "appointment_id": "be0fe12a-9f1f-4e68-aa0f-a94418e44867",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:07:25.769012",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:25.772272"
+    },
+    {
+      "id": "141dc869-a578-4b60-bc0d-fa459942ac4c",
+      "appointment_id": "be0fe12a-9f1f-4e68-aa0f-a94418e44867",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:07:25.769012",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:25.772300"
+    },
+    {
+      "id": "73015eb1-8028-4ae1-8ec0-0d485b2aa53d",
+      "appointment_id": "a995c53f-ec63-45fd-b561-c7e45c426c01",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:07:46.910569",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:46.918221"
+    },
+    {
+      "id": "5928367f-bbc6-425a-95c3-29badfc82528",
+      "appointment_id": "a995c53f-ec63-45fd-b561-c7e45c426c01",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:07:46.910569",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:46.918254"
+    },
+    {
+      "id": "c8851d60-7413-416b-b7b1-f9e60e81e08f",
+      "appointment_id": "a995c53f-ec63-45fd-b561-c7e45c426c01",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:07:46.910569",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:07:46.918278"
+    },
+    {
+      "id": "d7ba8a32-753d-4ba7-9a75-3e9458232d84",
+      "appointment_id": "0feec60c-d4a3-400f-b011-360926d7f05c",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:08:15.166461",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:08:15.174237"
+    },
+    {
+      "id": "51ece9dd-2817-4e3a-90d0-b763fec5ab3e",
+      "appointment_id": "0feec60c-d4a3-400f-b011-360926d7f05c",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:08:15.166461",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:08:15.174266"
+    },
+    {
+      "id": "88a86aae-fde2-41f2-9fda-1a9f488e0375",
+      "appointment_id": "0feec60c-d4a3-400f-b011-360926d7f05c",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:08:15.166461",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:08:15.174289"
+    },
+    {
+      "id": "42d7590c-e8d2-46e5-97a8-ecd120e2fece",
+      "appointment_id": "925c3de7-b956-4362-9ee1-6b6836f4912a",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:09:18.633999",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:09:18.652820"
+    },
+    {
+      "id": "bd613909-7235-43e5-ad7d-a73730fa0089",
+      "appointment_id": "925c3de7-b956-4362-9ee1-6b6836f4912a",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:09:18.633999",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:09:18.652940"
+    },
+    {
+      "id": "eb773d01-a99b-4d68-b72e-3130ee798d4a",
+      "appointment_id": "925c3de7-b956-4362-9ee1-6b6836f4912a",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:09:18.633999",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:09:18.652986"
+    },
+    {
+      "id": "95553ad4-28e2-4f17-94be-39f7390e7d0b",
+      "appointment_id": "ce4b0287-9874-4963-b7d5-ae2d989ca3cb",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:10:18.053548",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:18.065858"
+    },
+    {
+      "id": "81274f6c-e5a1-430f-bc90-aaa31fefa6ab",
+      "appointment_id": "ce4b0287-9874-4963-b7d5-ae2d989ca3cb",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:10:18.053548",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:18.065889"
+    },
+    {
+      "id": "9005f29e-4acf-4afa-b94f-e5149d8981d5",
+      "appointment_id": "ce4b0287-9874-4963-b7d5-ae2d989ca3cb",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:10:18.053548",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:18.065912"
+    },
+    {
+      "id": "972fd26e-d795-43af-98e8-c81aa1d17f26",
+      "appointment_id": "30ca4db6-a2cf-49ae-8cb9-7ddb9fb2393e",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-15T19:10:36.507564",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:36.521228"
+    },
+    {
+      "id": "fa619a89-24f8-4060-a014-4818da18b0fe",
+      "appointment_id": "30ca4db6-a2cf-49ae-8cb9-7ddb9fb2393e",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-16T19:10:36.507564",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:36.521262"
+    },
+    {
+      "id": "b0a6bf87-5f97-4786-88e7-d845d155f7e5",
+      "appointment_id": "30ca4db6-a2cf-49ae-8cb9-7ddb9fb2393e",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-17T19:10:36.507564",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:10:36.521288"
+    },
+    {
+      "id": "6fe97b3b-b713-4688-ac0c-b99a2a0776fd",
+      "appointment_id": "2aaec86d-84d5-41c7-8f08-b1c076af6d0e",
+      "reminder_type": "reminder_1weeks",
+      "scheduled_time": "2025-09-13T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:11:44.681890"
+    },
+    {
+      "id": "6fcbc49e-e6cc-47fa-a559-111adab3db73",
+      "appointment_id": "2aaec86d-84d5-41c7-8f08-b1c076af6d0e",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-17T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:11:44.681921"
+    },
+    {
+      "id": "69c67a57-00a7-466f-873b-e0a875e79673",
+      "appointment_id": "2aaec86d-84d5-41c7-8f08-b1c076af6d0e",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-18T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:11:44.681990"
+    },
+    {
+      "id": "342c830e-68fc-42e7-b307-e77afca63cd0",
+      "appointment_id": "2aaec86d-84d5-41c7-8f08-b1c076af6d0e",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-19T19:00:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-11T19:11:44.682107"
+    },
+    {
+      "id": "403fa873-5234-4135-8a74-bcc6e94ad274",
+      "appointment_id": "3e0d59a1-fd1c-4ae0-b160-7f43ace68492",
+      "reminder_type": "reminder_3days",
+      "scheduled_time": "2025-09-28T10:33:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-24T10:33:34.456348"
+    },
+    {
+      "id": "49359323-47ba-434a-8f66-b8ba56d3899a",
+      "appointment_id": "3e0d59a1-fd1c-4ae0-b160-7f43ace68492",
+      "reminder_type": "reminder_2days",
+      "scheduled_time": "2025-09-29T10:33:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-24T10:33:34.456374"
+    },
+    {
+      "id": "6c0918fb-760f-40ea-b990-6e3ee877ae37",
+      "appointment_id": "3e0d59a1-fd1c-4ae0-b160-7f43ace68492",
+      "reminder_type": "reminder_1days",
+      "scheduled_time": "2025-09-30T10:33:00",
+      "sent_time": null,
+      "status": "pending",
+      "email_message_id": null,
+      "created_at": "2025-09-24T10:33:34.456393"
+    }
+  ]
+}

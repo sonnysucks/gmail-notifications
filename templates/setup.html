@@ -1,0 +1,653 @@
+{% extends "base.html" %}
+
+{% block title %}System Setup{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>System Setup</h2>
+                <button type="button" class="btn btn-primary" onclick="saveAllSettings()">Save All Settings</button>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <ul class="nav nav-tabs" id="setupTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="business-tab" data-bs-toggle="tab" data-bs-target="#business" type="button" role="tab">Business Info</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="calendar-tab" data-bs-toggle="tab" data-bs-target="#calendar" type="button" role="tab">Calendar & Hours</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="photography-tab" data-bs-toggle="tab" data-bs-target="#photography" type="button" role="tab">Photography Settings</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab">Themes & Design</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button" role="tab">Account Settings</button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="setupTabsContent">
+                <!-- Business Info Tab -->
+                <div class="tab-pane fade show active" id="business" role="tabpanel">
+                    <h5 class="mb-4">Business Information</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="businessName" class="form-label">Business Name</label>
+                            <input type="text" class="form-control" id="businessName" 
+                                   value="{{ config.business.name if config.business else 'Your Photography Business' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessEmail" class="form-label">Business Email</label>
+                            <input type="email" class="form-control" id="businessEmail" 
+                                   value="{{ config.business.email if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessPhone" class="form-label">Business Phone</label>
+                            <input type="tel" class="form-control" id="businessPhone" 
+                                   value="{{ config.business.phone if config.business else '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessWebsite" class="form-label">Website</label>
+                            <input type="url" class="form-control" id="businessWebsite" 
+                                   value="{{ config.business.website if config.business else '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label for="businessAddress" class="form-label">Business Address</label>
+                            <input type="text" class="form-control" id="businessAddress" 
+                                   value="{{ config.business.address if config.business else '' }}" 
+                                   placeholder="123 Main St, City, State 12345">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="businessType" class="form-label">Business Type</label>
+                            <select class="form-select" id="businessType">
+                                <option value="LLC" {{ 'selected' if config.business and config.business.business_type == 'LLC' else '' }}>LLC</option>
+                                <option value="Corporation" {{ 'selected' if config.business and config.business.business_type == 'Corporation' else '' }}>Corporation</option>
+                                <option value="Sole Proprietorship" {{ 'selected' if config.business and config.business.business_type == 'Sole Proprietorship' else '' }}>Sole Proprietorship</option>
+                                <option value="Partnership" {{ 'selected' if config.business and config.business.business_type == 'Partnership' else '' }}>Partnership</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="taxId" class="form-label">Tax ID / EIN</label>
+                            <input type="text" class="form-control" id="taxId" 
+                                   value="{{ config.business.tax_id if config.business else '' }}" 
+                                   placeholder="12-3456789">
+                        </div>
+                    </div>
+                    
+                    <!-- Photography Specialties -->
+                    <hr class="my-4">
+                    <h6 class="mb-3">Photography Specialties</h6>
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">What types of photography do you offer?</label>
+                            <div class="row g-2">
+                                {% set specialties = ['Newborn Photography', 'Maternity Photography', 'Baby Milestones', 'Family Portraits', 'Smash Cake Sessions', 'Birthday Parties', 'Mini Sessions', 'Wedding Photography', 'Event Photography', 'Pet Photography'] %}
+                                {% for specialty in specialties %}
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="specialty{{ loop.index }}" 
+                                               value="{{ specialty }}" {{ 'checked' if config.business and config.business.specialties and specialty in config.business.specialties else '' }}>
+                                        <label class="form-check-label" for="specialty{{ loop.index }}">
+                                            {{ specialty }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Calendar Tab -->
+                <div class="tab-pane fade" id="calendar" role="tabpanel">
+                    <h5 class="mb-4">Calendar & Business Hours</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="timezone" class="form-label">Business Timezone</label>
+                            <select class="form-select" id="timezone">
+                                <option value="America/New_York" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/New_York' else '' }}>Eastern Time</option>
+                                <option value="America/Chicago" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Chicago' else '' }}>Central Time</option>
+                                <option value="America/Denver" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Denver' else '' }}>Mountain Time</option>
+                                <option value="America/Los_Angeles" {{ 'selected' if config.calendar and config.calendar.timezone == 'America/Los_Angeles' else '' }}>Pacific Time</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="targetCalendar" class="form-label">Google Calendar ID</label>
+                            <input type="text" class="form-control" id="targetCalendar" 
+                                   value="{{ config.calendar.target_calendar_id if config.calendar else 'primary' }}" 
+                                   placeholder="primary">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dailyStart" class="form-label">Daily Start Time</label>
+                            <input type="time" class="form-control" id="dailyStart" 
+                                   value="{{ config.calendar.business_hours.start if config.calendar and config.calendar.business_hours else '09:00' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="dailyEnd" class="form-label">Daily End Time</label>
+                            <input type="time" class="form-control" id="dailyEnd" 
+                                   value="{{ config.calendar.business_hours.end if config.calendar and config.calendar.business_hours else '17:00' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Working Days</label>
+                            <div class="row g-2">
+                                {% set days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                {% for day in days %}
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="day{{ loop.index }}" 
+                                               {{ 'checked' if config.calendar and config.calendar.business_hours.weekly and config.calendar.business_hours.weekly[day].enabled else '' }}>
+                                        <label class="form-check-label" for="day{{ loop.index }}">
+                                            {{ day }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Photography Settings Tab -->
+                <div class="tab-pane fade" id="photography" role="tabpanel">
+                    <h5 class="mb-4">Photography Settings</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="milestonesEnabled" 
+                                       {{ 'checked' if config.baby_photography and config.baby_photography.milestones.enabled else '' }}>
+                                <label class="form-check-label" for="milestonesEnabled">
+                                    Enable Milestone Tracking
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" id="autoReminders" 
+                                       {{ 'checked' if config.baby_photography and config.baby_photography.milestones.auto_reminders else '' }}>
+                                <label class="form-check-label" for="autoReminders">
+                                    Automatic Milestone Reminders
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="newbornMaxAge" class="form-label">Newborn Max Age (days)</label>
+                            <input type="number" class="form-control" id="newbornMaxAge" 
+                                   value="{{ config.baby_photography.newborn.max_age_days if config.baby_photography and config.baby_photography.newborn else 14 }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="milestoneReminderDays" class="form-label">Milestone Reminder (days before)</label>
+                            <input type="number" class="form-control" id="milestoneReminderDays" 
+                                   value="{{ config.baby_photography.milestones.reminder_days_before if config.baby_photography and config.baby_photography.milestones else 30 }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Available Birthday Themes</label>
+                            <div class="row g-2">
+                                {% set themes = ['Princess', 'Superhero', 'Farm', 'Space', 'Ocean', 'Jungle', 'Sports', 'Custom'] %}
+                                {% for theme in themes %}
+                                <div class="col-md-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="theme{{ loop.index }}" 
+                                               value="{{ theme }}" {{ 'checked' if config.baby_photography and config.baby_photography.birthday and theme in config.baby_photography.birthday.themes_available else '' }}>
+                                        <label class="form-check-label" for="theme{{ loop.index }}">
+                                            {{ theme }}
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Themes & Design Tab -->
+                <div class="tab-pane fade" id="theme" role="tabpanel">
+                    <h5 class="mb-4">Themes & Design Settings</h5>
+                    
+                    <!-- Current Theme Preview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h6 class="mb-3">Current Theme Preview</h6>
+                            <div class="theme-preview p-3 rounded border" id="themePreview">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--primary-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Primary Color</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--secondary-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Secondary Color</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="theme-color-swatch me-3" style="width: 20px; height: 20px; background: var(--accent-color); border-radius: 50%;"></div>
+                                    <span class="fw-bold">Accent Color</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Theme Selection -->
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="themeSelect" class="form-label">Choose Theme</label>
+                            <select class="form-select" id="themeSelect" onchange="changeTheme(this.value)">
+                                <option value="default" {{ 'selected' if not config.theme or config.theme.name == 'default' else '' }}>Default Professional</option>
+                                <option value="soft-pastels" {{ 'selected' if config.theme and config.theme.name == 'soft-pastels' else '' }}>Soft Pastels</option>
+                                <option value="modern-dark" {{ 'selected' if config.theme and config.theme.name == 'modern-dark' else '' }}>Modern Dark</option>
+                                <option value="nature-inspired" {{ 'selected' if config.theme and config.theme.name == 'nature-inspired' else '' }}>Nature Inspired</option>
+                                <option value="halloween" {{ 'selected' if config.theme and config.theme.name == 'halloween' else '' }}>🎃 Halloween</option>
+                                <option value="thanksgiving" {{ 'selected' if config.theme and config.theme.name == 'thanksgiving' else '' }}>🦃 Thanksgiving</option>
+                                <option value="christmas" {{ 'selected' if config.theme and config.theme.name == 'christmas' else '' }}>🎄 Christmas</option>
+                                <option value="valentine" {{ 'selected' if config.theme and config.theme.name == 'valentine' else '' }}>💕 Valentine's Day</option>
+                                <option value="easter" {{ 'selected' if config.theme and config.theme.name == 'easter' else '' }}>🐰 Easter</option>
+                                <option value="summer" {{ 'selected' if config.theme and config.theme.name == 'summer' else '' }}>☀️ Summer</option>
+                            </select>
+                        </div>
+
+                        <!-- Custom Color Overrides -->
+                        <div class="col-12">
+                            <h6 class="mb-3">Custom Color Overrides (Optional)</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="customPrimary" class="form-label">Primary Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customPrimary" 
+                                           value="{{ config.theme.custom_primary if config.theme and config.theme.custom_primary else '#6366f1' }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="customSecondary" class="form-label">Secondary Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customSecondary" 
+                                           value="{{ config.theme.custom_secondary if config.theme and config.theme.custom_secondary else '#8b5cf6' }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="customAccent" class="form-label">Accent Color</label>
+                                    <input type="color" class="form-control form-control-color" id="customAccent" 
+                                           value="{{ config.theme.custom_accent if config.theme and config.theme.custom_accent else '#f59e0b' }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Theme Options -->
+                        <div class="col-12">
+                            <h6 class="mb-3">Theme Options</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableCustomColors" 
+                                               {{ 'checked' if config.theme and config.theme.enable_custom_colors else '' }}>
+                                        <label class="form-check-label" for="enableCustomColors">
+                                            Enable Custom Color Overrides
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableAnimations" 
+                                               {{ 'checked' if config.theme and config.theme.enable_animations else '' }}>
+                                        <label class="form-check-label" for="enableAnimations">
+                                            Enable Smooth Animations
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableHolidayEffects" 
+                                               {{ 'checked' if config.theme and config.theme.enable_holiday_effects else '' }}>
+                                        <label class="form-check-label" for="enableHolidayEffects">
+                                            Enable Holiday Effects (Snow, Confetti, etc.)
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="enableDarkMode" 
+                                               {{ 'checked' if config.theme and config.theme.enable_dark_mode else '' }}>
+                                        <label class="form-check-label" for="enableDarkMode">
+                                            Enable Dark Mode Support
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Settings Tab -->
+                <div class="tab-pane fade" id="account" role="tabpanel">
+                    <h5 class="mb-4">Account Settings</h5>
+                    
+                    <!-- Current User Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Current Account Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Username</label>
+                                            <input type="text" class="form-control" value="{{ current_user.username }}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" value="{{ current_user.email }}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Role</label>
+                                            <input type="text" class="form-control" value="{{ current_user.role.title() }}" readonly>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Last Login</label>
+                                            <input type="text" class="form-control" value="{{ current_user.last_login.strftime('%Y-%m-%d %H:%M') if current_user.last_login else 'Never' }}" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Change Password Section -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Change Password</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="changePasswordForm">
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="currentPassword" class="form-label">Current Password</label>
+                                                <input type="password" class="form-control" id="currentPassword" required>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="newPassword" class="form-label">New Password</label>
+                                                <input type="password" class="form-control" id="newPassword" required minlength="6">
+                                                <div class="form-text">Password must be at least 6 characters long</div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                                <input type="password" class="form-control" id="confirmPassword" required minlength="6">
+                                            </div>
+                                            <div class="col-12">
+                                                <button type="submit" class="btn btn-primary">Change Password</button>
+                                                <button type="reset" class="btn btn-secondary ms-2">Clear Form</button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Security Information -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">Security Tips</h6>
+                                <ul class="mb-0">
+                                    <li>Use a strong password with at least 8 characters</li>
+                                    <li>Include a mix of letters, numbers, and special characters</li>
+                                    <li>Don't reuse passwords from other accounts</li>
+                                    <li>Consider using a password manager</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Simple theme system
+function changeTheme(themeName) {
+    const themes = {
+        'default': { primary: '#6366f1', secondary: '#8b5cf6', accent: '#f59e0b' },
+        'soft-pastels': { primary: '#f8b5d1', secondary: '#a8e6cf', accent: '#ffd3a5' },
+        'modern-dark': { primary: '#1f2937', secondary: '#374151', accent: '#10b981' },
+        'nature-inspired': { primary: '#059669', secondary: '#0d9488', accent: '#f59e0b' },
+        'halloween': { primary: '#f97316', secondary: '#7c2d12', accent: '#fbbf24' },
+        'thanksgiving': { primary: '#dc2626', secondary: '#f59e0b', accent: '#16a34a' },
+        'christmas': { primary: '#dc2626', secondary: '#16a34a', accent: '#fbbf24' },
+        'valentine': { primary: '#ec4899', secondary: '#f8b5d1', accent: '#fbbf24' },
+        'easter': { primary: '#8b5cf6', secondary: '#a8e6cf', accent: '#fbbf24' },
+        'summer': { primary: '#0ea5e9', secondary: '#f59e0b', accent: '#10b981' }
+    };
+    
+    const theme = themes[themeName];
+    if (theme) {
+        document.documentElement.style.setProperty('--primary-color', theme.primary);
+        document.documentElement.style.setProperty('--secondary-color', theme.secondary);
+        document.documentElement.style.setProperty('--accent-color', theme.accent);
+        
+        // Update color inputs
+        document.getElementById('customPrimary').value = theme.primary;
+        document.getElementById('customSecondary').value = theme.secondary;
+        document.getElementById('customAccent').value = theme.accent;
+        
+        // Update preview
+        updateThemePreview();
+    }
+}
+
+function updateThemePreview() {
+    const preview = document.getElementById('themePreview');
+    if (preview) {
+        const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primary-color').trim();
+        const secondaryColor = getComputedStyle(document.documentElement).getPropertyValue('--secondary-color').trim();
+        const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+        
+        const swatches = preview.querySelectorAll('.theme-color-swatch');
+        if (swatches.length >= 3) {
+            swatches[0].style.backgroundColor = primaryColor;
+            swatches[1].style.backgroundColor = secondaryColor;
+            swatches[2].style.backgroundColor = accentColor;
+        }
+    }
+}
+
+function saveAllSettings() {
+    // Collect business specialties
+    const specialties = [];
+    for (let i = 1; i <= 10; i++) {
+        const checkbox = document.getElementById('specialty' + i);
+        if (checkbox && checkbox.checked) {
+            specialties.push(checkbox.value);
+        }
+    }
+    
+    // Collect working days
+    const workingDays = {};
+    const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    days.forEach((day, index) => {
+        const checkbox = document.getElementById('day' + (index + 1));
+        workingDays[day] = { enabled: checkbox ? checkbox.checked : false };
+    });
+    
+    // Collect birthday themes
+    const birthdayThemes = [];
+    for (let i = 1; i <= 8; i++) {
+        const checkbox = document.getElementById('theme' + i);
+        if (checkbox && checkbox.checked) {
+            birthdayThemes.push(checkbox.value);
+        }
+    }
+    
+    const config = {
+        business: {
+            name: document.getElementById('businessName').value,
+            email: document.getElementById('businessEmail').value,
+            phone: document.getElementById('businessPhone').value,
+            website: document.getElementById('businessWebsite').value,
+            address: document.getElementById('businessAddress').value,
+            business_type: document.getElementById('businessType').value,
+            tax_id: document.getElementById('taxId').value,
+            specialties: specialties
+        },
+        calendar: {
+            timezone: document.getElementById('timezone').value,
+            target_calendar_id: document.getElementById('targetCalendar').value,
+            business_hours: {
+                start: document.getElementById('dailyStart').value,
+                end: document.getElementById('dailyEnd').value,
+                weekly: workingDays
+            }
+        },
+        baby_photography: {
+            milestones: {
+                enabled: document.getElementById('milestonesEnabled').checked,
+                auto_reminders: document.getElementById('autoReminders').checked,
+                reminder_days_before: parseInt(document.getElementById('milestoneReminderDays').value)
+            },
+            newborn: {
+                max_age_days: parseInt(document.getElementById('newbornMaxAge').value)
+            },
+            birthday: {
+                themes_available: birthdayThemes
+            }
+        },
+        theme: {
+            name: document.getElementById('themeSelect').value,
+            custom_primary: document.getElementById('customPrimary').value,
+            custom_secondary: document.getElementById('customSecondary').value,
+            custom_accent: document.getElementById('customAccent').value,
+            enable_custom_colors: document.getElementById('enableCustomColors').checked,
+            enable_animations: document.getElementById('enableAnimations').checked,
+            enable_holiday_effects: document.getElementById('enableHolidayEffects').checked,
+            enable_dark_mode: document.getElementById('enableDarkMode').checked
+        }
+    };
+    
+    fetch('/setup/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(config)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Settings saved successfully!');
+        } else {
+            alert('Error saving settings: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error saving settings');
+    });
+}
+
+// Apply theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const currentTheme = document.getElementById('themeSelect').value;
+    if (currentTheme) {
+        changeTheme(currentTheme);
+    }
+});
+
+// Custom color change handlers
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('customPrimary').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--primary-color', this.value);
+        updateThemePreview();
+    });
+    
+    document.getElementById('customSecondary').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--secondary-color', this.value);
+        updateThemePreview();
+    });
+    
+    document.getElementById('customAccent').addEventListener('change', function() {
+        document.documentElement.style.setProperty('--accent-color', this.value);
+        updateThemePreview();
+    });
+});
+
+// Password change functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const changePasswordForm = document.getElementById('changePasswordForm');
+    if (changePasswordForm) {
+        changePasswordForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            // Validate passwords match
+            if (newPassword !== confirmPassword) {
+                alert('New passwords do not match!');
+                return;
+            }
+            
+            // Validate password length
+            if (newPassword.length < 6) {
+                alert('Password must be at least 6 characters long!');
+                return;
+            }
+            
+            // Show loading state
+            const submitBtn = changePasswordForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Changing...';
+            submitBtn.disabled = true;
+            
+            // Send password change request
+            fetch('/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    current_password: currentPassword,
+                    new_password: newPassword,
+                    confirm_password: confirmPassword
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Password changed successfully!');
+                    changePasswordForm.reset();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error changing password. Please try again.');
+            })
+            .finally(() => {
+                // Reset button state
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+        
+        // Real-time password confirmation validation
+        const newPasswordInput = document.getElementById('newPassword');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        
+        function validatePasswordMatch() {
+            if (confirmPasswordInput.value && newPasswordInput.value !== confirmPasswordInput.value) {
+                confirmPasswordInput.setCustomValidity('Passwords do not match');
+            } else {
+                confirmPasswordInput.setCustomValidity('');
+            }
+        }
+        
+        newPasswordInput.addEventListener('input', validatePasswordMatch);
+        confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+    }
+});
+</script>
+{% endblock %}

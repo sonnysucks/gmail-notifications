@@ -172,6 +172,9 @@ class Client:
     # Baby Photography Specific Fields
     family_type: str = ""  # expecting, newborn, baby, toddler, multiple_children
     due_date: Optional[datetime] = None
+    children_count: int = 0
+    children_names: str = ""
+    children_birth_dates: str = ""
     children_info: List[Dict[str, Any]] = field(default_factory=list)  # List of children details
     family_size: int = 1
     previous_photographer: str = ""
@@ -352,7 +355,6 @@ class Appointment:
     baby_age_weeks: Optional[int] = None
     baby_age_months: Optional[int] = None
     milestone_type: str = ""  # newborn, 3month, 6month, 9month, 1year, etc.
-    is_milestone_session: bool = False
     baby_name: str = ""
     parent_names: List[str] = field(default_factory=list)
     siblings_included: bool = False

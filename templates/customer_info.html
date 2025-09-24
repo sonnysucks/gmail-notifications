@@ -1,0 +1,579 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Information - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Customer Information & Pricing</h1>
+            <p class="text-muted mb-0">Comprehensive information for your photography clients</p>
+            {% if business.email or business.phone %}
+            <div class="mt-2">
+                {% if business.email %}<span class="badge bg-primary me-2"><i class="fas fa-envelope me-1"></i>{{ business.email }}</span>{% endif %}
+                {% if business.phone %}<span class="badge bg-success"><i class="fas fa-phone me-1"></i>{{ business.phone }}</span>{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="generateClientPacket()">
+                <i class="fas fa-download me-2"></i>
+                Generate Client Packet
+            </button>
+            <button class="btn btn-primary" onclick="printPage()">
+                <i class="fas fa-print me-2"></i>
+                Print
+            </button>
+        </div>
+    </div>
+
+    <!-- Pricing Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-dollar-sign me-2"></i>
+                Session Pricing & Packages
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                {% for key, session in session_types.items() %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body text-center p-4">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 80px; height: 80px;">
+                                <i class="fas fa-camera text-primary" style="font-size: 2rem;"></i>
+                            </div>
+                            <h5 class="card-title fw-bold">{{ session.name }}</h5>
+                            <div class="display-6 text-primary fw-bold mb-2">${{ session.base_price }}</div>
+                            <p class="text-muted mb-3">{{ session.description }}</p>
+                            
+                            <div class="text-start">
+                                <h6 class="fw-bold mb-2">What's Included:</h6>
+                                <ul class="list-unstyled">
+                                    {% for item in session.includes %}
+                                    <li class="mb-1">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        {{ item }}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <span class="badge bg-info">{{ session.duration }} minutes</span>
+                                {% if session.recommended_age %}
+                                    <span class="badge bg-warning">{{ session.recommended_age }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Package Deals -->
+            <div class="mt-4">
+                <h6 class="text-center mb-3">Special Package Deals</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h6 class="text-success fw-bold">Milestone Package (3, 6, 9, 12 months)</h6>
+                                <div class="display-6 text-success fw-bold">$800</div>
+                                <p class="text-muted">Save $200 when you book all 4 milestone sessions!</p>
+                                <small class="text-muted">Includes: 4 milestone sessions, 100+ edited images, online galleries, print releases</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-warning">
+                            <div class="card-body text-center">
+                                <h6 class="text-warning fw-bold">Newborn + Milestone Package</h6>
+                                <div class="display-6 text-warning fw-bold">$1,100</div>
+                                <p class="text-muted">Save $150 when you book newborn + 3 milestone sessions!</p>
+                                <small class="text-muted">Includes: Newborn session, 3 milestone sessions, 125+ edited images, online galleries, print releases</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Deposit & Payment Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-credit-card me-2"></i>
+                Deposit & Payment Requirements
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Deposit Required at Scheduling
+                        </h6>
+                        <div class="display-6 text-primary fw-bold mb-2">$99</div>
+                        <p class="mb-2"><strong>Non-refundable deposit</strong> required to secure your appointment date and time.</p>
+                        <ul class="mb-0">
+                            <li>Reserves your preferred date and time</li>
+                            <li>Non-refundable and non-transferable</li>
+                            <li>Applied toward your total session fee</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="alert alert-success">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-money-bill-wave me-2"></i>
+                            Payment at Photo Session
+                        </h6>
+                        <div class="display-6 text-success fw-bold mb-2">$100</div>
+                        <p class="mb-2"><strong>Cash payment preferred</strong> at the time of your photo session.</p>
+                        <ul class="mb-0">
+                            <li>Due on the day of your session</li>
+                            <li>Cash is preferred for convenience</li>
+                            <li>Checks and cards also accepted</li>
+                            <li>Remaining balance due upon gallery delivery</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <h6>Payment Schedule Summary:</h6>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-primary">1</div>
+                            <small class="text-muted">$99 Deposit<br>at Scheduling</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-success">2</div>
+                            <small class="text-muted">$100 Payment<br>at Session</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-warning">3</div>
+                            <small class="text-muted">Remaining Balance<br>at Gallery Delivery</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 bg-light rounded">
+                            <div class="fw-bold text-info">4</div>
+                            <small class="text-muted">Final Products<br>4 weeks after</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- What to Expect -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-calendar-check me-2"></i>
+                What to Expect During Your Photo Session
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h6 class="text-primary mb-3">
+                        <i class="fas fa-clock me-2"></i>
+                        Session Timeline
+                    </h6>
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6>Arrival & Setup (15 min)</h6>
+                                <p class="text-muted">Get comfortable, discuss vision, and prepare for the session</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>Photo Session (varies by type)</h6>
+                                <p class="text-muted">Professional photography with multiple setups and poses</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6>Wrap-up & Payment (15 min)</h6>
+                                <p class="text-muted">Complete payment, discuss next steps, and answer questions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="text-success mb-3">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Session Tips
+                    </h6>
+                    <div class="alert alert-light">
+                        <h6 class="fw-bold">For Newborn Sessions:</h6>
+                        <ul class="mb-2">
+                            <li>Schedule within 5-14 days of birth</li>
+                            <li>Keep baby awake 1-2 hours before</li>
+                            <li>Bring extra diapers and wipes</li>
+                            <li>Feed baby right before arrival</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-light">
+                        <h6 class="fw-bold">For Milestone Sessions:</h6>
+                        <ul class="mb-2">
+                            <li>Schedule at exact milestone age</li>
+                            <li>Bring favorite toys or blankets</li>
+                            <li>Plan around nap schedules</li>
+                            <li>Include siblings if desired</li>
+                        </ul>
+                    </div>
+                    <div class="alert alert-light">
+                        <h6 class="fw-bold">For Birthday Sessions:</h6>
+                        <ul class="mb-0">
+                            <li>Choose theme and colors in advance</li>
+                            <li>Bring special outfits or props</li>
+                            <li>Consider cake smash timing</li>
+                            <li>Plan for cleanup after</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timeline & Deliverables -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-clock me-2"></i>
+                Timeline & Deliverables
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h6 class="text-info mb-3">Initial Proofing & Gallery</h6>
+                    <div class="alert alert-info">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>Up to 4 weeks after session</strong>
+                        </div>
+                        <p class="mb-2">You'll receive:</p>
+                        <ul class="mb-0">
+                            <li>Online proofing gallery</li>
+                            <li>Watermarked images for selection</li>
+                            <li>Ability to choose your favorites</li>
+                            <li>Request any minor adjustments</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="text-success mb-3">Final Products</h6>
+                    <div class="alert alert-success">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            <strong>Up to 4 weeks after selection</strong>
+                        </div>
+                        <p class="mb-2">Final delivery includes:</p>
+                        <ul class="mb-0">
+                            <li>High-resolution edited images</li>
+                            <li>Print release for personal use</li>
+                            <li>Online gallery for sharing</li>
+                            <li>Any additional products ordered</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <h6>Complete Timeline Overview:</h6>
+                <div class="timeline-horizontal">
+                    <div class="timeline-step">
+                        <div class="timeline-step-marker bg-primary">1</div>
+                        <div class="timeline-step-content">
+                            <h6>Session Day</h6>
+                            <small class="text-muted">Photo session completed</small>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-step-marker bg-info">2</div>
+                        <div class="timeline-step-content">
+                            <h6>Week 1-4</h6>
+                            <small class="text-muted">Initial editing & proofing</small>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-step-marker bg-warning">3</div>
+                        <div class="timeline-step-content">
+                            <h6>Week 4-5</h6>
+                            <small class="text-muted">Gallery selection</small>
+                        </div>
+                    </div>
+                    <div class="timeline-step">
+                        <div class="timeline-step-marker bg-success">4</div>
+                        <div class="timeline-step-content">
+                            <h6>Week 8-12</h6>
+                            <small class="text-muted">Final delivery</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contract Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-file-contract me-2"></i>
+                Contract & Agreement
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <h6 class="text-primary mb-3">Contract Requirements</h6>
+                    <p>All photography sessions require a signed contract before the session begins. The contract covers:</p>
+                    <ul>
+                        <li><strong>Session Details:</strong> Date, time, location, and session type</li>
+                        <li><strong>Pricing:</strong> Total cost, deposit requirements, and payment schedule</li>
+                        <li><strong>Deliverables:</strong> What's included and delivery timeline</li>
+                        <li><strong>Usage Rights:</strong> How images can be used and shared</li>
+                        <li><strong>Cancellation Policy:</strong> Deposit refund policy and rescheduling</li>
+                        <li><strong>Liability:</strong> Studio and client responsibilities</li>
+                    </ul>
+                    
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Important Notes
+                        </h6>
+                        <ul class="mb-0">
+                            <li>Contract must be signed before session begins</li>
+                            <li>Deposit is non-refundable and non-transferable</li>
+                            <li>Rescheduling requires 48-hour notice</li>
+                            <li>No-shows forfeit deposit and may require new deposit</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="card border-primary">
+                        <div class="card-body text-center">
+                            <i class="fas fa-file-contract text-primary" style="font-size: 3rem;"></i>
+                            <h6 class="mt-3">Contract Download</h6>
+                            <p class="text-muted">Download and review the contract before your session</p>
+                            <button class="btn btn-primary" onclick="downloadContract()">
+                                <i class="fas fa-download me-2"></i>
+                                Download Contract
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Additional Information
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <h6 class="text-info mb-3">Studio Policies</h6>
+                    <ul>
+                        <li><strong>Late Arrivals:</strong> Sessions may be shortened if you arrive late</li>
+                        <li><strong>Weather:</strong> Outdoor sessions may be rescheduled due to weather</li>
+                        <li><strong>Props:</strong> Studio provides basic props, you may bring special items</li>
+                        <li><strong>Guests:</strong> Limit to immediate family during sessions</li>
+                        <li><strong>Pets:</strong> Well-behaved pets welcome with advance notice</li>
+                    </ul>
+                </div>
+                
+                <div class="col-md-6">
+                    <h6 class="text-success mb-3">What to Bring</h6>
+                    <ul>
+                        <li><strong>For Babies:</strong> Extra diapers, wipes, formula, pacifiers</li>
+                        <li><strong>For Children:</strong> Favorite toys, snacks, change of clothes</li>
+                        <li><strong>For All:</strong> Any special props or items you'd like included</li>
+                        <li><strong>Payment:</strong> Cash preferred, checks/cards accepted</li>
+                        <li><strong>Contract:</strong> Signed contract if not completed online</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Section -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-download me-2"></i>
+                Download Complete Client Packet
+            </h5>
+        </div>
+        <div class="card-body text-center">
+            <p class="lead mb-4">Get everything you need in one comprehensive packet!</p>
+            <div class="row g-3 justify-content-center">
+                <div class="col-md-3">
+                    <div class="text-center p-3">
+                        <i class="fas fa-file-pdf text-danger" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">Complete Packet</h6>
+                        <small class="text-muted">All information in one PDF</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3">
+                        <i class="fas fa-file-contract text-primary" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">Contract</h6>
+                        <small class="text-muted">Session agreement</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3">
+                        <i class="fas fa-calendar-alt text-success" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">Session Checklist</h6>
+                        <small class="text-muted">What to bring & expect</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="text-center p-3">
+                        <i class="fas fa-dollar-sign text-warning" style="font-size: 2rem;"></i>
+                        <h6 class="mt-2">Pricing Guide</h6>
+                        <small class="text-muted">Complete pricing breakdown</small>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <div class="row g-3 justify-content-center">
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-primary w-100" onclick="downloadContract()">
+                            <i class="fas fa-download me-2"></i>
+                            Download Contract
+                        </button>
+                    </div>
+                    <div class="col-md-4">
+                        <button class="btn btn-outline-success w-100" onclick="downloadChecklist()">
+                            <i class="fas fa-download me-2"></i>
+                            Download Checklist
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <button class="btn btn-success btn-lg" onclick="generateClientPacket()">
+                    <i class="fas fa-download me-2"></i>
+                    Download Complete Client Packet
+                </button>
+                <p class="text-muted mt-2">Includes all pricing, policies, contracts, and session information</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for timeline -->
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #dee2e6;
+}
+
+.timeline-horizontal {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.timeline-step {
+    text-align: center;
+    flex: 1;
+}
+
+.timeline-step-marker {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    margin: 0 auto 10px;
+}
+
+.timeline-step-content h6 {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.timeline-step-content small {
+    font-size: 0.8rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function generateClientPacket() {
+    // This would generate a comprehensive PDF packet
+    alert('Client packet generation will be implemented here. This would create a PDF with all the information, pricing, contract, and policies.');
+}
+
+function downloadContract() {
+    // Open contract template in new window for download/printing
+    window.open('/contract-template', '_blank');
+}
+
+function downloadChecklist() {
+    // Open session checklist in new window for download/printing
+    window.open('/session-checklist', '_blank');
+}
+
+function printPage() {
+    window.print();
+}
+
+// Add any additional JavaScript functionality here
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize any interactive elements
+    console.log('Customer information page loaded');
+});
+</script>
+{% endblock %}

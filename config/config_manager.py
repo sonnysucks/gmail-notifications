@@ -5,7 +5,7 @@ Configuration management for the Gmail Photography Appointment Scheduler
 import os
 import yaml
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 import logging
 
 logger = logging.getLogger(__name__)
@@ -130,3 +130,49 @@ class ConfigManager:
         
         # Default fallback
         return 'credentials.json'
+    
+    def get_session_types(self) -> Dict[str, Dict[str, Any]]:
+        """Get session types from configuration as a dictionary with session names as keys"""
+        session_types_list = self.config.get('session_types', [])
+        session_types_dict = {}
+        
+        for session in session_types_list:
+            session_name = session.get('name', 'Unknown Session')
+            session_types_dict[session_name] = session
+        
+        return session_types_dict
+    
+    def save_config(self, config_data: Dict[str, Any]) -> bool:
+        """Save configuration to file"""
+        try:
+            self.config.update(config_data)
+            
+            with open(self.config_path, 'w') as f:
+                yaml.dump(self.config, f, default_flow_style=False, indent=2)
+            
+            logger.info("Configuration saved successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to save configuration: {e}")
+            return False
+    
+    def update_config(self, config_data: Dict[str, Any]) -> bool:
+        """Update specific configuration sections"""
+        try:
+            # Update only the provided sections
+            for section, values in config_data.items():
+                if section in self.config:
+                    if isinstance(values, dict):
+                        self.config[section].update(values)
+                    else:
+                        self.config[section] = values
+                else:
+                    self.config[section] = values
+            
+            # Save the updated configuration
+            return self.save_config(self.config)
+            
+        except Exception as e:
+            logger.error(f"Failed to update configuration: {e}")
+            return False

@@ -17,7 +17,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config.config_manager import ConfigManager
 from scheduler.appointment_scheduler import AppointmentScheduler
 from gmail.gmail_manager import GmailManager
-from calendar.calendar_manager import CalendarManager
+from calendar_integration.calendar_manager import CalendarManager
 from utils.logger import setup_logging
 
 

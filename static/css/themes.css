@@ -1,0 +1,188 @@
+/* Dynamic Theme CSS - Applied based on config settings */
+
+/* Default Theme Variables */
+:root {
+    --primary-color: #6366f1;
+    --secondary-color: #8b5cf6;
+    --accent-color: #f59e0b;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --danger-color: #ef4444;
+    --dark-color: #1f2937;
+    --light-color: #f9fafb;
+    --border-color: #e5e7eb;
+}
+
+/* Theme-specific styles */
+.theme-preview {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: 2px solid var(--accent-color) !important;
+}
+
+.theme-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.theme-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    border-color: var(--primary-color);
+}
+
+.theme-preview-mini {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.color-bar {
+    transition: all 0.3s ease;
+}
+
+/* Holiday Effects */
+.holiday-effects {
+    position: relative;
+    overflow: hidden;
+}
+
+/* Christmas Snow Effect */
+@keyframes snow {
+    0% { transform: translateY(-100vh) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+.snowflake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    animation: snow 3s linear infinite;
+    pointer-events: none;
+}
+
+/* Halloween Bats */
+@keyframes fly {
+    0% { transform: translateX(-100px) rotate(0deg); }
+    100% { transform: translateX(calc(100vw + 100px)) rotate(360deg); }
+}
+
+.bat {
+    position: absolute;
+    color: #1f2937;
+    font-size: 1.5em;
+    animation: fly 4s linear infinite;
+    pointer-events: none;
+}
+
+/* Thanksgiving Leaves */
+@keyframes fall {
+    0% { transform: translateY(-100px) rotate(0deg); }
+    100% { transform: translateY(100vh) rotate(360deg); }
+}
+
+.leaf {
+    position: absolute;
+    color: #f59e0b;
+    font-size: 1.2em;
+    animation: fall 5s linear infinite;
+    pointer-events: none;
+}
+
+/* Valentine Hearts */
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-20px) rotate(180deg); }
+}
+
+.heart {
+    position: absolute;
+    color: #ec4899;
+    font-size: 1em;
+    animation: float 3s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Easter Eggs */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50% { transform: translateY(-30px) rotate(180deg); }
+}
+
+.egg {
+    position: absolute;
+    color: #8b5cf6;
+    font-size: 1.2em;
+    animation: bounce 4s ease-in-out infinite;
+    pointer-events: none;
+}
+
+/* Summer Sun */
+@keyframes rotate {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.sun {
+    position: absolute;
+    color: #f59e0b;
+    font-size: 2em;
+    animation: rotate 10s linear infinite;
+    pointer-events: none;
+}
+
+/* Dark Mode Support */
+[data-theme="dark"] {
+    --primary-color: #3b82f6;
+    --secondary-color: #6366f1;
+    --accent-color: #f59e0b;
+    --dark-color: #f9fafb;
+    --light-color: #1f2937;
+    --border-color: #374151;
+}
+
+[data-theme="dark"] body {
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+[data-theme="dark"] .card {
+    background-color: #374151;
+    color: #f9fafb;
+}
+
+[data-theme="dark"] .form-control,
+[data-theme="dark"] .form-select {
+    background-color: #4b5563;
+    border-color: #6b7280;
+    color: #f9fafb;
+}
+
+/* Animation Controls */
+.no-animations * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+}
+
+/* Custom Color Override */
+.custom-colors-enabled {
+    /* Custom colors will be applied via JavaScript */
+}
+
+/* Responsive Theme Gallery */
+@media (max-width: 768px) {
+    .theme-card {
+        margin-bottom: 1rem;
+    }
+    
+    .theme-preview-mini {
+        height: 40px;
+    }
+    
+    .color-bar {
+        height: 13px !important;
+    }
+}

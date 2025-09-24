@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography Session Contract</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .contract-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .studio-info {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 25px;
+        }
+        .section-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .client-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .info-group {
+            margin-bottom: 15px;
+        }
+        .info-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .info-value {
+            border-bottom: 1px solid #ccc;
+            padding: 5px 0;
+            min-height: 20px;
+        }
+        .terms-list {
+            list-style-type: decimal;
+            padding-left: 20px;
+        }
+        .terms-list li {
+            margin-bottom: 10px;
+        }
+        .signature-section {
+            margin-top: 40px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .signature-box {
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            text-align: center;
+        }
+        .signature-line {
+            border-bottom: 1px solid #333;
+            height: 40px;
+            margin-bottom: 5px;
+        }
+        .print-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        @media print {
+            .print-button {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">Print Contract</button>
+    
+    <div class="header">
+        <div class="contract-title">PHOTOGRAPHY SESSION CONTRACT</div>
+        <div class="studio-info">
+            <strong>{{ business.name }}</strong><br>
+            {% if business.address %}{{ business.address }}<br>{% endif %}
+            {% if business.phone %}Phone: {{ business.phone }}<br>{% endif %}
+            {% if business.email %}Email: {{ business.email }}<br>{% endif %}
+            Date: <span id="contractDate"></span>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">CLIENT INFORMATION</div>
+        <div class="client-info">
+            <div class="info-group">
+                <div class="info-label">Client Name(s):</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Email Address:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Phone Number:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Mailing Address:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">SESSION DETAILS</div>
+        <div class="client-info">
+            <div class="info-group">
+                <div class="info-label">Session Type:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Session Date:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Session Time:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Session Location:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Baby/Child Name:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Baby/Child Age:</div>
+                <div class="info-value">_________________________________</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">PRICING & PAYMENT TERMS</div>
+        <div class="client-info">
+            <div class="info-group">
+                <div class="info-label">Session Fee:</div>
+                <div class="info-value">$_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Additional Charges:</div>
+                <div class="info-value">$_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Discount:</div>
+                <div class="info-value">$_________________________________</div>
+            </div>
+            <div class="info-group">
+                <div class="info-label">Total Amount:</div>
+                <div class="info-value">$_________________________________</div>
+            </div>
+        </div>
+        
+        <p><strong>Payment Schedule:</strong></p>
+        <ol class="terms-list">
+            <li><strong>$99 Non-refundable Deposit:</strong> Due at time of booking to secure your appointment date and time. This deposit is non-refundable and non-transferable.</li>
+            <li><strong>$100 Payment at Session:</strong> Due on the day of your photo session. Cash is preferred, but checks and cards are also accepted.</li>
+            <li><strong>Remaining Balance:</strong> Due upon delivery of your proofing gallery.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">WHAT'S INCLUDED</div>
+        <p>Your session includes:</p>
+        <ul class="terms-list">
+            <li>Professional photography session at agreed location</li>
+            <li>Professional editing and retouching of selected images</li>
+            <li>Online proofing gallery for image selection</li>
+            <li>High-resolution digital images with print release</li>
+            <li>Online gallery for sharing and downloading</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <div class="section-title">DELIVERY TIMELINE</div>
+        <ol class="terms-list">
+            <li><strong>Initial Proofing Gallery:</strong> Available within 4 weeks after your session date</li>
+            <li><strong>Image Selection:</strong> You will have 1 week to select your final images</li>
+            <li><strong>Final Delivery:</strong> High-resolution images and final products delivered within 4 weeks after image selection</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">CANCELLATION & RESCHEDULING POLICY</div>
+        <ol class="terms-list">
+            <li><strong>Rescheduling:</strong> Must be requested at least 48 hours before your scheduled session. Rescheduling is subject to availability.</li>
+            <li><strong>Cancellation:</strong> The $99 deposit is non-refundable. No-shows forfeit their deposit and may require a new deposit to reschedule.</li>
+            <li><strong>Weather:</strong> Outdoor sessions may be rescheduled due to inclement weather at no additional charge.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">USAGE RIGHTS & COPYRIGHT</div>
+        <ol class="terms-list">
+            <li><strong>Photographer Rights:</strong> The photographer retains copyright to all images and may use them for portfolio, marketing, and promotional purposes.</li>
+            <li><strong>Client Rights:</strong> Clients receive a print release allowing personal use of purchased images, including printing, sharing on social media, and personal projects.</li>
+            <li><strong>Commercial Use:</strong> Commercial use of images requires written permission and may incur additional fees.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">LIABILITY & RESPONSIBILITIES</div>
+        <ol class="terms-list">
+            <li><strong>Studio Responsibility:</strong> The studio is responsible for providing professional photography services and delivering images as agreed.</li>
+            <li><strong>Client Responsibility:</strong> Clients are responsible for arriving on time, bringing necessary items, and ensuring children are prepared for the session.</li>
+            <li><strong>Property Damage:</strong> Clients are responsible for any damage to studio property or equipment during their session.</li>
+            <li><strong>Limitation of Liability:</strong> The studio's liability is limited to the amount paid for the session.</li>
+        </ol>
+    </div>
+
+    <div class="section">
+        <div class="section-title">ADDITIONAL TERMS</div>
+        <ol class="terms-list">
+            <li><strong>Model Release:</strong> By signing this contract, you grant permission for the photographer to use images for marketing purposes.</li>
+            <li><strong>Image Storage:</strong> Images will be stored for 6 months after delivery. Additional storage may incur fees.</li>
+            <li><strong>Additional Products:</strong> Additional prints, albums, or products can be ordered at current pricing.</li>
+            <li><strong>Disputes:</strong> Any disputes will be resolved through good faith communication. If unable to resolve, mediation will be pursued.</li>
+        </ol>
+    </div>
+
+    <div class="signature-section">
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Client Signature</strong><br>
+            <small>Date: _________________</small>
+        </div>
+        <div class="signature-box">
+            <div class="signature-line"></div>
+            <strong>Photographer Signature</strong><br>
+            <small>Date: _________________</small>
+        </div>
+    </div>
+
+    <div style="margin-top: 40px; text-align: center; font-size: 12px; color: #666;">
+        <p>This contract constitutes a legally binding agreement between the client and Sass and Whimsy Photography.</p>
+        <p>By signing below, both parties acknowledge that they have read, understood, and agree to all terms and conditions outlined in this contract.</p>
+    </div>
+
+    <script>
+        // Set current date
+        document.getElementById('contractDate').textContent = new Date().toLocaleDateString();
+        
+        // Print functionality
+        function printContract() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

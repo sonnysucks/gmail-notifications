@@ -1,0 +1,458 @@
+{% extends "base.html" %}
+
+{% block title %}Calendar - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Calendar</h1>
+            <p class="text-muted mb-0">View and manage your photography sessions</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
+                <i class="fas fa-calendar-plus me-2"></i>
+                Schedule Session
+            </a>
+            <a href="{{ url_for('appointments') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-list me-2"></i>
+                List View
+            </a>
+        </div>
+    </div>
+
+    <!-- Calendar Navigation -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h5 class="mb-0">August 2025</h5>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button type="button" class="btn btn-outline-primary">Today</button>
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="card">
+        <div class="card-body p-0">
+            <!-- Calendar Header -->
+            <div class="calendar-header">
+                <div class="calendar-day-header">Sun</div>
+                <div class="calendar-day-header">Mon</div>
+                <div class="calendar-day-header">Tue</div>
+                <div class="calendar-day-header">Wed</div>
+                <div class="calendar-day-header">Thu</div>
+                <div class="calendar-day-header">Fri</div>
+                <div class="calendar-day-header">Sat</div>
+            </div>
+
+            <!-- Calendar Body -->
+            <div class="calendar-body">
+                <!-- Week 1 -->
+                <div class="calendar-week">
+                    <div class="calendar-day prev-month">
+                        <div class="day-number">27</div>
+                    </div>
+                    <div class="calendar-day prev-month">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day prev-month">
+                        <div class="day-number">29</div>
+                    </div>
+                    <div class="calendar-day prev-month">
+                        <div class="day-number">30</div>
+                    </div>
+                    <div class="calendar-day prev-month">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">1</div>
+                        <div class="appointment-indicator" title="Newborn Session - Sarah Johnson">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">2</div>
+                    </div>
+                </div>
+
+                <!-- Week 2 -->
+                <div class="calendar-week">
+                    <div class="calendar-day">
+                        <div class="day-number">3</div>
+                        <div class="appointment-indicator" title="Milestone Session - Emma Davis">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">5</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">6</div>
+                        <div class="appointment-indicator" title="Birthday Session - Liam Wilson">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">7</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">8</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">9</div>
+                    </div>
+                </div>
+
+                <!-- Week 3 -->
+                <div class="calendar-week">
+                    <div class="calendar-day">
+                        <div class="day-number">10</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">11</div>
+                        <div class="appointment-indicator" title="Family Session - The Smiths">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">12</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">13</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">14</div>
+                        <div class="appointment-indicator" title="Newborn Session - Baby Anderson">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">15</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">16</div>
+                    </div>
+                </div>
+
+                <!-- Week 4 -->
+                <div class="calendar-week">
+                    <div class="calendar-day">
+                        <div class="day-number">17</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">18</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">19</div>
+                        <div class="appointment-indicator" title="Milestone Session - Noah Brown">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">20</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">21</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">22</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">23</div>
+                    </div>
+                </div>
+
+                <!-- Week 5 -->
+                <div class="calendar-week">
+                    <div class="calendar-day">
+                        <div class="day-number">24</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">25</div>
+                        <div class="appointment-indicator" title="Birthday Session - Ava Garcia">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">26</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">27</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">28</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">29</div>
+                        <div class="appointment-indicator" title="Newborn Session - Baby Martinez">●</div>
+                    </div>
+                    <div class="calendar-day">
+                        <div class="day-number">30</div>
+                    </div>
+                </div>
+
+                <!-- Week 6 -->
+                <div class="calendar-week">
+                    <div class="calendar-day">
+                        <div class="day-number">31</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">1</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">2</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">3</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">4</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">5</div>
+                    </div>
+                    <div class="calendar-day next-month">
+                        <div class="day-number">6</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="row mt-4">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-week me-2"></i>
+                        Upcoming Appointments
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Client</th>
+                                        <th>Session Type</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in appointments %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ appointment.start_time.strftime('%b %d, %Y') }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ appointment.start_time.strftime('%I:%M %p') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>{{ appointment.client_name }}</strong>
+                                                    {% if appointment.baby_name %}
+                                                        <br>
+                                                        <small class="text-muted">{{ appointment.baby_name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-primary">{{ appointment.session_type }}</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                                                {{ appointment.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No appointments this month</h5>
+                            <p class="text-muted">Great time to schedule new sessions!</p>
+                            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                Schedule Session
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Calendar Legend & Stats -->
+        <div class="col-lg-4">
+            <!-- Legend -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Calendar Legend
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
+                        <span class="appointment-indicator me-2">●</span>
+                        <span>Appointment scheduled</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="calendar-day prev-month me-2" style="width: 30px; height: 30px;">
+                            <div class="day-number">1</div>
+                        </div>
+                        <span>Previous month</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <div class="calendar-day next-month me-2" style="width: 30px; height: 30px;">
+                            <div class="day-number">1</div>
+                        </div>
+                        <span>Next month</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        This Month
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="display-6 text-primary fw-bold">8</div>
+                            <small class="text-muted">Sessions</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="display-6 text-success fw-bold">6</div>
+                            <small class="text-muted">Confirmed</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('new_appointment') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calendar-plus me-2"></i>
+                            Schedule Session
+                        </a>
+                        <a href="{{ url_for('appointments') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-list me-2"></i>
+                            View All Appointments
+                        </a>
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            View Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.calendar-day-header {
+    padding: 15px;
+    text-align: center;
+    font-weight: 600;
+    color: #495057;
+    border-right: 1px solid #dee2e6;
+}
+
+.calendar-day-header:last-child {
+    border-right: none;
+}
+
+.calendar-week {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    border-bottom: 1px solid #dee2e6;
+}
+
+.calendar-week:last-child {
+    border-bottom: none;
+}
+
+.calendar-day {
+    min-height: 120px;
+    padding: 10px;
+    border-right: 1px solid #dee2e6;
+    position: relative;
+    background-color: white;
+}
+
+.calendar-day:last-child {
+    border-right: none;
+}
+
+.calendar-day.prev-month,
+.calendar-day.next-month {
+    background-color: #f8f9fa;
+    color: #6c757d;
+}
+
+.day-number {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.appointment-indicator {
+    color: #007bff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+
+.appointment-indicator:hover {
+    color: #0056b3;
+}
+
+.calendar-day:hover {
+    background-color: #f8f9fa;
+}
+
+.calendar-day.prev-month:hover,
+.calendar-day.next-month:hover {
+    background-color: #e9ecef;
+}
+</style>
+{% endblock %}

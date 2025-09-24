@@ -1,0 +1,523 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Dashboard</h1>
+            <p class="text-muted mb-0">Welcome back! Here's what's happening with your {{ business.business_type or 'photography' }} business today.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>
+                New Appointment
+            </a>
+            <a href="{{ url_for('new_client') }}" class="btn btn-accent">
+                <i class="fas fa-user-plus me-2"></i>
+                New Client
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_clients }}</div>
+                <div class="stats-label">Total Clients</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #8b5cf6, #a855f7);">
+                <div class="stats-number">{{ total_appointments }}</div>
+                <div class="stats-label">Total Appointments</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #f59e0b, #f97316);">
+                <div class="stats-number">${{ "%.0f"|format(monthly_revenue) }}</div>
+                <div class="stats-label">Monthly Revenue</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card" style="background: linear-gradient(135deg, #ef4444, #dc2626);">
+                {% if next_appointment %}
+                    <div class="stats-number">{{ next_appointment.start_time.strftime('%b %d') }}</div>
+                    <div class="stats-label">Next Session</div>
+                {% else %}
+                    <div class="stats-number">0</div>
+                    <div class="stats-label">Next Session</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-primary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-chart-line fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Analytics</h6>
+                            <p class="card-text small opacity-75">Business insights & performance</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('analytics') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-info text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-alt fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Google Calendar</h6>
+                            <p class="card-text small opacity-75">Sync & manage calendar</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('google_calendar_config') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-success text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-cog fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Setup</h6>
+                            <p class="card-text small opacity-75">Business configuration</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('setup') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-warning text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-info-circle fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Customer Info</h6>
+                            <p class="card-text small opacity-75">Pricing & policies</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('customer_info') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Second Row of Feature Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-danger text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-database fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Backup & Restore</h6>
+                            <p class="card-text small opacity-75">Data backup & recovery</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('backup_restore') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-secondary text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-box fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Packages</h6>
+                            <p class="card-text small opacity-75">Session packages & pricing</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('setup') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-dark text-white h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-users fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Clients</h6>
+                            <p class="card-text small opacity-75">Manage client database</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('clients') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-light text-dark h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-calendar-check fa-2x opacity-75"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">Appointments</h6>
+                            <p class="card-text small opacity-75">Schedule & manage sessions</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('appointments') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Next Scheduled Appointment -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Next Scheduled Appointment
+                    </h5>
+                    <a href="{{ url_for('appointments') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if next_appointment %}
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-calendar-alt text-primary fa-lg"></i>
+                                                </div>
+                                                <div>
+                                        <h4 class="mb-1">{{ next_appointment.client_name }}</h4>
+                                        {% if next_appointment.baby_name %}
+                                            <p class="text-muted mb-0">{{ next_appointment.baby_name }}</p>
+                                                    {% endif %}
+                                                </div>
+                                </div>
+                                
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-clock text-primary me-2"></i>
+                                            <div>
+                                                <strong>{{ next_appointment.start_time.strftime('%A, %B %d, %Y') }}</strong>
+                                                <br>
+                                                <span class="text-muted">{{ next_appointment.start_time.strftime('%I:%M %p') }} ({{ next_appointment.duration }} min)</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-camera text-primary me-2"></i>
+                                            <div>
+                                                <span class="badge bg-primary fs-6">{{ next_appointment.session_type }}</span>
+                                                <br>
+                                                <span class="badge bg-{{ 'success' if next_appointment.status == 'confirmed' else 'warning' if next_appointment.status == 'pending' else 'danger' }}">
+                                                    {{ next_appointment.status.title() }}
+                                            </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                {% if next_appointment.baby_age_days %}
+                                <div class="mt-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-baby text-primary me-2"></i>
+                                        <div>
+                                            {% if next_appointment.baby_age_days <= 14 %}
+                                                <span class="badge bg-warning">Newborn ({{ next_appointment.baby_age_days }} days)</span>
+                                            {% elif next_appointment.baby_age_days <= 90 %}
+                                                <span class="badge bg-info">3 Month ({{ next_appointment.baby_age_days }} days)</span>
+                                            {% elif next_appointment.baby_age_days <= 180 %}
+                                                <span class="badge bg-primary">6 Month ({{ next_appointment.baby_age_days }} days)</span>
+                                            {% elif next_appointment.baby_age_days <= 270 %}
+                                                <span class="badge bg-success">9 Month ({{ next_appointment.baby_age_days }} days)</span>
+                                            {% elif next_appointment.baby_age_days <= 365 %}
+                                                <span class="badge bg-danger">1 Year ({{ next_appointment.baby_age_days }} days)</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ next_appointment.baby_age_days }} days</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if next_appointment.notes %}
+                                <div class="mt-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="fas fa-sticky-note text-primary me-2 mt-1"></i>
+                                        <div>
+                                            <strong>Notes:</strong>
+                                            <p class="text-muted mb-0">{{ next_appointment.notes }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <div class="text-center">
+                                    <div class="mb-3">
+                                        <a href="{{ url_for('view_appointment', appointment_id=next_appointment.id) }}" class="btn btn-primary btn-lg w-100">
+                                            <i class="fas fa-eye me-2"></i>
+                                            View Details
+                                        </a>
+                                    </div>
+                                    <div class="mb-3">
+                                        <a href="{{ url_for('edit_appointment', appointment_id=next_appointment.id) }}" class="btn btn-outline-primary w-100">
+                                            <i class="fas fa-edit me-2"></i>
+                                            Edit Appointment
+                                        </a>
+                                    </div>
+                                    <div class="text-muted small">
+                                        <i class="fas fa-calendar-alt me-1"></i>
+                                        {% set days_until = (next_appointment.start_time.date() - today).days %}
+                                        {% if days_until == 0 %}
+                                            <strong>Today!</strong>
+                                        {% elif days_until == 1 %}
+                                            <strong>Tomorrow</strong>
+                                        {% elif days_until < 7 %}
+                                            <strong>{{ days_until }} days</strong>
+                                        {% else %}
+                                            <strong>{{ days_until }} days away</strong>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No upcoming appointments</h5>
+                            <p class="text-muted">Start scheduling sessions to grow your business!</p>
+                            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                Schedule Session
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions & Recent Clients -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('new_appointment') }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-calendar-plus me-2"></i>
+                            Schedule Session
+                        </a>
+                        <a href="{{ url_for('new_client') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Add New Client
+                        </a>
+                        <a href="{{ url_for('calendar') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            View Calendar
+                        </a>
+                        <a href="{{ url_for('analytics') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            View Analytics
+                        </a>
+                        <a href="{{ url_for('google_calendar_config') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-calendar-alt me-2"></i>
+                            Google Calendar
+                        </a>
+                        <a href="{{ url_for('backup_restore') }}" class="btn btn-outline-success btn-sm">
+                            <i class="fas fa-database me-2"></i>
+                            Backup & Restore
+                        </a>
+                        <a href="{{ url_for('customer_info') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Customer Info
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Clients -->
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">
+                        <i class="fas fa-users me-2"></i>
+                        Recent Clients
+                    </h6>
+                    <a href="{{ url_for('clients') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if recent_clients %}
+                        {% for client in recent_clients %}
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                <i class="fas fa-user text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ client.name }}</h6>
+                                <small class="text-muted">
+                                    {% if client.family_type %}
+                                        {{ client.family_type.title() }}
+                                    {% else %}
+                                        New Client
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <a href="{{ url_for('view_client', client_id=client.id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                        {% if not loop.last %}
+                            <hr class="my-2">
+                        {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-3">
+                            <i class="fas fa-users text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mt-2 mb-0">No clients yet</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upcoming Appointments -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-week me-2"></i>
+                        Upcoming Appointments
+                    </h5>
+                    <a href="{{ url_for('appointments') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                </div>
+                <div class="card-body">
+                    {% if upcoming_appointments %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Date & Time</th>
+                                        <th>Client</th>
+                                        <th>Session Type</th>
+                                        <th>Baby Age</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for appointment in upcoming_appointments %}
+                                    <tr>
+                                        <td>
+                                            <strong>{{ appointment.start_time.strftime('%b %d, %Y') }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ appointment.start_time.strftime('%I:%M %p') }}</small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                                    <i class="fas fa-user text-primary"></i>
+                                                </div>
+                                                <div>
+                                                    <strong>{{ appointment.client_name }}</strong>
+                                                    {% if appointment.baby_name %}
+                                                        <br>
+                                                        <small class="text-muted">{{ appointment.baby_name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-{{ appointment.session_type.lower() }}">
+                                                {{ appointment.session_type }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if appointment.baby_age_days %}
+                                                {% if appointment.baby_age_days <= 14 %}
+                                                    <span class="badge bg-warning">Newborn ({{ appointment.baby_age_days }} days)</span>
+                                                {% elif appointment.baby_age_days <= 90 %}
+                                                    <span class="badge bg-info">3 Month ({{ appointment.baby_age_days }} days)</span>
+                                                {% elif appointment.baby_age_days <= 180 %}
+                                                    <span class="badge bg-primary">6 Month ({{ appointment.baby_age_days }} days)</span>
+                                                {% elif appointment.baby_age_days <= 270 %}
+                                                    <span class="badge bg-success">9 Month ({{ appointment.baby_age_days }} days)</span>
+                                                {% elif appointment.baby_age_days <= 365 %}
+                                                    <span class="badge bg-danger">1 Year ({{ appointment.baby_age_days }} days)</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">{{ appointment.baby_age_days }} days</span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                                                {{ appointment.status.title() }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ url_for('view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
+                            <h5 class="text-muted mt-3">No upcoming appointments</h5>
+                            <p class="text-muted">Start scheduling sessions to grow your business!</p>
+                            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                Schedule First Session
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

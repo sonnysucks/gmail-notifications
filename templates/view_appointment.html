@@ -1,0 +1,570 @@
+{% extends "base.html" %}
+
+{% block title %}Appointment Details - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Appointment Details</h1>
+            <p class="text-muted mb-0">Session information and client details</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="btn btn-outline-primary">
+                <i class="fas fa-edit me-2"></i>
+                Edit Appointment
+            </a>
+            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-2"></i>
+                Delete Appointment
+            </button>
+            <a href="{{ url_for('appointments') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>
+                Back to Appointments
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Appointment Information -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Session Details
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-camera text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="mb-1">{{ appointment.session_type }}</h5>
+                        <p class="text-muted mb-0">Session</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar text-muted me-2"></i>
+                                <span><strong>Date:</strong> {{ appointment.start_time.strftime('%B %d, %Y') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock text-muted me-2"></i>
+                                <span><strong>Time:</strong> {{ appointment.start_time.strftime('%I:%M %p') }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-hourglass-half text-muted me-2"></i>
+                                <span><strong>Duration:</strong> {{ appointment.duration or 'Not specified' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-dollar-sign text-muted me-2"></i>
+                                <span><strong>Fee:</strong> ${{ appointment.fee or 'Not specified' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-info-circle text-muted me-2"></i>
+                                <span><strong>Status:</strong> 
+                                    <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                                        {{ appointment.status.title() }}
+                                    </span>
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if appointment.location %}
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-map-marker-alt text-muted me-2 mt-1"></i>
+                                <span><strong>Location:</strong> {{ appointment.location }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if appointment.notes %}
+                        <div class="col-12">
+                            <div class="d-flex align-items-start">
+                                <i class="fas fa-sticky-note text-muted me-2 mt-1"></i>
+                                <span><strong>Notes:</strong> {{ appointment.notes }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Client Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-user me-2"></i>
+                        Client Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                            <i class="fas fa-user text-primary"></i>
+                        </div>
+                        <div>
+                            <h6 class="mb-1">{{ appointment.client_name }}</h6>
+                            <small class="text-muted">Client</small>
+                        </div>
+                    </div>
+
+                    {% if appointment.baby_name %}
+                    <div class="mb-2">
+                        <strong>Baby/Child:</strong> {{ appointment.baby_name }}
+                    </div>
+                    {% endif %}
+
+                    {% if appointment.baby_age_days %}
+                    <div class="mb-2">
+                        <strong>Age:</strong> 
+                        {% if appointment.baby_age_days <= 14 %}
+                            <span class="badge bg-warning">{{ appointment.baby_age_days }} days old (Newborn)</span>
+                        {% elif appointment.baby_age_days <= 90 %}
+                            <span class="badge bg-info">{{ appointment.baby_age_days }} days old</span>
+                        {% elif appointment.baby_age_days <= 365 %}
+                            <span class="badge bg-primary">{{ appointment.baby_age_days }} days old</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ appointment.baby_age_days }} days old</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('edit_appointment', appointment_id=appointment.id) }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-2"></i>
+                            Edit Appointment
+                        </a>
+                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i>
+                            Delete Appointment
+                        </button>
+                        <a href="{{ url_for('customer_info') }}" class="btn btn-outline-info btn-sm">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Customer Info
+                        </a>
+                        <a href="{{ url_for('appointments') }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Back to Appointments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Session Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-camera me-2"></i>
+                        Session Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <!-- Basic Session Info -->
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Session Details</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-calendar text-muted me-2"></i>
+                                    <strong>Date:</strong> {{ appointment.start_time.strftime('%A, %B %d, %Y') }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-clock text-muted me-2"></i>
+                                    <strong>Time:</strong> {{ appointment.start_time.strftime('%I:%M %p') }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-hourglass-half text-muted me-2"></i>
+                                    <strong>Duration:</strong> {{ appointment.duration or 'Not specified' }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-dollar-sign text-muted me-2"></i>
+                                    <strong>Session Fee:</strong> ${{ appointment.fee or 'Not specified' }}
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- Client Details -->
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">Client Information</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-user text-muted me-2"></i>
+                                    <strong>Client:</strong> {{ appointment.client_name }}
+                                </li>
+                                {% if appointment.baby_name %}
+                                <li class="mb-2">
+                                    <i class="fas fa-baby text-muted me-2"></i>
+                                    <strong>Baby/Child:</strong> {{ appointment.baby_name }}
+                                </li>
+                                {% endif %}
+                                {% if appointment.baby_age_days %}
+                                <li class="mb-2">
+                                    <i class="fas fa-birthday-cake text-muted me-2"></i>
+                                    <strong>Age:</strong> {{ appointment.baby_age_days }} days old
+                                </li>
+                                {% endif %}
+                                <li class="mb-2">
+                                    <i class="fas fa-info-circle text-muted me-2"></i>
+                                    <strong>Status:</strong> 
+                                    <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
+                                        {{ appointment.status.title() }}
+                                    </span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Additional Details -->
+                    {% if appointment.location or appointment.notes %}
+                    <hr class="my-4">
+                    <div class="row g-4">
+                        {% if appointment.location %}
+                        <div class="col-md-6">
+                            <h6 class="text-info mb-3">Location</h6>
+                            <p class="mb-0">
+                                <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                {{ appointment.location }}
+                            </p>
+                        </div>
+                        {% endif %}
+
+                        {% if appointment.notes %}
+                        <div class="col-md-6">
+                            <h6 class="text-warning mb-3">Notes</h6>
+                            <p class="mb-0">
+                                <i class="fas fa-sticky-note text-muted me-2"></i>
+                                {{ appointment.notes }}
+                            </p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Session Preparation -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Session Preparation
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">What to Bring</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <strong>Payment:</strong> $100 cash (preferred)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <strong>Contract:</strong> Signed agreement
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <strong>Props:</strong> Special items if desired
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    <strong>Clothing:</strong> Backup outfits
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6 class="text-success mb-3">Session Tips</h6>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    <strong>Arrive Early:</strong> 10-15 minutes before
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    <strong>Well Rested:</strong> Especially for babies
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    <strong>Fed Baby:</strong> Right before session
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-lightbulb text-warning me-2"></i>
+                                    <strong>Relaxed:</strong> Stay calm and patient
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock me-2"></i>
+                        What Happens Next
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-primary"></div>
+                            <div class="timeline-content">
+                                <h6>Session Day</h6>
+                                <p class="text-muted">Complete your photography session and payment</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-info"></div>
+                            <div class="timeline-content">
+                                <h6>Week 1-4</h6>
+                                <p class="text-muted">Initial editing and proofing gallery preparation</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-warning"></div>
+                            <div class="timeline-content">
+                                <h6>Week 4-5</h6>
+                                <p class="text-muted">Proofing gallery available for image selection</p>
+                            </div>
+                        </div>
+                        <div class="timeline-item">
+                            <div class="timeline-marker bg-success"></div>
+                            <div class="timeline-content">
+                                <h6>Week 8-12</h6>
+                                <p class="text-muted">Final high-resolution images delivered</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Delete Appointment
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+                
+                <p>You are about to permanently delete this appointment:</p>
+                
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ appointment.client_name }}</h6>
+                        <p class="card-text mb-1">
+                            <strong>Date:</strong> {{ appointment.start_time.strftime('%B %d, %Y at %I:%M %p') }}
+                        </p>
+                        <p class="card-text mb-1">
+                            <strong>Session:</strong> {{ appointment.session_type }}
+                        </p>
+                        {% if appointment.baby_name %}
+                        <p class="card-text mb-0">
+                            <strong>Baby/Child:</strong> {{ appointment.baby_name }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <label for="confirmDelete" class="form-label">
+                        <strong>To confirm deletion, type "DELETE" below:</strong>
+                    </label>
+                    <input type="text" class="form-control" id="confirmDelete" placeholder="Type DELETE to confirm">
+                    <div class="form-text">This helps prevent accidental deletions.</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times me-2"></i>
+                    Cancel
+                </button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn" disabled>
+                    <i class="fas fa-trash me-2"></i>
+                    Delete Appointment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -35px;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 3px #dee2e6;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.timeline-content p {
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const confirmDeleteInput = document.getElementById('confirmDelete');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    
+    // Enable/disable delete button based on input
+    confirmDeleteInput.addEventListener('input', function() {
+        if (this.value.trim().toUpperCase() === 'DELETE') {
+            confirmDeleteBtn.disabled = false;
+            confirmDeleteBtn.classList.remove('btn-secondary');
+            confirmDeleteBtn.classList.add('btn-danger');
+        } else {
+            confirmDeleteBtn.disabled = true;
+            confirmDeleteBtn.classList.remove('btn-danger');
+            confirmDeleteBtn.classList.add('btn-secondary');
+        }
+    });
+    
+    // Handle delete confirmation
+    confirmDeleteBtn.addEventListener('click', function() {
+        if (confirmDeleteInput.value.trim().toUpperCase() === 'DELETE') {
+            deleteAppointment();
+        }
+    });
+    
+    // Reset modal when closed
+    const deleteModal = document.getElementById('deleteModal');
+    deleteModal.addEventListener('hidden.bs.modal', function() {
+        confirmDeleteInput.value = '';
+        confirmDeleteBtn.disabled = true;
+        confirmDeleteBtn.classList.remove('btn-danger');
+        confirmDeleteBtn.classList.add('btn-secondary');
+    });
+});
+
+function deleteAppointment() {
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    const originalText = confirmBtn.innerHTML;
+    
+    // Show loading state
+    confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Deleting...';
+    confirmBtn.disabled = true;
+    
+    // Send delete request
+    fetch('/api/appointments/{{ appointment.id }}', {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Show success message
+            showAlert('Appointment deleted successfully!', 'success');
+            
+            // Close modal
+            const deleteModal = bootstrap.Modal.getInstance(document.getElementById('deleteModal'));
+            deleteModal.hide();
+            
+            // Redirect to appointments list after a short delay
+            setTimeout(() => {
+                window.location.href = '/appointments';
+            }, 1500);
+        } else {
+            showAlert('Error deleting appointment: ' + (data.error || 'Unknown error'), 'error');
+            // Reset button
+            confirmBtn.innerHTML = originalText;
+            confirmBtn.disabled = false;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('Error deleting appointment. Please try again.', 'error');
+        // Reset button
+        confirmBtn.innerHTML = originalText;
+        confirmBtn.disabled = false;
+    });
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Add to body
+    document.body.appendChild(alertDiv);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

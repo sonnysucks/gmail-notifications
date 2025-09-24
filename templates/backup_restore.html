@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+
+{% block title %}Backup & Restore - Gmail Notifications{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0">
+            <i class="fas fa-database text-primary me-2"></i>
+            Backup & Restore System
+        </h1>
+        <div class="text-muted">
+            <small>Protect your data with automated backups</small>
+        </div>
+    </div>
+
+    <!-- Alert Messages -->
+    <div id="alertContainer"></div>
+
+    <!-- Main Content Tabs -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <ul class="nav nav-tabs card-header-tabs" id="backupTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active text-white" id="create-tab" data-bs-toggle="tab" 
+                            data-bs-target="#create" type="button" role="tab" aria-controls="create" aria-selected="true">
+                        <i class="fas fa-plus-circle me-2"></i>Create Backup
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white" id="restore-tab" data-bs-toggle="tab" 
+                            data-bs-target="#restore" type="button" role="tab" aria-controls="restore" aria-selected="false">
+                        <i class="fas fa-undo me-2"></i>Restore Backup
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link text-white" id="manage-tab" data-bs-toggle="tab" 
+                            data-bs-target="#manage" type="button" role="tab" aria-controls="manage" aria-selected="false">
+                        <i class="fas fa-folder-open me-2"></i>Manage Backups
+                    </button>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="card-body">
+            <div class="tab-content" id="backupTabsContent">
+                <!-- Create Backup Tab -->
+                <div class="tab-pane fade show active" id="create" role="tabpanel" aria-labelledby="create-tab">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4 class="mb-3">Create System Backup</h4>
+                            <p class="text-muted mb-4">
+                                Create a complete backup of all your system data including clients, appointments, 
+                                configuration settings, and business data. This ensures your data is safe and can be 
+                                restored if needed.
+                            </p>
+                            
+                            <div class="card bg-light border-0">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary">
+                                        <i class="fas fa-info-circle me-2"></i>What Gets Backed Up
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-users text-success me-2"></i>Client Profiles & Data</li>
+                                                <li><i class="fas fa-calendar text-info me-2"></i>Appointments & Sessions</li>
+                                                <li><i class="fas fa-baby text-warning me-2"></i>Baby Milestones</li>
+                                                <li><i class="fas fa-birthday-cake text-danger me-2"></i>Birthday Sessions</li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-cog text-secondary me-2"></i>System Configuration</li>
+                                                <li><i class="fas fa-tags text-primary me-2"></i>Session Types & Pricing</li>
+                                                <li><i class="fas fa-palette text-success me-2"></i>Themes & Props</li>
+                                                <li><i class="fas fa-notes-medical text-info me-2"></i>Client Notes</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="createBackup()">
+                                    <i class="fas fa-download me-2"></i>Create Backup Now
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="scheduleBackup()">
+                                    <i class="fas fa-clock me-2"></i>Schedule Auto-Backup
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-shield-alt me-2"></i>Backup Security
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled small">
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>Encrypted data storage
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>Secure file transfer
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>Access control protection
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-check text-success me-2"></i>Audit trail logging
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Restore Backup Tab -->
+                <div class="tab-pane fade" id="restore" role="tabpanel" aria-labelledby="restore-tab">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h4 class="mb-3">Restore from Backup</h4>
+                            <p class="text-muted mb-4">
+                                <strong class="text-warning">⚠️ Warning:</strong> Restoring from a backup will overwrite 
+                                your current data. Make sure to create a backup of your current system before proceeding.
+                            </p>
+                            
+                            <div class="card border-warning">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>Important Notes
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled">
+                                        <li class="mb-2">
+                                            <i class="fas fa-info-circle text-info me-2"></i>
+                                            Restore will overwrite existing data
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-info-circle text-info me-2"></i>
+                                            Process cannot be undone once completed
+                                        </li>
+                                        <li class="mb-2">
+                                            <i class="fas fa-info-circle text-info me-2"></i>
+                                            System will be temporarily unavailable during restore
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <form id="restoreForm" enctype="multipart/form-data">
+                                    <div class="mb-3">
+                                        <label for="backupFile" class="form-label">Select Backup File</label>
+                                        <input type="file" class="form-control" id="backupFile" name="backup_file" 
+                                               accept=".json" required>
+                                        <div class="form-text">Upload a JSON backup file created by this system</div>
+                                    </div>
+                                    
+                                    <button type="submit" class="btn btn-warning btn-lg">
+                                        <i class="fas fa-upload me-2"></i>Upload & Validate Backup
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Restore Preview -->
+                            <div id="restorePreview" class="mt-4" style="display: none;">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-eye me-2"></i>Backup Preview
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="backupInfo"></div>
+                                        <div class="mt-3">
+                                            <button type="button" class="btn btn-danger" onclick="confirmRestore()">
+                                                <i class="fas fa-exclamation-triangle me-2"></i>Confirm Restore
+                                            </button>
+                                            <button type="button" class="btn btn-secondary ms-2" onclick="cancelRestore()">
+                                                <i class="fas fa-times me-2"></i>Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-question-circle me-2"></i>Restore Process
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <ol class="list-unstyled">
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">1</span>
+                                            Upload backup file
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">2</span>
+                                            Validate file structure
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">3</span>
+                                            Preview data contents
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">4</span>
+                                            Confirm restore operation
+                                        </li>
+                                        <li class="mb-2">
+                                            <span class="badge bg-primary me-2">5</span>
+                                            Execute restore process
+                                        </li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Manage Backups Tab -->
+                <div class="tab-pane fade" id="manage" role="tabpanel" aria-labelledby="manage-tab">
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="mb-0">Manage Existing Backups</h4>
+                                <button type="button" class="btn btn-outline-primary" onclick="refreshBackupList()">
+                                    <i class="fas fa-sync-alt me-2"></i>Refresh List
+                                </button>
+                            </div>
+                            
+                            <div class="card">
+                                <div class="card-body">
+                                    <div id="backupList" class="text-center py-4">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p class="mt-2 text-muted">Loading backup files...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Restore Confirmation Modal -->
+<div class="modal fade" id="restoreConfirmModal" tabindex="-1" aria-labelledby="restoreConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="restoreConfirmModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Confirm Restore Operation
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <h6 class="alert-heading">
+                        <i class="fas fa-exclamation-triangle me-2"></i>This action cannot be undone!
+                    </h6>
+                    <p class="mb-0">
+                        You are about to restore your system from a backup file. This will:
+                    </p>
+                    <ul class="mb-0 mt-2">
+                        <li>Overwrite all existing data</li>
+                        <li>Replace current configuration settings</li>
+                        <li>Restore client and appointment information</li>
+                        <li>Potentially cause data loss if the backup is incomplete</li>
+                    </ul>
+                </div>
+                
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6 class="card-title">Backup Details</h6>
+                        <div id="restoreConfirmDetails"></div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <label for="confirmCheckbox" class="form-check-label">
+                        <input type="checkbox" class="form-check-input" id="confirmCheckbox" required>
+                        I understand that this operation will overwrite my current data and cannot be undone
+                    </label>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" id="executeRestoreBtn" disabled>
+                    <i class="fas fa-exclamation-triangle me-2"></i>Execute Restore
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentRestoreData = null;
+
+// Create backup functionality
+function createBackup() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Backup...';
+    
+    fetch('/api/backup', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', `Backup created successfully! File: ${data.filename}`);
+            // Refresh backup list if on manage tab
+            if (document.getElementById('manage-tab').classList.contains('active')) {
+                refreshBackupList();
+            }
+        } else {
+            showAlert('danger', `Backup failed: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `Error creating backup: ${error.message}`);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+}
+
+// Schedule backup functionality
+function scheduleBackup() {
+    showAlert('info', 'Auto-backup scheduling feature coming soon!');
+}
+
+// Handle restore form submission
+document.getElementById('restoreForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    const fileInput = document.getElementById('backupFile');
+    
+    if (fileInput.files.length === 0) {
+        showAlert('warning', 'Please select a backup file');
+        return;
+    }
+    
+    formData.append('backup_file', fileInput.files[0]);
+    
+    fetch('/api/restore', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            currentRestoreData = data;
+            showRestorePreview(data);
+        } else {
+            showAlert('danger', `Restore validation failed: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `Error validating backup: ${error.message}`);
+    });
+});
+
+// Show restore preview
+function showRestorePreview(data) {
+    const preview = document.getElementById('restorePreview');
+    const backupInfo = document.getElementById('backupInfo');
+    
+    backupInfo.innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Backup Created:</strong> ${new Date(data.backup_info.created_at).toLocaleString()}</p>
+                <p><strong>System Version:</strong> ${data.backup_info.version}</p>
+                <p><strong>System Name:</strong> ${data.backup_info.system}</p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Clients:</strong> ${data.summary.clients}</p>
+                <p><strong>Appointments:</strong> ${data.summary.appointments}</p>
+                <p><strong>Configuration:</strong> ${data.summary.configuration}</p>
+            </div>
+        </div>
+    `;
+    
+    preview.style.display = 'block';
+    preview.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Confirm restore operation
+function confirmRestore() {
+    if (!currentRestoreData) {
+        showAlert('warning', 'No restore data available');
+        return;
+    }
+    
+    const details = document.getElementById('restoreConfirmDetails');
+    details.innerHTML = `
+        <p><strong>Backup File:</strong> ${currentRestoreData.backup_info.system}</p>
+        <p><strong>Created:</strong> ${new Date(currentRestoreData.backup_info.created_at).toLocaleString()}</p>
+        <p><strong>Data Summary:</strong> ${currentRestoreData.summary.clients} clients, ${currentRestoreData.summary.appointments} appointments</p>
+    `;
+    
+    const modal = new bootstrap.Modal(document.getElementById('restoreConfirmModal'));
+    modal.show();
+}
+
+// Execute restore operation
+document.getElementById('executeRestoreBtn').addEventListener('click', function() {
+    if (!document.getElementById('confirmCheckbox').checked) {
+        showAlert('warning', 'Please confirm that you understand the consequences');
+        return;
+    }
+    
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Restoring...';
+    
+    fetch('/api/restore/confirm', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('success', data.message);
+            // Close modal and reset form
+            bootstrap.Modal.getInstance(document.getElementById('restoreConfirmModal')).hide();
+            document.getElementById('restoreForm').reset();
+            document.getElementById('restorePreview').style.display = 'none';
+            currentRestoreData = null;
+        } else {
+            showAlert('danger', `Restore failed: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        showAlert('danger', `Error during restore: ${error.message}`);
+    })
+    .finally(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+    });
+});
+
+// Cancel restore operation
+function cancelRestore() {
+    document.getElementById('restoreForm').reset();
+    document.getElementById('restorePreview').style.display = 'none';
+    currentRestoreData = null;
+    showAlert('info', 'Restore operation cancelled');
+}
+
+// Refresh backup list
+function refreshBackupList() {
+    const backupList = document.getElementById('backupList');
+    backupList.innerHTML = `
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading backup files...</p>
+    `;
+    
+    fetch('/api/backup/list')
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayBackupList(data.backups);
+        } else {
+            backupList.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Error loading backups: ${data.error}
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        backupList.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                Error: ${error.message}
+            </div>
+        `;
+    });
+}
+
+// Display backup list
+function displayBackupList(backups) {
+    const backupList = document.getElementById('backupList');
+    
+    if (backups.length === 0) {
+        backupList.innerHTML = `
+            <div class="text-center py-4">
+                <i class="fas fa-folder-open text-muted" style="font-size: 3rem;"></i>
+                <h5 class="text-muted mt-3">No Backups Found</h5>
+                <p class="text-muted">Create your first backup to get started</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Filename</th>
+                        <th>Size</th>
+                        <th>Created</th>
+                        <th>Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    backups.forEach(backup => {
+        const size = formatFileSize(backup.size);
+        const created = new Date(backup.created_at).toLocaleString();
+        const modified = new Date(backup.modified_at).toLocaleString();
+        
+        html += `
+            <tr>
+                <td>
+                    <i class="fas fa-file-archive text-primary me-2"></i>
+                    <strong>${backup.filename}</strong>
+                </td>
+                <td><span class="badge bg-secondary">${size}</span></td>
+                <td><small class="text-muted">${created}</small></td>
+                <td><small class="text-muted">${modified}</small></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadBackup('${backup.filename}')">
+                        <i class="fas fa-download me-1"></i>Download
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger ms-1" onclick="deleteBackup('${backup.filename}')">
+                        <i class="fas fa-trash me-1"></i>Delete
+                    </button>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += `
+                </tbody>
+            </table>
+        </div>
+    `;
+    
+    backupList.innerHTML = html;
+}
+
+// Download backup file
+function downloadBackup(filename) {
+    window.open(`/api/backup/download/${filename}`, '_blank');
+}
+
+// Delete backup file
+function deleteBackup(filename) {
+    if (confirm(`Are you sure you want to delete the backup file "${filename}"?`)) {
+        // Note: Delete functionality would need to be implemented in the backend
+        showAlert('info', 'Delete functionality coming soon!');
+    }
+}
+
+// Format file size
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// Show alert messages
+function showAlert(type, message) {
+    const alertContainer = document.getElementById('alertContainer');
+    const alertId = 'alert-' + Date.now();
+    
+    const alertHtml = `
+        <div class="alert alert-${type} alert-dismissible fade show" id="${alertId}" role="alert">
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    `;
+    
+    alertContainer.innerHTML = alertHtml;
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        const alert = document.getElementById(alertId);
+        if (alert) {
+            alert.remove();
+        }
+    }, 5000);
+}
+
+// Handle checkbox change for restore confirmation
+document.getElementById('confirmCheckbox').addEventListener('change', function() {
+    document.getElementById('executeRestoreBtn').disabled = !this.checked;
+});
+
+// Load backup list when manage tab is shown
+document.getElementById('manage-tab').addEventListener('shown.bs.tab', function() {
+    refreshBackupList();
+});
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up tab switching
+    const triggerTabList = [].slice.call(document.querySelectorAll('#backupTabs button'));
+    triggerTabList.forEach(function(triggerEl) {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+        triggerEl.addEventListener('click', function(event) {
+            event.preventDefault();
+            tabTrigger.show();
+        });
+    });
+});
+</script>
+{% endblock %}

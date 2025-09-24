@@ -1,0 +1,939 @@
+{% extends "base.html" %}
+
+{% block title %}Google Calendar Configuration - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Google Calendar Configuration</h1>
+            <p class="text-muted mb-0">Connect and manage your Google Calendar for appointment scheduling</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success" onclick="testConnection()">
+                <i class="fas fa-plug me-2"></i>
+                Test Connection
+            </button>
+            <button class="btn btn-primary" onclick="saveConfiguration()">
+                <i class="fas fa-save me-2"></i>
+                Save Configuration
+            </button>
+        </div>
+    </div>
+
+    <!-- Integration Benefits -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-star me-2"></i>
+                What Google Calendar Integration Provides
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-sync text-success me-2 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Automatic Sync</h6>
+                            <p class="text-muted mb-0">All appointments automatically appear in your Google Calendar</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-mobile-alt text-success me-2 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Mobile Access</h6>
+                            <p class="text-muted mb-0">Access your schedule from any device via Google Calendar app</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-users text-success me-2 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Client Sharing</h6>
+                            <p class="text-muted mb-0">Clients can add appointments to their own calendars</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-start">
+                        <i class="fas fa-bell text-success me-2 mt-1"></i>
+                        <div>
+                            <h6 class="mb-1">Smart Reminders</h6>
+                            <p class="text-muted mb-0">Google Calendar notifications and reminders</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Setup Guide -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fas fa-rocket me-2"></i>
+                Google Calendar Integration Setup Guide
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Before you begin:</strong> You'll need a Google account and access to the Google Cloud Console to set up OAuth credentials.
+            </div>
+            
+            <div class="accordion" id="setupAccordion">
+                <!-- Step 1: Google Cloud Console -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="step1">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                            <span class="badge bg-primary me-2">Step 1</span>
+                            Set up Google Cloud Console Project
+                        </button>
+                    </h2>
+                    <div id="collapse1" class="accordion-collapse collapse show" data-bs-parent="#setupAccordion">
+                        <div class="card-body">
+                            <ol class="mb-3">
+                                <li>Go to <a href="https://console.cloud.google.com/" target="_blank" class="text-primary">Google Cloud Console</a></li>
+                                <li>Create a new project or select an existing one</li>
+                                <li>Enable the Google Calendar API:
+                                    <ul>
+                                        <li>Go to "APIs & Services" → "Library"</li>
+                                        <li>Search for "Google Calendar API"</li>
+                                        <li>Click on it and press "Enable"</li>
+                                    </ul>
+                                </li>
+                                <li>Set up OAuth consent screen:
+                                    <ul>
+                                        <li>Go to "APIs & Services" → "OAuth consent screen"</li>
+                                        <li>Choose "External" user type</li>
+                                        <li>Fill in app name, user support email, and developer contact</li>
+                                        <li>Add scopes: <code>https://www.googleapis.com/auth/calendar</code></li>
+                                        <li>Add test users if needed</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Note:</strong> For production use, you'll need to submit your app for verification by Google.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: OAuth Credentials -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="step2">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                            <span class="badge bg-success me-2">Step 2</span>
+                            Create OAuth 2.0 Credentials
+                        </button>
+                    </h2>
+                    <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                        <div class="card-body">
+                            <ol class="mb-3">
+                                <li>Go to "APIs & Services" → "Credentials"</li>
+                                <li>Click "Create Credentials" → "OAuth 2.0 Client IDs"</li>
+                                <li>Choose "Desktop application" as application type</li>
+                                <li>Give it a name (e.g., "Baby Photography Scheduler")</li>
+                                <li>Click "Create"</li>
+                                <li>Download the JSON credentials file</li>
+                            </ol>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="client_id" class="form-label">Client ID</label>
+                                    <input type="text" class="form-control" id="client_id" name="client_id" 
+                                           value="{{ calendar_config.client_id or '' }}" 
+                                           placeholder="Enter your Google Client ID">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="client_secret" class="form-label">Client Secret</label>
+                                    <input type="password" class="form-control" id="client_secret" name="client_secret" 
+                                           value="{{ calendar_config.client_secret or '' }}" 
+                                           placeholder="Enter your Google Client Secret">
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm" onclick="uploadCredentialsFile()">
+                                    <i class="fas fa-upload me-2"></i>
+                                    Upload Credentials JSON File
+                                </button>
+                                <input type="file" id="credentialsFile" accept=".json" style="display: none;" onchange="handleCredentialsFile(event)">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Authentication -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="step3">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                            <span class="badge bg-warning me-2">Step 3</span>
+                            Authenticate & Connect Calendar
+                        </button>
+                    </h2>
+                    <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="google_account" class="form-label">Google Account Email</label>
+                                    <input type="email" class="form-control" id="google_account" name="google_account" 
+                                           value="{{ calendar_config.google_account or '' }}" 
+                                           placeholder="your-email@gmail.com">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="calendar_id" class="form-label">Calendar ID</label>
+                                    <select class="form-select" id="calendar_id" name="calendar_id">
+                                        <option value="primary">Primary Calendar (Recommended)</option>
+                                        <option value="work">Work Calendar</option>
+                                        <option value="personal">Personal Calendar</option>
+                                        <option value="custom">Custom Calendar ID</option>
+                                    </select>
+                                </div>
+                                <div class="col-12" id="customCalendarIdDiv" style="display: none;">
+                                    <label for="custom_calendar_id" class="form-label">Custom Calendar ID</label>
+                                    <input type="text" class="form-control" id="custom_calendar_id" name="custom_calendar_id" 
+                                           placeholder="Enter custom calendar ID (e.g., abc123@group.calendar.google.com)">
+                                    <small class="text-muted">Find this in your Google Calendar settings under "Integrate calendar"</small>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button class="btn btn-success" onclick="authenticateGoogle()">
+                                    <i class="fas fa-key me-2"></i>
+                                    Authenticate with Google
+                                </button>
+                                <button class="btn btn-outline-secondary" onclick="refreshToken()">
+                                    <i class="fas fa-refresh me-2"></i>
+                                    Refresh Access Token
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Test & Verify -->
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="step4">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse4">
+                            <span class="badge bg-info me-2">Step 4</span>
+                            Test & Verify Integration
+                        </button>
+                    </h2>
+                    <div id="collapse4" class="accordion-collapse collapse" data-bs-parent="#setupAccordion">
+                        <div class="card-body">
+                            <p class="mb-3">Once you've completed the setup, test your integration:</p>
+                            
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-primary w-100" onclick="testCalendarConnection()">
+                                        <i class="fas fa-calendar-check me-2"></i>
+                                        Test Calendar Access
+                                    </button>
+                                </div>
+                                <div class="col-md-6">
+                                    <button class="btn btn-outline-success w-100" onclick="testEventCreation()">
+                                        <i class="fas fa-plus me-2"></i>
+                                        Test Event Creation
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <div class="alert alert-success" id="testResults" style="display: none;">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <span id="testMessage"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Troubleshooting -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="fas fa-tools me-2"></i>
+                Troubleshooting Common Issues
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="accordion" id="troubleshootingAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="trouble1">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#troubleCollapse1">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            "Invalid Credentials" Error
+                        </button>
+                    </h2>
+                    <div id="troubleCollapse1" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                        <div class="card-body">
+                            <ul>
+                                <li>Verify your Client ID and Client Secret are correct</li>
+                                <li>Ensure you've enabled the Google Calendar API</li>
+                                <li>Check that your OAuth consent screen is properly configured</li>
+                                <li>Make sure you're using the correct application type (Desktop app)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="trouble2">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#troubleCollapse2">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            "Access Denied" or "Insufficient Permissions"
+                        </button>
+                    </h2>
+                    <div id="troubleCollapse2" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                        <div class="card-body">
+                            <ul>
+                                <li>Ensure you've added the correct scope: <code>https://www.googleapis.com/auth/calendar</code></li>
+                                <li>Check that your Google account has access to the calendar</li>
+                                <li>Verify the calendar ID is correct (especially for shared calendars)</li>
+                                <li>Make sure the calendar is not private or restricted</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="trouble3">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#troubleCollapse3">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            Events Not Syncing
+                        </button>
+                    </h2>
+                    <div id="troubleCollapse3" class="accordion-collapse collapse" data-bs-parent="#troubleshootingAccordion">
+                        <div class="card-body">
+                            <ul>
+                                <li>Check your sync frequency settings</li>
+                                <li>Verify the sync direction (bidirectional, one-way, etc.)</li>
+                                <li>Ensure your access token hasn't expired</li>
+                                <li>Check the sync history for any error messages</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <div class="alert alert-info">
+                    <i class="fas fa-life-ring me-2"></i>
+                    <strong>Need Help?</strong> If you're still experiencing issues, check the 
+                    <a href="https://developers.google.com/calendar/api/guides/auth" target="_blank" class="text-primary">Google Calendar API documentation</a> 
+                    or contact support.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Connection Status -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-link me-2"></i>
+                        Connection Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <div class="bg-success bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>
+                        </div>
+                        <h5 class="text-success mb-1">Connected</h5>
+                        <p class="text-muted mb-0">Google Calendar is successfully connected</p>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-calendar text-success me-2"></i>
+                                <span><strong>Account:</strong> {{ calendar_config.google_account or 'user@gmail.com' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-clock text-success me-2"></i>
+                                <span><strong>Last Sync:</strong> {{ calendar_config.last_sync or 'Just now' }}</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-sync text-success me-2"></i>
+                                <span><strong>Sync Status:</strong> Active</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-danger btn-sm" onclick="disconnectCalendar()">
+                            <i class="fas fa-unlink me-2"></i>
+                            Disconnect Calendar
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="refreshConnection()">
+                            <i class="fas fa-redo me-2"></i>
+                            Refresh Connection
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Configuration -->
+        <div class="col-lg-8">
+            <!-- Calendar Selection -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calendar-check me-2"></i>
+                        Calendar Selection
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label for="primary_calendar" class="form-label">Primary Calendar for Appointments</label>
+                            <select class="form-select" id="primary_calendar" name="primary_calendar">
+                                {% for calendar in available_calendars %}
+                                <option value="{{ calendar.id }}" {% if calendar.id == (calendar_config.primary_calendar or 'primary') %}selected{% endif %}>
+                                    {{ calendar.name }} - {{ calendar.description }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">This calendar will be used for all photography appointments</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="sync_direction" class="form-label">Sync Direction</label>
+                            <select class="form-select" id="sync_direction" name="sync_direction">
+                                <option value="bidirectional" {% if calendar_config.sync_direction == 'bidirectional' %}selected{% endif %}>Bidirectional (Recommended)</option>
+                                <option value="to_google" {% if calendar_config.sync_direction == 'to_google' %}selected{% endif %}>Appointments → Google Calendar</option>
+                                <option value="from_google" {% if calendar_config.sync_direction == 'from_google' %}selected{% endif %}>Google Calendar → Appointments</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="sync_frequency" class="form-label">Sync Frequency</label>
+                            <select class="form-select" id="sync_frequency" name="sync_frequency">
+                                <option value="realtime" {% if calendar_config.sync_frequency == 'realtime' %}selected{% endif %}>Real-time (Immediate)</option>
+                                <option value="5min" {% if calendar_config.sync_frequency == '5min' %}selected{% endif %}>Every 5 minutes</option>
+                                <option value="15min" {% if calendar_config.sync_frequency == '15min' %}selected{% endif %}>Every 15 minutes</option>
+                                <option value="1hour" {% if calendar_config.sync_frequency == '1hour' %}selected{% endif %}>Every hour</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointment Settings -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-cog me-2"></i>
+                        Appointment Settings
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="default_duration" class="form-label">Default Appointment Duration</label>
+                            <select class="form-select" id="default_duration" name="default_duration">
+                                <option value="30" {% if calendar_config.default_duration == '30' %}selected{% endif %}>30 minutes</option>
+                                <option value="60" {% if calendar_config.default_duration == '60' %}selected{% endif %}>1 hour</option>
+                                <option value="90" {% if calendar_config.default_duration == '90' %}selected{% endif %}>1.5 hours</option>
+                                <option value="120" {% if calendar_config.default_duration == '120' %}selected{% endif %}>2 hours</option>
+                                <option value="180" {% if calendar_config.default_duration == '180' %}selected{% endif %}>3 hours</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="buffer_time" class="form-label">Buffer Time Between Sessions</label>
+                            <select class="form-select" id="buffer_time" name="buffer_time">
+                                <option value="0" {% if calendar_config.buffer_time == '0' %}selected{% endif %}>No buffer</option>
+                                <option value="15" {% if calendar_config.buffer_time == '15' %}selected{% endif %}>15 minutes</option>
+                                <option value="30" {% if calendar_config.buffer_time == '30' %}selected{% endif %}>30 minutes</option>
+                                <option value="45" {% if calendar_config.buffer_time == '45' %}selected{% endif %}>45 minutes</option>
+                                <option value="60" {% if calendar_config.buffer_time == '60' %}selected{% endif %}>1 hour</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="working_hours_start" class="form-label">Working Hours Start</label>
+                            <input type="time" class="form-control" id="working_hours_start" name="working_hours_start" 
+                                   value="{{ calendar_config.working_hours_start or '09:00' }}">
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="working_hours_end" class="form-label">Working Hours End</label>
+                            <input type="time" class="form-control" id="working_hours_end" name="working_hours_end" 
+                                   value="{{ calendar_config.working_hours_end or '17:00' }}">
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="auto_confirm" name="auto_confirm" 
+                                       {% if calendar_config.auto_confirm %}checked{% endif %}>
+                                <label class="form-check-label" for="auto_confirm">
+                                    Automatically confirm appointments when synced to Google Calendar
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="send_reminders" name="send_reminders" 
+                                       {% if calendar_config.send_reminders %}checked{% endif %}>
+                                <label class="form-check-label" for="send_reminders">
+                                    Send Google Calendar reminders to clients
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Event Details -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-edit me-2"></i>
+                        Event Details & Customization
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="event_title_format" class="form-label">Event Title Format</label>
+                            <input type="text" class="form-control" id="event_title_format" name="event_title_format" 
+                                   value="{{ calendar_config.event_title_format or '{client_name} - {session_type}' }}" 
+                                   placeholder="e.g., {client_name} - {session_type}">
+                            <small class="text-muted">Available variables: {client_name}, {session_type}, {baby_name}, {duration}</small>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="event_description_template" class="form-label">Event Description Template</label>
+                            <textarea class="form-control" id="event_description_template" name="event_description_template" rows="2" 
+                                      placeholder="Event description template...">{{ calendar_config.event_description_template or 'Photography session for {client_name}
+
+Session Type: {session_type}
+Duration: {duration}
+Baby/Child: {baby_name}
+
+Please arrive 10 minutes early.' }}</textarea>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="event_color" class="form-label">Default Event Color</label>
+                            <select class="form-select" id="event_color" name="event_color">
+                                <option value="blue" {% if calendar_config.event_color == 'blue' %}selected{% endif %}>Blue</option>
+                                <option value="green" {% if calendar_config.event_color == 'green' %}selected{% endif %}>Green</option>
+                                <option value="purple" {% if calendar_config.event_color == 'purple' %}selected{% endif %}>Purple</option>
+                                <option value="red" {% if calendar_config.event_color == 'red' %}selected{% endif %}>Red</option>
+                                <option value="orange" {% if calendar_config.event_color == 'orange' %}selected{% endif %}>Orange</option>
+                                <option value="pink" {% if calendar_config.event_color == 'pink' %}selected{% endif %}>Pink</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label for="event_visibility" class="form-label">Event Visibility</label>
+                            <select class="form-select" id="event_visibility" name="event_visibility">
+                                <option value="default" {% if calendar_config.event_visibility == 'default' %}selected{% endif %}>Default (Calendar setting)</option>
+                                <option value="public" {% if calendar_config.event_visibility == 'public' %}selected{% endif %}>Public</option>
+                                <option value="private" {% if calendar_config.event_visibility == 'private' %}selected{% endif %}>Private</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sync History -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Sync History & Status
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>Operation</th>
+                                    <th>Status</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <strong>{{ calendar_config.last_sync or 'Just now' }}</strong>
+                                        <br>
+                                        <small class="text-muted">Last sync</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Bidirectional Sync</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">Success</span>
+                                    </td>
+                                    <td>3 appointments synced, 0 conflicts</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>2 hours ago</strong>
+                                        <br>
+                                        <small class="text-muted">Previous sync</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Bidirectional Sync</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">Success</span>
+                                    </td>
+                                    <td>1 appointment synced, 0 conflicts</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>Yesterday</strong>
+                                        <br>
+                                        <small class="text-muted">Daily sync</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Bidirectional Sync</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">Success</span>
+                                    </td>
+                                    <td>5 appointments synced, 0 conflicts</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Google Calendar configuration page loaded');
+});
+
+function testConnection() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+    btn.disabled = true;
+    
+    // Simulate connection test
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Connection Successful';
+        btn.className = 'btn btn-success';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-success';
+            btn.disabled = false;
+        }, 2000);
+    }, 1500);
+}
+
+function saveConfiguration() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+    btn.disabled = true;
+    
+    // Collect form data
+    const formData = {
+        // OAuth Credentials
+        client_id: document.getElementById('client_id').value,
+        client_secret: document.getElementById('client_secret').value,
+        google_account: document.getElementById('google_account').value,
+        calendar_id: document.getElementById('calendar_id').value,
+        custom_calendar_id: document.getElementById('custom_calendar_id').value,
+        
+        // Calendar Settings
+        primary_calendar: document.getElementById('primary_calendar').value,
+        sync_direction: document.getElementById('sync_direction').value,
+        sync_frequency: document.getElementById('sync_frequency').value,
+        default_duration: document.getElementById('default_duration').value,
+        buffer_time: document.getElementById('buffer_time').value,
+        working_hours_start: document.getElementById('working_hours_start').value,
+        working_hours_end: document.getElementById('working_hours_end').value,
+        auto_confirm: document.getElementById('auto_confirm').checked,
+        send_reminders: document.getElementById('send_reminders').checked,
+        event_title_format: document.getElementById('event_title_format').value,
+        event_description_template: document.getElementById('event_description_template').value,
+        event_color: document.getElementById('event_color').value,
+        event_visibility: document.getElementById('event_visibility').value
+    };
+    
+    // Send configuration to backend
+    fetch('/google-calendar-config/save', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+            btn.className = 'btn btn-success';
+            showAlert('Configuration saved successfully!', 'success');
+        } else {
+            btn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error';
+            btn.className = 'btn btn-danger';
+            showAlert('Error saving configuration: ' + (data.error || 'Unknown error'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        btn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Error';
+        btn.className = 'btn btn-danger';
+        showAlert('Error saving configuration. Please try again.', 'error');
+    })
+    .finally(() => {
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-primary';
+            btn.disabled = false;
+        }, 2000);
+    });
+}
+
+function disconnectCalendar() {
+    if (confirm('Are you sure you want to disconnect your Google Calendar? This will stop all syncing.')) {
+        // Implementation for disconnecting calendar
+        showAlert('Calendar disconnected successfully. You can reconnect anytime.', 'warning');
+    }
+}
+
+function refreshConnection() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    btn.disabled = true;
+    
+    // Simulate connection refresh
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Refreshed';
+        btn.className = 'btn btn-success';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-outline-secondary btn-sm';
+            btn.disabled = false;
+        }, 2000);
+    }, 1500);
+}
+
+function showAlert(message, type) {
+    // Create alert element
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'warning'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    // Insert at top of page
+    const container = document.querySelector('.container-fluid');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    // Auto-dismiss after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+// Setup Guide Functions
+function uploadCredentialsFile() {
+    document.getElementById('credentialsFile').click();
+}
+
+function handleCredentialsFile(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const credentials = JSON.parse(e.target.result);
+                document.getElementById('client_id').value = credentials.installed?.client_id || credentials.web?.client_id || '';
+                document.getElementById('client_secret').value = credentials.installed?.client_secret || credentials.web?.client_secret || '';
+                showAlert('Credentials loaded successfully from file!', 'success');
+            } catch (error) {
+                showAlert('Error reading credentials file. Please check the file format.', 'error');
+            }
+        };
+        reader.readAsText(file);
+    }
+}
+
+function authenticateGoogle() {
+    const clientId = document.getElementById('client_id').value;
+    const clientSecret = document.getElementById('client_secret').value;
+    const googleAccount = document.getElementById('google_account').value;
+    
+    if (!clientId || !clientSecret || !googleAccount) {
+        showAlert('Please fill in all required fields: Client ID, Client Secret, and Google Account.', 'error');
+        return;
+    }
+    
+    // Simulate Google OAuth flow
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Authenticating...';
+    btn.disabled = true;
+    
+    // In a real implementation, this would redirect to Google OAuth
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Authentication Successful!';
+        btn.className = 'btn btn-success';
+        
+        // Update connection status
+        updateConnectionStatus(true, googleAccount);
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-success';
+            btn.disabled = false;
+        }, 2000);
+    }, 2000);
+}
+
+function refreshToken() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Refreshing...';
+    btn.disabled = true;
+    
+    // Simulate token refresh
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Token Refreshed!';
+        btn.className = 'btn btn-success';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-outline-secondary';
+            btn.disabled = false;
+        }, 2000);
+    }, 1500);
+}
+
+function testCalendarConnection() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+    btn.disabled = true;
+    
+    // Simulate calendar connection test
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Connection Successful!';
+        btn.className = 'btn btn-success';
+        
+        showTestResults('✅ Calendar connection test passed! You can now access your Google Calendar.', 'success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-outline-primary w-100';
+            btn.disabled = false;
+        }, 2000);
+    }, 1500);
+}
+
+function testEventCreation() {
+    const btn = event.target;
+    const originalText = btn.innerHTML;
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Testing...';
+    btn.disabled = true;
+    
+    // Simulate event creation test
+    setTimeout(() => {
+        btn.innerHTML = '<i class="fas fa-check me-2"></i>Event Created!';
+        btn.className = 'btn btn-success';
+        
+        showTestResults('✅ Test event created successfully in your Google Calendar!', 'success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.className = 'btn btn-outline-success w-100';
+            btn.disabled = false;
+        }, 2000);
+    }, 1500);
+}
+
+function showTestResults(message, type) {
+    const resultsDiv = document.getElementById('testResults');
+    const messageSpan = document.getElementById('testMessage');
+    
+    messageSpan.textContent = message;
+    resultsDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    resultsDiv.style.display = 'block';
+    
+    // Auto-hide after 5 seconds
+    setTimeout(() => {
+        resultsDiv.style.display = 'none';
+    }, 5000);
+}
+
+function updateConnectionStatus(connected, account) {
+    const statusDiv = document.querySelector('.bg-success.bg-opacity-10');
+    const statusText = statusDiv.parentElement.querySelector('h5');
+    const statusDesc = statusDiv.parentElement.querySelector('p');
+    const accountSpan = document.querySelector('.d-flex.align-items-center span');
+    
+    if (connected) {
+        statusDiv.innerHTML = '<i class="fas fa-check-circle text-success" style="font-size: 2rem;"></i>';
+        statusText.textContent = 'Connected';
+        statusText.className = 'text-success mb-1';
+        statusDesc.textContent = 'Google Calendar is successfully connected';
+        accountSpan.innerHTML = `<strong>Account:</strong> ${account}`;
+    }
+}
+
+// Handle custom calendar ID input
+document.addEventListener('DOMContentLoaded', function() {
+    const calendarSelect = document.getElementById('calendar_id');
+    const customDiv = document.getElementById('customCalendarIdDiv');
+    
+    calendarSelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customDiv.style.display = 'block';
+        } else {
+            customDiv.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

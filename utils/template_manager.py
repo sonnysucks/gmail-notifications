@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from jinja2 import Environment, FileSystemLoader, Template
 
-from ..config.config_manager import ConfigManager
+from config.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
 
@@ -285,27 +285,27 @@ Email: {business.get('email', 'N/A')}
     
     def _get_reminder_template(self, amount: int, unit: str) -> str:
         """Get default reminder email template"""
-        return f"""<!DOCTYPE html>
+        return """<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Appointment Reminder</title>
     <style>
-        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
-        .header {{ background-color: #fff3cd; padding: 20px; text-align: center; border-radius: 5px; border: 1px solid #ffeaa7; }}
-        .content {{ padding: 20px; }}
-        .details {{ background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }}
-        .footer {{ text-align: center; padding: 20px; color: #666; font-size: 14px; }}
-        .urgent {{ color: #dc3545; font-weight: bold; }}
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #fff3cd; padding: 20px; text-align: center; border-radius: 5px; border: 1px solid #ffeaa7; }
+        .content { padding: 20px; }
+        .details { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #666; font-size: 14px; }
+        .urgent { color: #dc3545; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
             <h1>Appointment Reminder</h1>
-            <p>Your session is coming up in {amount} {unit}{'s' if amount > 1 else ''}!</p>
+            <p>Your session is coming up in """ + str(amount) + " " + unit + ("s" if amount > 1 else "") + """!</p>
         </div>
         
         <div class="content">
