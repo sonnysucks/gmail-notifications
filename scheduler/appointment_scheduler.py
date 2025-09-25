@@ -743,7 +743,19 @@ class AppointmentScheduler:
             range_appointments = []
             
             for apt in all_appointments:
-                if start_date <= apt.start_time.date() <= end_date:
+                # Handle both datetime and date objects
+                if hasattr(apt.start_time, 'date'):
+                    apt_date = apt.start_time.date()
+                else:
+                    apt_date = apt.start_time
+                
+                # Ensure we're comparing date objects
+                if isinstance(start_date, datetime):
+                    start_date = start_date.date()
+                if isinstance(end_date, datetime):
+                    end_date = end_date.date()
+                
+                if start_date <= apt_date <= end_date:
                     range_appointments.append(apt)
             
             return range_appointments
@@ -759,6 +771,8 @@ class AppointmentScheduler:
             all_appointments = self._get_all_appointments_from_crm()
             
             monthly_data = {}
+            total_revenue = 0.0
+            
             for apt in all_appointments:
                 month = apt.start_time.strftime('%Y-%m')
                 if month not in monthly_data:
@@ -766,12 +780,30 @@ class AppointmentScheduler:
                 
                 monthly_data[month]['revenue'] += apt.total_amount or 0.0
                 monthly_data[month]['count'] += 1
+                total_revenue += apt.total_amount or 0.0
             
-            return monthly_data
+            # Generate labels and data for charts (last 12 months)
+            labels = []
+            data = []
+            
+            for i in range(12):
+                month_date = datetime.now() - timedelta(days=30*i)
+                month_str = month_date.strftime('%Y-%m')
+                month_label = month_date.strftime('%b %Y')
+                
+                labels.insert(0, month_label)
+                data.insert(0, monthly_data.get(month_str, {}).get('revenue', 0.0))
+            
+            return {
+                'total': total_revenue,
+                'monthly_data': monthly_data,
+                'labels': labels,
+                'data': data
+            }
             
         except Exception as e:
             logger.error(f"Failed to get monthly revenue data: {e}")
-            return {}
+            return {'total': 0.0, 'monthly_data': {}, 'labels': [], 'data': []}
     
     def get_session_type_statistics(self) -> Dict[str, Any]:
         """Get statistics by session type"""
@@ -795,7 +827,9 @@ class AppointmentScheduler:
                 'total_sessions': total_sessions,
                 'total_revenue': total_revenue,
                 'avg_session_value': total_revenue / total_sessions if total_sessions > 0 else 0,
-                'by_type': session_stats
+                'by_type': session_stats,
+                'labels': list(session_stats.keys()),
+                'data': [stats['count'] for stats in session_stats.values()]
             }
             
         except Exception as e:
@@ -804,7 +838,9 @@ class AppointmentScheduler:
                 'total_sessions': 0,
                 'total_revenue': 0,
                 'avg_session_value': 0,
-                'by_type': {}
+                'by_type': {},
+                'labels': [],
+                'data': []
             }
     
     def get_milestone_package_data(self) -> Dict[str, Any]:
@@ -822,11 +858,19 @@ class AppointmentScheduler:
                     milestone_data[month]['count'] += 1
                     milestone_data[month]['revenue'] += apt.total_amount or 0.0
             
-            return milestone_data
+            # Generate labels and data for charts
+            labels = ['3 Month', '6 Month', '9 Month', '12 Month']
+            data = [milestone_data.get(f'{datetime.now().year}-{i:02d}', {}).get('revenue', 0.0) for i in range(3, 13, 3)]
+            
+            return {
+                'milestone_data': milestone_data,
+                'labels': labels,
+                'data': data
+            }
             
         except Exception as e:
             logger.error(f"Failed to get milestone package data: {e}")
-            return {}
+            return {'milestone_data': {}, 'labels': [], 'data': []}
     
     def _get_all_appointments_from_crm(self) -> List[Appointment]:
         """Helper method to get all appointments from CRM"""

@@ -416,6 +416,10 @@
                                 <i class="fas fa-users"></i>
                                 Clients
                             </a>
+                            <a class="nav-link {% if request.endpoint == 'packages' %}active{% endif %}" href="{{ url_for('packages') }}">
+                                <i class="fas fa-box"></i>
+                                Packages
+                            </a>
                             <a class="nav-link {% if request.endpoint == 'calendar' %}active{% endif %}" href="{{ url_for('calendar') }}">
                                 <i class="fas fa-calendar-alt"></i>
                                 Calendar

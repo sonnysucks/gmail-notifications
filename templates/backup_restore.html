@@ -82,10 +82,10 @@
                             </div>
                             
                             <div class="mt-4">
-                                <button type="button" class="btn btn-primary btn-lg" onclick="createBackup()">
+                                <button type="button" class="btn btn-primary btn-lg" onclick="createBackup(event)">
                                     <i class="fas fa-download me-2"></i>Create Backup Now
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="scheduleBackup()">
+                                <button type="button" class="btn btn-outline-secondary ms-2" onclick="scheduleBackup(event)">
                                     <i class="fas fa-clock me-2"></i>Schedule Auto-Backup
                                 </button>
                             </div>
@@ -307,25 +307,36 @@
 </div>
 {% endblock %}
 
-{% block scripts %}
+{% block extra_js %}
 <script>
 let currentRestoreData = null;
 
 // Create backup functionality
-function createBackup() {
+function createBackup(event) {
     const btn = event.target;
     const originalText = btn.innerHTML;
     
     btn.disabled = true;
     btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Backup...';
     
+    // Create AbortController for timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+    
     fetch('/api/backup', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'same-origin',
+        signal: controller.signal
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showAlert('success', `Backup created successfully! File: ${data.filename}`);
@@ -338,16 +349,18 @@ function createBackup() {
         }
     })
     .catch(error => {
+        console.error('Error creating backup:', error);
         showAlert('danger', `Error creating backup: ${error.message}`);
     })
     .finally(() => {
+        clearTimeout(timeoutId);
         btn.disabled = false;
         btn.innerHTML = originalText;
     });
 }
 
 // Schedule backup functionality
-function scheduleBackup() {
+function scheduleBackup(event) {
     showAlert('info', 'Auto-backup scheduling feature coming soon!');
 }
 
@@ -581,8 +594,24 @@ function downloadBackup(filename) {
 // Delete backup file
 function deleteBackup(filename) {
     if (confirm(`Are you sure you want to delete the backup file "${filename}"?`)) {
-        // Note: Delete functionality would need to be implemented in the backend
-        showAlert('info', 'Delete functionality coming soon!');
+        fetch(`/api/backup/delete/${filename}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showAlert('success', data.message);
+                refreshBackupList();
+            } else {
+                showAlert('danger', `Delete failed: ${data.error}`);
+            }
+        })
+        .catch(error => {
+            showAlert('danger', `Error deleting backup: ${error.message}`);
+        });
     }
 }
 

@@ -91,6 +91,94 @@ class BabyMilestone:
 
 
 @dataclass
+class Package:
+    """Photography package with customizable pricing and details"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    name: str = ""
+    description: str = ""
+    category: str = ""  # maternity, newborn, milestone, birthday, family
+    
+    # Pricing Information
+    base_price: float = 0.0
+    duration_minutes: int = 60
+    is_customizable: bool = True
+    
+    # Package Details
+    includes: List[str] = field(default_factory=list)  # What's included
+    add_ons: List[Dict[str, Any]] = field(default_factory=list)  # Optional add-ons
+    requirements: List[str] = field(default_factory=list)  # Requirements/restrictions
+    
+    # Session Information
+    recommended_age: str = ""  # For baby sessions
+    recommended_weeks: str = ""  # For maternity sessions
+    optimal_timing: str = ""  # Best time of day, etc.
+    
+    # Customization Options
+    customizable_fields: List[str] = field(default_factory=list)  # What can be customized
+    price_ranges: Dict[str, float] = field(default_factory=dict)  # Min/max pricing
+    
+    # Business Information
+    is_active: bool = True
+    is_featured: bool = False
+    display_order: int = 0
+    
+    # Timestamps
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert package to dictionary"""
+        return {
+            'id': self.id,
+            'name': self.name,
+            'description': self.description,
+            'category': self.category,
+            'base_price': self.base_price,
+            'duration_minutes': self.duration_minutes,
+            'is_customizable': self.is_customizable,
+            'includes': self.includes,
+            'add_ons': self.add_ons,
+            'requirements': self.requirements,
+            'recommended_age': self.recommended_age,
+            'recommended_weeks': self.recommended_weeks,
+            'optimal_timing': self.optimal_timing,
+            'customizable_fields': self.customizable_fields,
+            'price_ranges': self.price_ranges,
+            'is_active': self.is_active,
+            'is_featured': self.is_featured,
+            'display_order': self.display_order,
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Package':
+        """Create package from dictionary"""
+        return cls(
+            id=data.get('id', str(uuid.uuid4())),
+            name=data.get('name', ''),
+            description=data.get('description', ''),
+            category=data.get('category', ''),
+            base_price=data.get('base_price', 0.0),
+            duration_minutes=data.get('duration_minutes', 60),
+            is_customizable=data.get('is_customizable', True),
+            includes=data.get('includes', []),
+            add_ons=data.get('add_ons', []),
+            requirements=data.get('requirements', []),
+            recommended_age=data.get('recommended_age', ''),
+            recommended_weeks=data.get('recommended_weeks', ''),
+            optimal_timing=data.get('optimal_timing', ''),
+            customizable_fields=data.get('customizable_fields', []),
+            price_ranges=data.get('price_ranges', {}),
+            is_active=data.get('is_active', True),
+            is_featured=data.get('is_featured', False),
+            display_order=data.get('display_order', 0),
+            created_at=datetime.fromisoformat(data.get('created_at', datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(data.get('updated_at', datetime.now().isoformat()))
+        )
+
+
+@dataclass
 class BirthdaySession:
     """Specialized birthday photography session details"""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))

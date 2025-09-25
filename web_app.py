@@ -27,7 +27,7 @@ from utils.ics_generator import ICSGenerator, ICSAppointment
 
 # Import our existing modules
 try:
-    from scheduler.models import Client, Appointment, BabyMilestone, BirthdaySession, ClientNote
+    from scheduler.models import Client, Appointment, BabyMilestone, BirthdaySession, ClientNote, Package
     from scheduler.crm_manager import CRMManager
     from scheduler.appointment_scheduler import AppointmentScheduler
     from gmail.gmail_manager import GmailManager
@@ -578,15 +578,30 @@ def calendar():
     """Calendar view"""
     # Get appointments for the current month
     now = datetime.now()
-    start_date = now.replace(day=1)
+    start_date = now.replace(day=1).date()  # Convert to date object
     if now.month == 12:
-        end_date = now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)
+        end_date = (now.replace(year=now.year + 1, month=1, day=1) - timedelta(days=1)).date()
     else:
-        end_date = now.replace(month=now.month + 1, day=1) - timedelta(days=1)
+        end_date = (now.replace(month=now.month + 1, day=1) - timedelta(days=1)).date()
     
     appointments = appointment_scheduler.get_appointments_in_range(start_date, end_date)
     
-    return render_template('calendar.html', appointments=appointments)
+    # Format appointments for JavaScript
+    formatted_appointments = []
+    for appointment in appointments:
+        formatted_appointments.append({
+            'id': appointment.id,
+            'client_name': appointment.client_name,
+            'session_type': appointment.session_type,
+            'start_time': appointment.start_time.strftime('%Y-%m-%d %H:%M') if appointment.start_time else '',
+            'status': appointment.status,
+            'baby_name': getattr(appointment, 'baby_name', ''),
+            'duration': appointment.duration
+        })
+    
+    return render_template('calendar.html', 
+                         appointments=formatted_appointments,
+                         current_month=now.strftime('%B %Y'))
 
 @app.route('/analytics')
 @login_required
@@ -611,8 +626,9 @@ def analytics():
                          milestone_packages=milestone_packages)
 
 @app.route('/customer-info')
+@app.route('/customer-info/<client_id>')
 @login_required
-def customer_info():
+def customer_info(client_id=None):
     """Customer information and pricing page"""
     # Get session types for pricing display
     session_types_dict = config_manager.get('appointments.session_types', {})
@@ -628,7 +644,15 @@ def customer_info():
             'props': session.get('props', [])
         }
     
-    return render_template('customer_info.html', session_types=session_types)
+    # Get client data if client_id is provided
+    client = None
+    if client_id:
+        client = crm_manager.get_client(client_id)
+    
+    return render_template('customer_info.html', 
+                         session_types=session_types, 
+                         client=client,
+                         client_id=client_id)
 
 @app.route('/contract-template')
 @login_required
@@ -673,8 +697,14 @@ def delete_appointment(appointment_id):
 @login_required
 def api_clients():
     """API endpoint for clients"""
-    clients = crm_manager.get_all_clients()
-    return jsonify([client.to_dict() for client in clients])
+    try:
+        clients = crm_manager.get_all_clients()
+        return jsonify({
+            'success': True,
+            'clients': [client.to_dict() for client in clients]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/clients/<client_id>', methods=['DELETE'])
 @login_required
@@ -736,6 +766,67 @@ def backup_restore():
     """Backup and restore system page"""
     return render_template('backup_restore.html')
 
+@app.route('/packages')
+@login_required
+def packages():
+    """Package management page"""
+    return render_template('packages.html')
+
+@app.route('/api/client-packet/<client_id>')
+@login_required
+def generate_client_packet(client_id):
+    """Generate a complete client packet PDF"""
+    try:
+        # Get client data
+        client = crm_manager.get_client(client_id)
+        if not client:
+            return jsonify({'error': 'Client not found'}), 404
+        
+        # Get client's appointments
+        appointments = crm_manager.get_client_appointments(client_id)
+        
+        # Get recommended packages
+        family_type = client.family_type or 'family'
+        packages = crm_manager.get_packages_by_category(family_type)
+        if not packages:
+            packages = crm_manager.get_active_packages()[:3]  # Get top 3 packages
+        
+        # Get selected package if provided
+        selected_package = None
+        package_id = request.args.get('package_id')
+        if package_id:
+            selected_package = crm_manager.get_package(package_id)
+        
+        # Generate HTML content for PDF
+        html_content = render_template('client_packet_template.html', 
+                                     client=client, 
+                                     appointments=appointments,
+                                     packages=packages,
+                                     selected_package=selected_package,
+                                     business=config_manager.get_business_info())
+        
+        # For now, return the HTML content (in production, you'd use a PDF library like WeasyPrint)
+        return html_content, 200, {'Content-Type': 'text/html'}
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/clients/<client_id>')
+@login_required
+def get_client(client_id):
+    """Get a specific client by ID"""
+    try:
+        client = crm_manager.get_client(client_id)
+        if not client:
+            return jsonify({'success': False, 'error': 'Client not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'client': client.to_dict()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 @app.route('/api/backup', methods=['POST'])
 @login_required
 def create_backup():
@@ -777,19 +868,25 @@ def create_backup():
         try:
             clients = crm_manager.get_all_clients()
             for client in clients:
-                backup_data['clients'].append({
-                    'id': client.id,
-                    'name': client.name,
-                    'email': client.email,
-                    'phone': client.phone,
-                    'address': client.address,
-                    'children_count': client.children_count,
-                    'children_names': client.children_names,
-                    'children_birth_dates': client.children_birth_dates,
-                    'preferences': client.preferences,
-                    'created_at': client.created_at.isoformat() if client.created_at else None,
-                    'updated_at': client.updated_at.isoformat() if client.updated_at else None
-                })
+                # Handle both Client objects and dictionaries
+                if hasattr(client, 'id'):
+                    # It's a Client object
+                    backup_data['clients'].append({
+                        'id': client.id,
+                        'name': client.name,
+                        'email': client.email,
+                        'phone': client.phone,
+                        'address': client.address,
+                        'children_count': client.children_count,
+                        'children_names': client.children_names,
+                        'children_birth_dates': client.children_birth_dates,
+                        'preferences': client.preferences,
+                        'created_at': client.created_at.isoformat() if client.created_at else None,
+                        'updated_at': client.updated_at.isoformat() if client.updated_at else None
+                    })
+                else:
+                    # It's a dictionary
+                    backup_data['clients'].append(client)
         except Exception as e:
             backup_data['clients'] = [{'error': f'Could not backup clients: {str(e)}'}]
         
@@ -797,17 +894,30 @@ def create_backup():
         try:
             appointments = appointment_scheduler.get_all_appointments()
             for appointment in appointments:
-                backup_data['appointments'].append({
-                    'id': appointment.id,
-                    'client_id': appointment.client_id,
-                    'session_type': appointment.session_type,
-                    'date': appointment.date.isoformat() if appointment.date else None,
-                    'time': appointment.time.isoformat() if appointment.time else None,
-                    'duration': appointment.duration,
-                    'status': appointment.status,
-                    'notes': appointment.notes,
-                    'created_at': appointment.created_at.isoformat() if appointment.created_at else None
-                })
+                # Handle both Appointment objects and dictionaries
+                if hasattr(appointment, 'id'):
+                    # It's an Appointment object
+                    backup_data['appointments'].append({
+                        'id': appointment.id,
+                        'client_id': appointment.client_id,
+                        'client_name': getattr(appointment, 'client_name', ''),
+                        'client_email': getattr(appointment, 'client_email', ''),
+                        'session_type': appointment.session_type,
+                        'start_time': appointment.start_time.isoformat() if appointment.start_time else None,
+                        'end_time': appointment.end_time.isoformat() if appointment.end_time else None,
+                        'duration': appointment.duration,
+                        'status': appointment.status,
+                        'notes': appointment.notes,
+                        'baby_name': getattr(appointment, 'baby_name', ''),
+                        'baby_age_days': getattr(appointment, 'baby_age_days', None),
+                        'session_fee': getattr(appointment, 'session_fee', 0),
+                        'total_amount': getattr(appointment, 'total_amount', 0),
+                        'payment_status': getattr(appointment, 'payment_status', ''),
+                        'created_at': appointment.created_at.isoformat() if appointment.created_at else None
+                    })
+                else:
+                    # It's a dictionary
+                    backup_data['appointments'].append(appointment)
         except Exception as e:
             backup_data['appointments'] = [{'error': f'Could not backup appointments: {str(e)}'}]
         
@@ -952,7 +1062,7 @@ def download_backup(filename):
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/backup/list')
+@app.route('/api/backup/list', methods=['GET'])
 @login_required
 def list_backups():
     """List all available backup files"""
@@ -980,6 +1090,33 @@ def list_backups():
         backups.sort(key=lambda x: x['created_at'], reverse=True)
         
         return jsonify({'success': True, 'backups': backups})
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/backup/delete/<filename>', methods=['DELETE'])
+@login_required
+def delete_backup(filename):
+    """Delete a specific backup file"""
+    try:
+        import os
+        
+        backup_dir = os.path.join(os.getcwd(), 'backups')
+        backup_path = os.path.join(backup_dir, filename)
+        
+        if not os.path.exists(backup_path):
+            return jsonify({'success': False, 'error': 'Backup file not found'}), 404
+        
+        # Security check - only allow deletion of JSON files in backups directory
+        if not filename.endswith('.json') or not os.path.abspath(backup_path).startswith(os.path.abspath(backup_dir)):
+            return jsonify({'success': False, 'error': 'Invalid file path'}), 400
+        
+        os.remove(backup_path)
+        
+        return jsonify({
+            'success': True,
+            'message': f'Backup file "{filename}" deleted successfully'
+        })
         
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
@@ -1090,6 +1227,164 @@ def download_ics_file(filename):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+# Package Management API Endpoints
+
+@app.route('/api/packages', methods=['GET'])
+@login_required
+def get_packages():
+    """Get all packages"""
+    try:
+        packages = crm_manager.get_all_packages()
+        return jsonify({
+            'success': True,
+            'packages': [package.to_dict() for package in packages]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages/active', methods=['GET'])
+@login_required
+def get_active_packages():
+    """Get all active packages"""
+    try:
+        packages = crm_manager.get_active_packages()
+        return jsonify({
+            'success': True,
+            'packages': [package.to_dict() for package in packages]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages/category/<category>', methods=['GET'])
+@login_required
+def get_packages_by_category(category):
+    """Get packages by category"""
+    try:
+        packages = crm_manager.get_packages_by_category(category)
+        return jsonify({
+            'success': True,
+            'packages': [package.to_dict() for package in packages]
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages/<package_id>', methods=['GET'])
+@login_required
+def get_package(package_id):
+    """Get a specific package"""
+    try:
+        package = crm_manager.get_package(package_id)
+        if not package:
+            return jsonify({'success': False, 'error': 'Package not found'}), 404
+        
+        return jsonify({
+            'success': True,
+            'package': package.to_dict()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages', methods=['POST'])
+@login_required
+def create_package():
+    """Create a new package"""
+    try:
+        data = request.get_json()
+        
+        # Create package from data
+        package = Package(
+            name=data.get('name', ''),
+            description=data.get('description', ''),
+            category=data.get('category', ''),
+            base_price=float(data.get('base_price', 0.0)),
+            duration_minutes=int(data.get('duration_minutes', 60)),
+            is_customizable=data.get('is_customizable', True),
+            includes=data.get('includes', []),
+            add_ons=data.get('add_ons', []),
+            requirements=data.get('requirements', []),
+            recommended_age=data.get('recommended_age', ''),
+            recommended_weeks=data.get('recommended_weeks', ''),
+            optimal_timing=data.get('optimal_timing', ''),
+            customizable_fields=data.get('customizable_fields', []),
+            price_ranges=data.get('price_ranges', {}),
+            is_active=data.get('is_active', True),
+            is_featured=data.get('is_featured', False),
+            display_order=int(data.get('display_order', 0))
+        )
+        
+        success = crm_manager.add_package(package)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Package created successfully',
+                'package': package.to_dict()
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Failed to create package'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages/<package_id>', methods=['PUT'])
+@login_required
+def update_package(package_id):
+    """Update an existing package"""
+    try:
+        package = crm_manager.get_package(package_id)
+        if not package:
+            return jsonify({'success': False, 'error': 'Package not found'}), 404
+        
+        data = request.get_json()
+        
+        # Update package fields
+        package.name = data.get('name', package.name)
+        package.description = data.get('description', package.description)
+        package.category = data.get('category', package.category)
+        package.base_price = float(data.get('base_price', package.base_price))
+        package.duration_minutes = int(data.get('duration_minutes', package.duration_minutes))
+        package.is_customizable = data.get('is_customizable', package.is_customizable)
+        package.includes = data.get('includes', package.includes)
+        package.add_ons = data.get('add_ons', package.add_ons)
+        package.requirements = data.get('requirements', package.requirements)
+        package.recommended_age = data.get('recommended_age', package.recommended_age)
+        package.recommended_weeks = data.get('recommended_weeks', package.recommended_weeks)
+        package.optimal_timing = data.get('optimal_timing', package.optimal_timing)
+        package.customizable_fields = data.get('customizable_fields', package.customizable_fields)
+        package.price_ranges = data.get('price_ranges', package.price_ranges)
+        package.is_active = data.get('is_active', package.is_active)
+        package.is_featured = data.get('is_featured', package.is_featured)
+        package.display_order = int(data.get('display_order', package.display_order))
+        
+        success = crm_manager.update_package(package)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Package updated successfully',
+                'package': package.to_dict()
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Failed to update package'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/packages/<package_id>', methods=['DELETE'])
+@login_required
+def delete_package(package_id):
+    """Delete a package"""
+    try:
+        success = crm_manager.delete_package(package_id)
+        if success:
+            return jsonify({
+                'success': True,
+                'message': 'Package deleted successfully'
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Failed to delete package'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
 # Error handlers
 @app.errorhandler(404)
 def not_found_error(error):
@@ -1104,6 +1399,13 @@ if __name__ == '__main__':
     # Create database tables
     with app.app_context():
         db.create_all()
+        
+        # Initialize CRM database
+        try:
+            crm_manager._init_database()
+            print("CRM database initialized successfully")
+        except Exception as e:
+            print(f"Warning: Could not initialize CRM database: {e}")
         
         # Create default admin user if none exists
         if not User.query.filter_by(username='admin').first():

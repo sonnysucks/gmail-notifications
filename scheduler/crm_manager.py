@@ -10,7 +10,7 @@ from pathlib import Path
 import sqlite3
 from collections import defaultdict
 
-from .models import Client, Appointment, ClientNote, MarketingCampaign
+from .models import Client, Appointment, ClientNote, MarketingCampaign, Package
 from config.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
@@ -134,6 +134,32 @@ class CRMManager:
                     target_audience TEXT,
                     metrics TEXT,
                     created_at TEXT
+                )
+            ''')
+            
+            # Packages table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS packages (
+                    id TEXT PRIMARY KEY,
+                    name TEXT NOT NULL,
+                    description TEXT,
+                    category TEXT,
+                    base_price REAL,
+                    duration_minutes INTEGER,
+                    is_customizable BOOLEAN,
+                    includes TEXT,
+                    add_ons TEXT,
+                    requirements TEXT,
+                    recommended_age TEXT,
+                    recommended_weeks TEXT,
+                    optimal_timing TEXT,
+                    customizable_fields TEXT,
+                    price_ranges TEXT,
+                    is_active BOOLEAN,
+                    is_featured BOOLEAN,
+                    display_order INTEGER,
+                    created_at TEXT,
+                    updated_at TEXT
                 )
             ''')
             
@@ -687,11 +713,9 @@ class CRMManager:
                 'total_clients': total_clients,
                 'monthly_acquisition': [{'month': row[0], 'count': row[1]} for row in monthly_data],
                 'by_family_type': [{'type': row[0], 'count': row[1]} for row in family_type_data],
-                'by_source': {
-                    'social_media': {'count': 15, 'conversion_rate': '85%', 'avg_value': 275},
-                    'google_search': {'count': 8, 'conversion_rate': '70%', 'avg_value': 300},
-                    'friend_family': {'count': 12, 'conversion_rate': '95%', 'avg_value': 250}
-                }
+                'by_source': {},  # No fake data - will be empty until real data is available
+                'labels': [row[0] for row in family_type_data],
+                'data': [row[1] for row in family_type_data]
             }
             
         except Exception as e:
@@ -699,7 +723,10 @@ class CRMManager:
             return {
                 'total_clients': 0,
                 'monthly_acquisition': [],
-                'by_family_type': []
+                'by_family_type': [],
+                'by_source': {},
+                'labels': [],
+                'data': []
             }
     
     def _row_to_client(self, row: Tuple) -> Client:
@@ -837,3 +864,222 @@ class CRMManager:
         except Exception as e:
             logger.error(f"Failed to delete client {client_id}: {e}")
             return False
+    
+    # Package Management Methods
+    
+    def add_package(self, package: Package) -> bool:
+        """Add a new package to the database"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO packages (
+                    id, name, description, category, base_price, duration_minutes,
+                    is_customizable, includes, add_ons, requirements,
+                    recommended_age, recommended_weeks, optimal_timing,
+                    customizable_fields, price_ranges, is_active, is_featured,
+                    display_order, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                package.id, package.name, package.description, package.category,
+                package.base_price, package.duration_minutes, package.is_customizable,
+                json.dumps(package.includes), json.dumps(package.add_ons),
+                json.dumps(package.requirements), package.recommended_age,
+                package.recommended_weeks, package.optimal_timing,
+                json.dumps(package.customizable_fields), json.dumps(package.price_ranges),
+                package.is_active, package.is_featured, package.display_order,
+                package.created_at.isoformat(), package.updated_at.isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Package '{package.name}' added successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to add package: {e}")
+            return False
+    
+    def get_package(self, package_id: str) -> Optional[Package]:
+        """Get a package by ID"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM packages WHERE id = ?', (package_id,))
+            row = cursor.fetchone()
+            
+            conn.close()
+            
+            if row:
+                return self._row_to_package(row)
+            return None
+            
+        except Exception as e:
+            logger.error(f"Failed to get package {package_id}: {e}")
+            return None
+    
+    def get_all_packages(self) -> List[Package]:
+        """Get all packages"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM packages ORDER BY display_order, name')
+            rows = cursor.fetchall()
+            
+            conn.close()
+            
+            packages = []
+            for row in rows:
+                try:
+                    package = self._row_to_package(row)
+                    packages.append(package)
+                except Exception as e:
+                    logger.warning(f"Failed to convert package row: {e}")
+                    continue
+            
+            return packages
+            
+        except Exception as e:
+            logger.error(f"Failed to get packages: {e}")
+            return []
+    
+    def get_active_packages(self) -> List[Package]:
+        """Get all active packages"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM packages WHERE is_active = 1 ORDER BY display_order, name')
+            rows = cursor.fetchall()
+            
+            conn.close()
+            
+            packages = []
+            for row in rows:
+                try:
+                    package = self._row_to_package(row)
+                    packages.append(package)
+                except Exception as e:
+                    logger.warning(f"Failed to convert package row: {e}")
+                    continue
+            
+            return packages
+            
+        except Exception as e:
+            logger.error(f"Failed to get active packages: {e}")
+            return []
+    
+    def get_packages_by_category(self, category: str) -> List[Package]:
+        """Get packages by category"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM packages WHERE category = ? AND is_active = 1 ORDER BY display_order, name', (category,))
+            rows = cursor.fetchall()
+            
+            conn.close()
+            
+            packages = []
+            for row in rows:
+                try:
+                    package = self._row_to_package(row)
+                    packages.append(package)
+                except Exception as e:
+                    logger.warning(f"Failed to convert package row: {e}")
+                    continue
+            
+            return packages
+            
+        except Exception as e:
+            logger.error(f"Failed to get packages by category {category}: {e}")
+            return []
+    
+    def update_package(self, package: Package) -> bool:
+        """Update an existing package"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            package.updated_at = datetime.now()
+            
+            cursor.execute('''
+                UPDATE packages SET
+                    name = ?, description = ?, category = ?, base_price = ?,
+                    duration_minutes = ?, is_customizable = ?, includes = ?,
+                    add_ons = ?, requirements = ?, recommended_age = ?,
+                    recommended_weeks = ?, optimal_timing = ?, customizable_fields = ?,
+                    price_ranges = ?, is_active = ?, is_featured = ?,
+                    display_order = ?, updated_at = ?
+                WHERE id = ?
+            ''', (
+                package.name, package.description, package.category, package.base_price,
+                package.duration_minutes, package.is_customizable, json.dumps(package.includes),
+                json.dumps(package.add_ons), json.dumps(package.requirements),
+                package.recommended_age, package.recommended_weeks, package.optimal_timing,
+                json.dumps(package.customizable_fields), json.dumps(package.price_ranges),
+                package.is_active, package.is_featured, package.display_order,
+                package.updated_at.isoformat(), package.id
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Package '{package.name}' updated successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to update package: {e}")
+            return False
+    
+    def delete_package(self, package_id: str) -> bool:
+        """Delete a package"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('DELETE FROM packages WHERE id = ?', (package_id,))
+            
+            if cursor.rowcount == 0:
+                conn.close()
+                logger.warning(f"Package {package_id} not found for deletion")
+                return False
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Package {package_id} deleted successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to delete package {package_id}: {e}")
+            return False
+    
+    def _row_to_package(self, row: Tuple) -> Package:
+        """Convert database row to Package object"""
+        return Package(
+            id=row[0],
+            name=row[1],
+            description=row[2] or '',
+            category=row[3] or '',
+            base_price=row[4] or 0.0,
+            duration_minutes=row[5] or 60,
+            is_customizable=bool(row[6]),
+            includes=json.loads(row[7]) if row[7] else [],
+            add_ons=json.loads(row[8]) if row[8] else [],
+            requirements=json.loads(row[9]) if row[9] else [],
+            recommended_age=row[10] or '',
+            recommended_weeks=row[11] or '',
+            optimal_timing=row[12] or '',
+            customizable_fields=json.loads(row[13]) if row[13] else [],
+            price_ranges=json.loads(row[14]) if row[14] else {},
+            is_active=bool(row[15]),
+            is_featured=bool(row[16]),
+            display_order=row[17] or 0,
+            created_at=datetime.fromisoformat(row[18]) if row[18] else datetime.now(),
+            updated_at=datetime.fromisoformat(row[19]) if row[19] else datetime.now()
+        )

@@ -216,6 +216,19 @@
                         </div>
                     {% endif %}
                     
+                    <!-- Available Packages -->
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">
+                            <i class="fas fa-box me-2"></i>
+                            Recommended Packages
+                        </h6>
+                        <div class="d-flex flex-wrap gap-1" id="clientPackages-{{ client.id }}">
+                            <!-- Packages will be loaded dynamically -->
+                            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+                            <small class="text-muted ms-2">Loading packages...</small>
+                        </div>
+                    </div>
+                    
                     <!-- Business Metrics -->
                     <div class="border-top pt-3">
                         <div class="row text-center">
@@ -268,6 +281,28 @@
     {% endif %}
 </div>
 
+<!-- Package Customization Modal -->
+<div class="modal fade" id="packageCustomizationModal" tabindex="-1" aria-labelledby="packageCustomizationLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="packageCustomizationLabel">Customize Package</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="packageCustomizationBody">
+                <!-- Package details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="bookCustomizedPackage()">
+                    <i class="fas fa-calendar-plus me-2"></i>
+                    Book This Package
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
@@ -291,6 +326,293 @@
 {% block extra_js %}
 <script>
 let currentDeleteId = null;
+let currentCustomizeClient = null;
+
+// Load packages for each client on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadPackagesForClients();
+});
+
+function loadPackagesForClients() {
+    // Get all client cards
+    const clientCards = document.querySelectorAll('[data-client-id]');
+    
+    clientCards.forEach(card => {
+        const clientId = card.dataset.clientId;
+        const familyType = getFamilyTypeFromCard(card);
+        loadRecommendedPackages(clientId, familyType);
+    });
+}
+
+function getFamilyTypeFromCard(card) {
+    // Try to determine family type from the badge
+    const badge = card.querySelector('.badge');
+    if (badge) {
+        const badgeText = badge.textContent.toLowerCase();
+        if (badgeText.includes('expecting')) return 'maternity';
+        if (badgeText.includes('newborn')) return 'newborn';
+        if (badgeText.includes('baby')) return 'milestone';
+        if (badgeText.includes('toddler')) return 'birthday';
+    }
+    return 'family'; // Default fallback
+}
+
+function loadRecommendedPackages(clientId, familyType) {
+    const packageContainer = document.getElementById(`clientPackages-${clientId}`);
+    
+    // Load packages by category
+    fetch(`/api/packages/category/${familyType}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.packages.length > 0) {
+                displayPackages(packageContainer, data.packages, clientId);
+            } else {
+                // If no packages for specific category, load all active packages
+                return fetch('/api/packages/active');
+            }
+        })
+        .then(response => {
+            if (response) {
+                return response.json();
+            }
+            return null;
+        })
+        .then(data => {
+            if (data && data.success) {
+                displayPackages(packageContainer, data.packages.slice(0, 3), clientId); // Show max 3 packages
+            }
+        })
+        .catch(error => {
+            console.error('Error loading packages:', error);
+            packageContainer.innerHTML = '<small class="text-muted">No packages available</small>';
+        });
+}
+
+function displayPackages(container, packages, clientId) {
+    if (packages.length === 0) {
+        container.innerHTML = '<small class="text-muted">No packages available</small>';
+        return;
+    }
+    
+    container.innerHTML = packages.map(package => `
+        <span class="badge bg-primary package-badge" 
+              style="cursor: pointer;" 
+              onclick="customizePackageForClient('${package.id}', '${clientId}')"
+              title="Click to customize: ${package.description || package.name}">
+            $${package.base_price} - ${package.name}
+        </span>
+    `).join('');
+}
+
+function customizePackageForClient(packageId, clientId) {
+    currentCustomizeClient = clientId;
+    
+    // Fetch package details
+    fetch(`/api/packages/${packageId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showPackageCustomizationModal(data.package, clientId);
+            } else {
+                showAlert('Failed to load package details', 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading package:', error);
+            showAlert('Error loading package details', 'danger');
+        });
+}
+
+function showPackageCustomizationModal(package, clientId) {
+    const modalBody = document.getElementById('packageCustomizationBody');
+    const modalTitle = document.getElementById('packageCustomizationLabel');
+    
+    modalTitle.textContent = `Customize: ${package.name}`;
+    
+    modalBody.innerHTML = `
+        <div class="row g-4">
+            <!-- Package Overview -->
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h5 class="card-title">${package.name}</h5>
+                                <p class="card-text text-muted">${package.description || 'Professional photography session'}</p>
+                                <span class="badge bg-primary">${package.category.charAt(0).toUpperCase() + package.category.slice(1)}</span>
+                            </div>
+                            <div class="text-end">
+                                <div class="h4 text-success mb-0">$<span id="totalPrice">${package.base_price}</span></div>
+                                <small class="text-muted">${package.duration_minutes} minutes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Customization Options -->
+            <div class="col-md-6">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-cog me-2"></i>
+                    Customize Your Session
+                </h6>
+                
+                <!-- Base Price Adjustment -->
+                ${package.is_customizable ? `
+                    <div class="mb-3">
+                        <label for="customPrice" class="form-label">Session Fee</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" id="customPrice" value="${package.base_price}" step="0.01" onchange="updateTotalPrice()">
+                        </div>
+                        <small class="text-muted">Base price: $${package.base_price}</small>
+                    </div>
+                ` : `
+                    <div class="mb-3">
+                        <label class="form-label">Session Fee</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" class="form-control" value="${package.base_price}" readonly>
+                        </div>
+                        <small class="text-muted">Fixed price package</small>
+                    </div>
+                `}
+                
+                <!-- Duration Adjustment -->
+                <div class="mb-3">
+                    <label for="customDuration" class="form-label">Duration (minutes)</label>
+                    <input type="number" class="form-control" id="customDuration" value="${package.duration_minutes}" ${!package.is_customizable ? 'readonly' : ''}>
+                    <small class="text-muted">Recommended: ${package.duration_minutes} minutes</small>
+                </div>
+                
+                <!-- Special Requests -->
+                <div class="mb-3">
+                    <label for="specialRequests" class="form-label">Special Requests</label>
+                    <textarea class="form-control" id="specialRequests" rows="3" placeholder="Any special requests or notes for this session..."></textarea>
+                </div>
+            </div>
+            
+            <!-- Package Details -->
+            <div class="col-md-6">
+                <h6 class="text-muted mb-3">
+                    <i class="fas fa-list me-2"></i>
+                    What's Included
+                </h6>
+                
+                ${package.includes && package.includes.length > 0 ? `
+                    <div class="mb-3">
+                        <ul class="list-group list-group-flush">
+                            ${package.includes.map(item => `
+                                <li class="list-group-item px-0 py-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    ${item}
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : '<p class="text-muted">No specific inclusions listed</p>'}
+                
+                <!-- Add-ons -->
+                ${package.add_ons && package.add_ons.length > 0 ? `
+                    <h6 class="text-muted mb-3 mt-4">
+                        <i class="fas fa-plus me-2"></i>
+                        Available Add-ons
+                    </h6>
+                    <div class="mb-3">
+                        ${package.add_ons.map((addon, index) => `
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="addon${index}" onchange="updateTotalPrice()">
+                                <label class="form-check-label" for="addon${index}">
+                                    ${addon.name} (+$${addon.price || 0})
+                                    ${addon.description ? `<br><small class="text-muted">${addon.description}</small>` : ''}
+                                </label>
+                            </div>
+                        `).join('')}
+                    </div>
+                ` : ''}
+                
+                <!-- Session Info -->
+                ${package.recommended_age || package.recommended_weeks || package.optimal_timing ? `
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Session Information</h6>
+                        ${package.recommended_age ? `<p class="mb-1"><strong>Recommended Age:</strong> ${package.recommended_age}</p>` : ''}
+                        ${package.recommended_weeks ? `<p class="mb-1"><strong>Recommended Weeks:</strong> ${package.recommended_weeks}</p>` : ''}
+                        ${package.optimal_timing ? `<p class="mb-0"><strong>Optimal Timing:</strong> ${package.optimal_timing}</p>` : ''}
+                    </div>
+                ` : ''}
+                
+                <!-- Requirements -->
+                ${package.requirements && package.requirements.length > 0 ? `
+                    <div class="alert alert-warning">
+                        <h6 class="alert-heading">Requirements</h6>
+                        <ul class="mb-0">
+                            ${package.requirements.map(req => `<li>${req}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    // Store package data for booking
+    window.currentPackageData = {
+        packageId: package.id,
+        clientId: clientId,
+        package: package
+    };
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('packageCustomizationModal'));
+    modal.show();
+}
+
+function updateTotalPrice() {
+    const basePrice = parseFloat(document.getElementById('customPrice')?.value || window.currentPackageData.package.base_price);
+    let totalPrice = basePrice;
+    
+    // Add addon prices
+    const addons = document.querySelectorAll('input[id^="addon"]:checked');
+    addons.forEach(addon => {
+        const label = addon.nextElementSibling.textContent;
+        const priceMatch = label.match(/\+\$(\d+(?:\.\d{2})?)/);
+        if (priceMatch) {
+            totalPrice += parseFloat(priceMatch[1]);
+        }
+    });
+    
+    document.getElementById('totalPrice').textContent = totalPrice.toFixed(2);
+}
+
+function bookCustomizedPackage() {
+    if (!window.currentPackageData) {
+        showAlert('No package selected', 'danger');
+        return;
+    }
+    
+    const customPrice = document.getElementById('customPrice')?.value;
+    const customDuration = document.getElementById('customDuration')?.value;
+    const specialRequests = document.getElementById('specialRequests')?.value;
+    
+    // Get selected add-ons
+    const selectedAddons = [];
+    document.querySelectorAll('input[id^="addon"]:checked').forEach(addon => {
+        const label = addon.nextElementSibling.textContent;
+        selectedAddons.push(label);
+    });
+    
+    // Redirect to new appointment page with pre-filled data
+    const params = new URLSearchParams({
+        client_id: window.currentPackageData.clientId,
+        package_id: window.currentPackageData.packageId,
+        session_type: window.currentPackageData.package.name,
+        session_fee: customPrice || window.currentPackageData.package.base_price,
+        duration: customDuration || window.currentPackageData.package.duration_minutes,
+        notes: specialRequests || '',
+        addons: selectedAddons.join('; ')
+    });
+    
+    window.location.href = `/new-appointment?${params.toString()}`;
+}
 
 // Filter functionality
 document.getElementById('familyTypeFilter').addEventListener('change', filterClients);

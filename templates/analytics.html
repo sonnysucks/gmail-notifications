@@ -29,7 +29,7 @@
                                 <div class="card-body">
                                     <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <h4 class="mb-1">${{ monthly_revenue.total if monthly_revenue and monthly_revenue.total else '4,800' }}</h4>
+                                            <h4 class="mb-1">${{ monthly_revenue.total if monthly_revenue and monthly_revenue.total else '0' }}</h4>
                                             <p class="mb-0">Monthly Revenue</p>
                                         </div>
                                         <div class="bg-white bg-opacity-25 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
@@ -188,30 +188,11 @@
                                     </tr>
                                     {% endfor %}
                                 {% else %}
-                                    <!-- Sample data for demonstration -->
                                     <tr>
-                                        <td><span class="badge bg-primary">Newborn</span></td>
-                                        <td>12</td>
-                                        <td>$3,000</td>
-                                        <td>$250</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-success">Milestone</span></td>
-                                        <td>8</td>
-                                        <td>$1,600</td>
-                                        <td>$200</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-warning">Birthday</span></td>
-                                        <td>6</td>
-                                        <td>$1,350</td>
-                                        <td>$225</td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="badge bg-info">Family</span></td>
-                                        <td>4</td>
-                                        <td>$1,200</td>
-                                        <td>$300</td>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                            <br>No session data available yet
+                                        </td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -252,30 +233,11 @@
                                     </tr>
                                     {% endfor %}
                                 {% else %}
-                                    <!-- Sample data for demonstration -->
                                     <tr>
-                                        <td>Social Media</td>
-                                        <td>15</td>
-                                        <td>85%</td>
-                                        <td>$275</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Google Search</td>
-                                        <td>8</td>
-                                        <td>70%</td>
-                                        <td>$300</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Friend/Family</td>
-                                        <td>12</td>
-                                        <td>95%</td>
-                                        <td>$250</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Previous Client</td>
-                                        <td>5</td>
-                                        <td>100%</td>
-                                        <td>$350</td>
+                                        <td colspan="4" class="text-center text-muted py-4">
+                                            <i class="fas fa-users fa-2x mb-2"></i>
+                                            <br>No client acquisition data available yet
+                                        </td>
                                     </tr>
                                 {% endif %}
                             </tbody>
@@ -346,12 +308,12 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Sample data for charts (replace with actual data from backend)
+    // Use actual data from backend
     const revenueData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        labels: {{ monthly_revenue.labels|tojson if monthly_revenue and monthly_revenue.labels else '[]' }},
         datasets: [{
             label: 'Monthly Revenue',
-            data: [2500, 3200, 2800, 4100, 3800, 4500, 4200, 4800],
+            data: {{ monthly_revenue.data|tojson if monthly_revenue and monthly_revenue.data else '[]' }},
             borderColor: '#007bff',
             backgroundColor: 'rgba(0, 123, 255, 0.1)',
             tension: 0.4,
@@ -360,9 +322,9 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     const sessionTypeData = {
-        labels: ['Newborn', 'Milestone', 'Birthday', 'Family', 'Maternity'],
+        labels: {{ session_stats.labels|tojson if session_stats and session_stats.labels else '[]' }},
         datasets: [{
-            data: [30, 25, 20, 15, 10],
+            data: {{ session_stats.data|tojson if session_stats and session_stats.data else '[]' }},
             backgroundColor: [
                 '#007bff',
                 '#28a745',
@@ -374,10 +336,10 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     const clientAcquisitionData = {
-        labels: ['Social Media', 'Google', 'Referrals', 'Previous Clients'],
+        labels: {{ client_acquisition.labels|tojson if client_acquisition and client_acquisition.labels else '[]' }},
         datasets: [{
             label: 'New Clients',
-            data: [45, 30, 15, 10],
+            data: {{ client_acquisition.data|tojson if client_acquisition and client_acquisition.data else '[]' }},
             backgroundColor: [
                 '#007bff',
                 '#28a745',
@@ -388,10 +350,10 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     const milestoneData = {
-        labels: ['3 Month', '6 Month', '9 Month', '12 Month'],
+        labels: {{ milestone_packages.labels|tojson if milestone_packages and milestone_packages.labels else '[]' }},
         datasets: [{
             label: 'Revenue',
-            data: [1200, 1800, 1600, 2000],
+            data: {{ milestone_packages.data|tojson if milestone_packages and milestone_packages.data else '[]' }},
             backgroundColor: '#28a745'
         }]
     };

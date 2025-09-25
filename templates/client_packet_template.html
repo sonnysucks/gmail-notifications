@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Packet - {{ client.name }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @media print {
+            .no-print { display: none !important; }
+            .page-break { page-break-before: always; }
+            body { font-size: 12px; }
+            .card { border: 1px solid #ddd !important; }
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .package-card {
+            border-left: 4px solid #007bff;
+            transition: all 0.3s ease;
+        }
+        
+        .package-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .price-highlight {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+        }
+        
+        .timeline-item {
+            border-left: 2px solid #007bff;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .contact-info {
+            background: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-2">{{ business.name or 'Photography Business' }}</h1>
+                    <p class="mb-0 lead">Complete Client Information Packet</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="contact-info">
+                        <p class="mb-1"><i class="fas fa-envelope me-2"></i>{{ business.email or 'info@photography.com' }}</p>
+                        <p class="mb-1"><i class="fas fa-phone me-2"></i>{{ business.phone or '(555) 123-4567' }}</p>
+                        <p class="mb-0"><i class="fas fa-globe me-2"></i>{{ business.website or 'www.photography.com' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Client Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0"><i class="fas fa-user me-2"></i>Client Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>{{ client.name }}</h5>
+                                <p class="text-muted mb-2">{{ client.email }}</p>
+                                {% if client.phone %}
+                                <p class="mb-2"><i class="fas fa-phone me-2"></i>{{ client.phone }}</p>
+                                {% endif %}
+                                {% if client.address %}
+                                <p class="mb-2"><i class="fas fa-map-marker-alt me-2"></i>{{ client.address }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if client.family_type %}
+                                <p class="mb-2"><strong>Family Type:</strong> {{ client.family_type.title() }}</p>
+                                {% endif %}
+                                {% if client.children_count > 0 %}
+                                <p class="mb-2"><strong>Children:</strong> {{ client.children_count }}</p>
+                                {% endif %}
+                                {% if client.total_appointments > 0 %}
+                                <p class="mb-2"><strong>Total Sessions:</strong> {{ client.total_appointments }}</p>
+                                <p class="mb-0"><strong>Total Spent:</strong> ${{ "%.2f"|format(client.total_spent) }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Session History -->
+        {% if appointments %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-calendar-check me-2"></i>Session History</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            {% for appointment in appointments %}
+                            <div class="timeline-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div>
+                                        <h6 class="mb-1">{{ appointment.session_type }}</h6>
+                                        <p class="mb-1 text-muted">{{ appointment.start_time.strftime('%B %d, %Y at %I:%M %p') }}</p>
+                                        {% if appointment.baby_name %}
+                                        <p class="mb-1"><strong>Baby:</strong> {{ appointment.baby_name }}</p>
+                                        {% endif %}
+                                        {% if appointment.notes %}
+                                        <p class="mb-0"><strong>Notes:</strong> {{ appointment.notes }}</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="price-highlight">${{ "%.2f"|format(appointment.total_amount) }}</div>
+                                        <small class="text-muted">{{ appointment.status.title() }}</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Selected Package (if any) -->
+        {% if selected_package %}
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-success">
+                    <div class="card-header bg-success text-white">
+                        <h4 class="mb-0"><i class="fas fa-star me-2"></i>Selected Package</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h5 class="text-success">{{ selected_package.name }}</h5>
+                                <p class="text-muted mb-2">{{ selected_package.description }}</p>
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary">{{ selected_package.category.title() }}</span>
+                                    {% if selected_package.is_featured %}
+                                    <span class="badge bg-warning">Featured</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="h3 text-success mb-1">${{ "%.2f"|format(selected_package.base_price) }}</div>
+                                <small class="text-muted">{{ selected_package.duration_minutes }} minutes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recommended Packages -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h4 class="mb-0"><i class="fas fa-box me-2"></i>Recommended Photography Packages</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            {% for package in packages %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card package-card h-100 {% if selected_package and package.id == selected_package.id %}border-success{% endif %}">
+                                    <div class="card-header d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">{{ package.name }}</h6>
+                                        {% if package.is_featured %}
+                                        <span class="badge bg-warning">Featured</span>
+                                        {% endif %}
+                                        {% if selected_package and package.id == selected_package.id %}
+                                        <span class="badge bg-success">Selected</span>
+                                        {% endif %}
+                                    </div>
+                                    <div class="card-body">
+                                        <p class="text-muted small mb-3">{{ package.description }}</p>
+                                        
+                                        <div class="d-flex justify-content-between align-items-center mb-3">
+                                            <div class="price-highlight">${{ "%.2f"|format(package.base_price) }}</div>
+                                            <small class="text-muted">{{ package.duration_minutes }} min</small>
+                                        </div>
+                                        
+                                        {% if package.includes %}
+                                        <h6 class="small text-muted mb-2">Includes:</h6>
+                                        <ul class="small mb-3">
+                                            {% for item in package.includes[:3] %}
+                                            <li>{{ item }}</li>
+                                            {% endfor %}
+                                            {% if package.includes|length > 3 %}
+                                            <li class="text-muted">+{{ package.includes|length - 3 }} more items</li>
+                                            {% endif %}
+                                        </ul>
+                                        {% endif %}
+                                        
+                                        {% if package.recommended_age or package.recommended_weeks %}
+                                        <div class="alert alert-info small mb-0">
+                                            {% if package.recommended_age %}
+                                            <strong>Recommended Age:</strong> {{ package.recommended_age }}<br>
+                                            {% endif %}
+                                            {% if package.recommended_weeks %}
+                                            <strong>Recommended Weeks:</strong> {{ package.recommended_weeks }}
+                                            {% endif %}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business Policies -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0"><i class="fas fa-file-contract me-2"></i>Business Policies & Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Session Policies</h6>
+                                <ul class="small">
+                                    <li>Sessions are scheduled by appointment only</li>
+                                    <li>Payment is due at the time of booking</li>
+                                    <li>Rescheduling requires 48-hour notice</li>
+                                    <li>No-shows will be charged 50% of session fee</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>What to Expect</h6>
+                                <ul class="small">
+                                    <li>Professional editing included</li>
+                                    <li>Online gallery delivery within 2 weeks</li>
+                                    <li>Print release provided with all packages</li>
+                                    <li>Props and accessories included</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contact Information -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="mb-0"><i class="fas fa-phone me-2"></i>Contact Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <i class="fas fa-envelope fa-2x text-primary mb-2"></i>
+                                <h6>Email</h6>
+                                <p class="mb-0">{{ business.email or 'info@photography.com' }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-phone fa-2x text-success mb-2"></i>
+                                <h6>Phone</h6>
+                                <p class="mb-0">{{ business.phone or '(555) 123-4567' }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <i class="fas fa-globe fa-2x text-info mb-2"></i>
+                                <h6>Website</h6>
+                                <p class="mb-0">{{ business.website or 'www.photography.com' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="row no-print">
+            <div class="col-12 text-center">
+                <button class="btn btn-primary btn-lg" onclick="window.print()">
+                    <i class="fas fa-print me-2"></i>
+                    Print Client Packet
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,7 +1,19 @@
 # Gmail Photography Appointment Scheduler with CRM
 ## Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
 
-A comprehensive appointment scheduling and Customer Relationship Management (CRM) system **specifically designed for baby photography businesses** that integrates with Gmail and Google Calendar to automatically manage client appointments, send reminder notifications, and track customer relationships through every precious milestone.
+A comprehensive **web-based** appointment scheduling and Customer Relationship Management (CRM) system **specifically designed for baby photography businesses**. Features a modern Flask web application with interactive calendar, business analytics, and complete backup/restore functionality.
+
+## 🌐 **Web Application (Primary Interface)**
+
+**Quick Start**: `python run_web_app.py` → Open `http://localhost:5001` → Login: `admin` / `admin123`
+
+### **Key Web Features**
+- **📊 Dashboard**: Business overview with metrics and quick actions
+- **📅 Interactive Calendar**: Visual appointment management with clickable days
+- **👥 Client Management**: Complete CRM with family and baby tracking
+- **📈 Analytics**: Revenue tracking, session statistics, client metrics
+- **💾 Backup & Restore**: Complete system backup and data management
+- **⚙️ Configuration**: Comprehensive business setup and customization
 
 ## 🍼 **Baby Photography Specialization**
 
@@ -54,9 +66,23 @@ This system is **tailor-made** for photographers specializing in:
 
 ## 🏗️ **Architecture**
 
-- **SQLite Database**: Robust CRM database with proper indexing and relationships
+### **Web Application Stack**
+- **Backend**: Flask (Python web framework) with RESTful API
+- **Database**: SQLite with custom ORM and proper indexing
+- **Frontend**: Bootstrap 5 + Custom CSS/JavaScript
+- **Authentication**: Session-based security
+- **Templates**: Jinja2 templating engine
+
+### **Core Components**
+- **Web Application** (`web_app.py`): Flask routes and web logic
+- **Scheduler Module** (`scheduler/`): Business logic and data models
+- **Configuration** (`config/`): YAML-based configuration management
+- **Templates** (`templates/`): HTML templates for web interface
+- **Static Assets** (`static/`): CSS, JavaScript, and images
+
+### **Legacy CLI Support**
+- **CLI Application** (`main.py`): Command-line interface (still functional)
 - **Modular Design**: Clean separation of concerns (Gmail, Calendar, Scheduler, CRM, Templates)
-- **RESTful API Ready**: Designed for easy web interface integration
 - **Scalable**: Can be upgraded to PostgreSQL or MySQL for production use
 - **Baby Photography Focused**: Built specifically for baby photography workflows
 
@@ -102,28 +128,39 @@ This system is **tailor-made** for photographers specializing in:
 
 ## 📦 **Installation**
 
-1. **Clone the repository**:
+### **Web Application (Recommended)**
+
+1. **Clone and setup**:
 ```bash
 git clone <your-repo-url>
 cd gmail-notifications
-```
-
-2. **Install dependencies**:
-```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. **Set up Google Cloud credentials**:
-   - Create a project in Google Cloud Console
-   - Enable Gmail API and Google Calendar API
-   - Create OAuth 2.0 credentials
-   - Download the credentials JSON file and save as `credentials.json`
+2. **Run the web application**:
+```bash
+python run_web_app.py
+```
 
-4. **Configure the application**:
+3. **Access the application**:
+   - Open browser to: `http://localhost:5001`
+   - Login: `admin` / `admin123`
+
+### **CLI Application (Legacy)**
+
+1. **Configure the application**:
 ```bash
 cp config.example.yaml config.yaml
 # Edit config.yaml with your baby photography business settings
 ```
+
+2. **Set up Google Cloud credentials** (optional):
+   - Create a project in Google Cloud Console
+   - Enable Gmail API and Google Calendar API
+   - Create OAuth 2.0 credentials
+   - Download the credentials JSON file and save as `credentials.json`
 
 ## ⚙️ **Configuration for Baby Photography**
 
@@ -138,12 +175,27 @@ Edit `config.yaml` to configure:
 
 ## 🎯 **Usage for Baby Photography**
 
-### **Basic Setup**
+### **Web Application Usage (Recommended)**
+
+1. **Access the web interface**: `http://localhost:5001`
+2. **Login**: `admin` / `admin123`
+3. **Navigate through the interface**:
+   - **Dashboard**: Overview of business metrics
+   - **Appointments**: Create, edit, view appointments
+   - **Calendar**: Interactive calendar with appointment visualization
+   - **Clients**: Manage client information and family details
+   - **Analytics**: View business performance and revenue
+   - **Setup**: Configure business settings and preferences
+   - **Backup & Restore**: Manage system backups
+
+### **CLI Application Usage (Legacy)**
+
+#### **Basic Setup**
 ```bash
 python main.py --setup
 ```
 
-### **Baby Photography Appointment Management**
+#### **Baby Photography Appointment Management**
 ```bash
 # Schedule newborn session with baby details
 python main.py --schedule "Sarah Johnson" "2024-01-15 10:00" "Newborn Session" \
@@ -215,24 +267,34 @@ python test_baby_photography.py
 
 ```
 gmail-notifications/
-├── main.py                 # Main CLI application with baby photography commands
-├── config/                 # Configuration management
-├── scheduler/              # Appointment scheduling + CRM + Baby photography
-│   ├── models.py          # Data models (Client, Appointment, BabyMilestone, BirthdaySession)
-│   ├── crm_manager.py     # CRM database operations
+├── web_app.py              # Flask web application (main entry point)
+├── run_web_app.py         # Web application launcher
+├── main.py                # CLI application (legacy)
+├── scheduler/             # Core business logic
+│   ├── models.py         # Data models (Client, Appointment, BabyMilestone, BirthdaySession)
+│   ├── crm_manager.py    # CRM database operations
 │   └── appointment_scheduler.py  # Scheduling logic with baby photography
-├── gmail/                  # Gmail API integration
-├── calendar/               # Google Calendar operations
-├── templates/              # Email templates (baby photography specific)
-├── utils/                  # Utility functions
-├── data/                   # CRM database and data storage
-├── logs/                   # Application logs
-├── config.example.yaml     # Example configuration for baby photography
-├── requirements.txt        # Python dependencies
-├── test_scheduler.py       # Basic functionality tests
-├── test_crm.py            # CRM system tests
+├── templates/             # Jinja2 HTML templates for web interface
+│   ├── dashboard.html    # Main dashboard
+│   ├── appointments.html # Appointment management
+│   ├── calendar.html     # Interactive calendar view
+│   ├── clients.html      # Client management
+│   ├── analytics.html    # Business analytics
+│   └── backup_restore.html # Backup management
+├── static/                # CSS, JavaScript, and static assets
+├── config/                # Configuration management
+├── gmail/                 # Gmail API integration
+├── calendar_integration/  # Google Calendar operations
+├── utils/                 # Utility functions
+├── data/                  # SQLite database and data storage
+├── backups/               # System backup files
+├── logs/                  # Application logs
+├── config.example.yaml    # Example configuration for baby photography
+├── requirements.txt       # Python dependencies
+├── test_scheduler.py      # Basic functionality tests
+├── test_crm.py           # CRM system tests
 ├── test_baby_photography.py # Baby photography specific tests
-└── README.md              # This file
+└── README.md             # This file
 ```
 
 ## 🔧 **Advanced Baby Photography Features**

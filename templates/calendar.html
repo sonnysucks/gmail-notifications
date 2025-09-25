@@ -27,15 +27,15 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <h5 class="mb-0">August 2025</h5>
+                    <h5 class="mb-0" id="currentMonth">{{ current_month }}</h5>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="btn-group" role="group">
-                        <button type="button" class="btn btn-outline-primary">
+                        <button type="button" class="btn btn-outline-primary" onclick="changeMonth(-1)">
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <button type="button" class="btn btn-outline-primary">Today</button>
-                        <button type="button" class="btn btn-outline-primary">
+                        <button type="button" class="btn btn-outline-primary" onclick="goToToday()">Today</button>
+                        <button type="button" class="btn btn-outline-primary" onclick="changeMonth(1)">
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
@@ -59,247 +59,14 @@
             </div>
 
             <!-- Calendar Body -->
-            <div class="calendar-body">
-                <!-- Week 1 -->
-                <div class="calendar-week">
-                    <div class="calendar-day prev-month">
-                        <div class="day-number">27</div>
-                    </div>
-                    <div class="calendar-day prev-month">
-                        <div class="day-number">28</div>
-                    </div>
-                    <div class="calendar-day prev-month">
-                        <div class="day-number">29</div>
-                    </div>
-                    <div class="calendar-day prev-month">
-                        <div class="day-number">30</div>
-                    </div>
-                    <div class="calendar-day prev-month">
-                        <div class="day-number">31</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">1</div>
-                        <div class="appointment-indicator" title="Newborn Session - Sarah Johnson">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">2</div>
-                    </div>
-                </div>
-
-                <!-- Week 2 -->
-                <div class="calendar-week">
-                    <div class="calendar-day">
-                        <div class="day-number">3</div>
-                        <div class="appointment-indicator" title="Milestone Session - Emma Davis">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">4</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">5</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">6</div>
-                        <div class="appointment-indicator" title="Birthday Session - Liam Wilson">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">7</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">8</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">9</div>
-                    </div>
-                </div>
-
-                <!-- Week 3 -->
-                <div class="calendar-week">
-                    <div class="calendar-day">
-                        <div class="day-number">10</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">11</div>
-                        <div class="appointment-indicator" title="Family Session - The Smiths">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">12</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">13</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">14</div>
-                        <div class="appointment-indicator" title="Newborn Session - Baby Anderson">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">15</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">16</div>
-                    </div>
-                </div>
-
-                <!-- Week 4 -->
-                <div class="calendar-week">
-                    <div class="calendar-day">
-                        <div class="day-number">17</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">18</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">19</div>
-                        <div class="appointment-indicator" title="Milestone Session - Noah Brown">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">20</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">21</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">22</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">23</div>
-                    </div>
-                </div>
-
-                <!-- Week 5 -->
-                <div class="calendar-week">
-                    <div class="calendar-day">
-                        <div class="day-number">24</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">25</div>
-                        <div class="appointment-indicator" title="Birthday Session - Ava Garcia">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">26</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">27</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">28</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">29</div>
-                        <div class="appointment-indicator" title="Newborn Session - Baby Martinez">●</div>
-                    </div>
-                    <div class="calendar-day">
-                        <div class="day-number">30</div>
-                    </div>
-                </div>
-
-                <!-- Week 6 -->
-                <div class="calendar-week">
-                    <div class="calendar-day">
-                        <div class="day-number">31</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">1</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">2</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">3</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">4</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">5</div>
-                    </div>
-                    <div class="calendar-day next-month">
-                        <div class="day-number">6</div>
-                    </div>
-                </div>
+            <div class="calendar-body" id="calendarBody">
+                <!-- Calendar will be generated dynamically by JavaScript -->
             </div>
         </div>
     </div>
 
-    <!-- Upcoming Appointments -->
+    <!-- Calendar Legend & Stats -->
     <div class="row mt-4">
-        <div class="col-lg-8">
-            <div class="card">
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        <i class="fas fa-calendar-week me-2"></i>
-                        Upcoming Appointments
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% if appointments %}
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Date & Time</th>
-                                        <th>Client</th>
-                                        <th>Session Type</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for appointment in appointments %}
-                                    <tr>
-                                        <td>
-                                            <strong>{{ appointment.start_time.strftime('%b %d, %Y') }}</strong>
-                                            <br>
-                                            <small class="text-muted">{{ appointment.start_time.strftime('%I:%M %p') }}</small>
-                                        </td>
-                                        <td>
-                                            <div class="d-flex align-items-center">
-                                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                                                    <i class="fas fa-user text-primary"></i>
-                                                </div>
-                                                <div>
-                                                    <strong>{{ appointment.client_name }}</strong>
-                                                    {% if appointment.baby_name %}
-                                                        <br>
-                                                        <small class="text-muted">{{ appointment.baby_name }}</small>
-                                                    {% endif %}
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-primary">{{ appointment.session_type }}</span>
-                                        </td>
-                                        <td>
-                                            <span class="badge bg-{{ 'success' if appointment.status == 'confirmed' else 'warning' if appointment.status == 'pending' else 'danger' }}">
-                                                {{ appointment.status.title() }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ url_for('view_appointment', appointment_id=appointment.id) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    {% else %}
-                        <div class="text-center py-4">
-                            <i class="fas fa-calendar-times text-muted" style="font-size: 3rem;"></i>
-                            <h5 class="text-muted mt-3">No appointments this month</h5>
-                            <p class="text-muted">Great time to schedule new sessions!</p>
-                            <a href="{{ url_for('new_appointment') }}" class="btn btn-primary">
-                                <i class="fas fa-calendar-plus me-2"></i>
-                                Schedule Session
-                            </a>
-                        </div>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-
-        <!-- Calendar Legend & Stats -->
         <div class="col-lg-4">
             <!-- Legend -->
             <div class="card mb-4">
@@ -440,19 +207,317 @@
     position: absolute;
     top: 5px;
     right: 5px;
+    transition: all 0.2s ease;
 }
 
 .appointment-indicator:hover {
     color: #0056b3;
+    transform: scale(1.2);
+}
+
+.appointment-banner {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin: 2px 0;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.appointment-banner:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.appointment-banner.newborn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.appointment-banner.milestone {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+}
+
+.appointment-banner.birthday {
+    background: linear-gradient(135deg, #dc3545, #e83e8c);
+}
+
+.appointment-banner.family {
+    background: linear-gradient(135deg, #6f42c1, #8b5cf6);
+}
+
+.appointment-banner.maternity {
+    background: linear-gradient(135deg, #17a2b8, #20c997);
+}
+
+.calendar-day {
+    min-height: 120px;
+    padding: 10px;
+    border-right: 1px solid #dee2e6;
+    position: relative;
+    background-color: white;
+    transition: all 0.2s ease;
 }
 
 .calendar-day:hover {
-    background-color: #f8f9fa;
+    background-color: rgba(0, 123, 255, 0.05);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .calendar-day.prev-month:hover,
 .calendar-day.next-month:hover {
     background-color: #e9ecef;
 }
+
+.calendar-day.has-appointments {
+    background: linear-gradient(135deg, rgba(0, 123, 255, 0.05), rgba(0, 123, 255, 0.1));
+    border-left: 3px solid #007bff;
+}
+
+.calendar-day.today {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.2));
+    border: 2px solid #ffc107;
+}
+
+.appointment-count {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let appointmentsData = {{ appointments|tojson }};
+let currentDate = new Date();
+let currentMonth = currentDate.getMonth();
+let currentYear = currentDate.getFullYear();
+
+// Initialize calendar
+document.addEventListener('DOMContentLoaded', function() {
+    generateCalendar();
+});
+
+function generateCalendar() {
+    const calendarBody = document.getElementById('calendarBody');
+    const monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+    ];
+    
+    // Update month display
+    document.getElementById('currentMonth').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    
+    // Get first day of month and number of days
+    const firstDay = new Date(currentYear, currentMonth, 1);
+    const lastDay = new Date(currentYear, currentMonth + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+    
+    // Clear calendar
+    calendarBody.innerHTML = '';
+    
+    // Generate calendar weeks
+    let currentWeek = document.createElement('div');
+    currentWeek.className = 'calendar-week';
+    
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < startingDayOfWeek; i++) {
+        const prevMonthDay = new Date(currentYear, currentMonth, 0).getDate() - startingDayOfWeek + i + 1;
+        const dayElement = createDayElement(prevMonthDay, 'prev-month');
+        currentWeek.appendChild(dayElement);
+    }
+    
+    // Add days of the current month
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dayElement = createDayElement(day, 'current-month');
+        currentWeek.appendChild(dayElement);
+        
+        // Start new week if we've reached Sunday
+        if ((startingDayOfWeek + day) % 7 === 0) {
+            calendarBody.appendChild(currentWeek);
+            currentWeek = document.createElement('div');
+            currentWeek.className = 'calendar-week';
+        }
+    }
+    
+    // Add remaining days from next month to complete the last week
+    const remainingDays = 7 - ((startingDayOfWeek + daysInMonth) % 7);
+    if (remainingDays < 7) {
+        for (let day = 1; day <= remainingDays; day++) {
+            const dayElement = createDayElement(day, 'next-month');
+            currentWeek.appendChild(dayElement);
+        }
+    }
+    
+    // Add the last week if it has any days
+    if (currentWeek.children.length > 0) {
+        calendarBody.appendChild(currentWeek);
+    }
+}
+
+function createDayElement(day, monthType) {
+    const dayElement = document.createElement('div');
+    dayElement.className = `calendar-day ${monthType}`;
+    
+    // Check if this is today
+    const today = new Date();
+    if (monthType === 'current-month' && 
+        day === today.getDate() && 
+        currentMonth === today.getMonth() && 
+        currentYear === today.getFullYear()) {
+        dayElement.classList.add('today');
+    }
+    
+    // Create day number
+    const dayNumber = document.createElement('div');
+    dayNumber.className = 'day-number';
+    dayNumber.textContent = day;
+    dayElement.appendChild(dayNumber);
+    
+    // Find appointments for this day
+    const dayAppointments = getAppointmentsForDay(day, monthType);
+    
+    if (dayAppointments.length > 0) {
+        dayElement.classList.add('has-appointments');
+        
+        // Add appointment count indicator
+        const countElement = document.createElement('div');
+        countElement.className = 'appointment-count';
+        countElement.textContent = dayAppointments.length;
+        countElement.title = `${dayAppointments.length} appointment${dayAppointments.length > 1 ? 's' : ''}`;
+        dayElement.appendChild(countElement);
+        
+        // Add appointment banners
+        const appointmentsContainer = document.createElement('div');
+        appointmentsContainer.className = 'appointments-container';
+        
+        dayAppointments.forEach(appointment => {
+            const banner = document.createElement('div');
+            banner.className = `appointment-banner ${appointment.session_type.toLowerCase().replace(/\s+/g, '-')}`;
+            banner.textContent = `${appointment.start_time.split(' ')[1]} - ${appointment.client_name}`;
+            banner.title = `${appointment.session_type} - ${appointment.client_name} (${appointment.start_time})`;
+            banner.onclick = (e) => {
+                e.stopPropagation();
+                viewAppointment(appointment.id);
+            };
+            appointmentsContainer.appendChild(banner);
+        });
+        
+        dayElement.appendChild(appointmentsContainer);
+        
+        // Make the day clickable to view all appointments
+        dayElement.onclick = () => {
+            if (dayAppointments.length === 1) {
+                viewAppointment(dayAppointments[0].id);
+            } else {
+                showDayAppointments(day, dayAppointments);
+            }
+        };
+    }
+    
+    return dayElement;
+}
+
+function getAppointmentsForDay(day, monthType) {
+    if (monthType !== 'current-month') return [];
+    
+    const targetDate = new Date(currentYear, currentMonth, day);
+    const targetDateStr = targetDate.toISOString().split('T')[0];
+    
+    return appointmentsData.filter(appointment => {
+        const appointmentDate = new Date(appointment.start_time);
+        const appointmentDateStr = appointmentDate.toISOString().split('T')[0];
+        return appointmentDateStr === targetDateStr;
+    });
+}
+
+function viewAppointment(appointmentId) {
+    window.location.href = `/appointments/${appointmentId}`;
+}
+
+function showDayAppointments(day, appointments) {
+    // Create a modal or dropdown to show all appointments for the day
+    const modalHtml = `
+        <div class="modal fade" id="dayAppointmentsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Appointments for ${day} ${new Date(currentYear, currentMonth).toLocaleDateString('en-US', { month: 'long' })} ${currentYear}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="list-group">
+                            ${appointments.map(appointment => `
+                                <div class="list-group-item list-group-item-action" onclick="viewAppointment('${appointment.id}')">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h6 class="mb-1">${appointment.session_type}</h6>
+                                        <small>${appointment.start_time.split(' ')[1]}</small>
+                                    </div>
+                                    <p class="mb-1">${appointment.client_name}</p>
+                                    <small>${appointment.status}</small>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('dayAppointmentsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('dayAppointmentsModal'));
+    modal.show();
+    
+    // Clean up modal when hidden
+    document.getElementById('dayAppointmentsModal').addEventListener('hidden.bs.modal', function() {
+        this.remove();
+    });
+}
+
+function changeMonth(direction) {
+    currentMonth += direction;
+    if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    }
+    generateCalendar();
+}
+
+function goToToday() {
+    const today = new Date();
+    currentMonth = today.getMonth();
+    currentYear = today.getFullYear();
+    generateCalendar();
+}
+</script>
 {% endblock %}

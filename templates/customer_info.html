@@ -28,6 +28,40 @@
         </div>
     </div>
 
+    <!-- Client Selection Section -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-user me-2"></i>
+                Select Client & Package
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="clientSelect" class="form-label">Select Client</label>
+                    <select class="form-select" id="clientSelect" onchange="loadClientPackages()">
+                        <option value="">Choose a client...</option>
+                        <!-- Clients will be loaded dynamically -->
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="packageSelect" class="form-label">Select Package</label>
+                    <select class="form-select" id="packageSelect" disabled>
+                        <option value="">First select a client...</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button class="btn btn-primary" id="generatePacketBtn" onclick="generateClientPacket()" disabled>
+                    <i class="fas fa-download me-2"></i>
+                    Generate Client Packet
+                </button>
+                <small class="text-muted ms-3">Select a client and package to generate a customized packet</small>
+            </div>
+        </div>
+    </div>
+
     <!-- Pricing Information -->
     <div class="card mb-4">
         <div class="card-header">
@@ -551,9 +585,169 @@
 
 {% block extra_js %}
 <script>
+// Load clients and packages on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadClients();
+});
+
+function loadClients() {
+    fetch('/api/clients')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                populateClientDropdown(data.clients);
+            } else {
+                console.error('Failed to load clients:', data.error);
+                showAlert('Failed to load clients: ' + (data.error || 'Unknown error'), 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading clients:', error);
+            showAlert('Error loading clients: ' + error.message, 'danger');
+        });
+}
+
+function populateClientDropdown(clients) {
+    const clientSelect = document.getElementById('clientSelect');
+    clientSelect.innerHTML = '<option value="">Choose a client...</option>';
+    
+    if (clients && clients.length > 0) {
+        clients.forEach(client => {
+            const option = document.createElement('option');
+            option.value = client.id;
+            option.textContent = `${client.name} (${client.email})`;
+            clientSelect.appendChild(option);
+        });
+    } else {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No clients found - Add clients first';
+        option.disabled = true;
+        clientSelect.appendChild(option);
+    }
+}
+
+function loadClientPackages() {
+    const clientId = document.getElementById('clientSelect').value;
+    const packageSelect = document.getElementById('packageSelect');
+    const generateBtn = document.getElementById('generatePacketBtn');
+    
+    if (!clientId) {
+        packageSelect.innerHTML = '<option value="">First select a client...</option>';
+        packageSelect.disabled = true;
+        generateBtn.disabled = true;
+        return;
+    }
+    
+    // Get client data to determine family type
+    fetch(`/api/clients/${clientId}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const client = data.client;
+                const familyType = client.family_type || 'family';
+                
+                // Load packages for this client's family type
+                return fetch(`/api/packages/category/${familyType}`);
+            } else {
+                throw new Error('Failed to load client data');
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.packages.length > 0) {
+                populatePackageDropdown(data.packages);
+            } else {
+                // If no packages for specific category, load all active packages
+                return fetch('/api/packages/active');
+            }
+        })
+        .then(response => {
+            if (response) {
+                return response.json();
+            }
+            return null;
+        })
+        .then(data => {
+            if (data && data.success) {
+                populatePackageDropdown(data.packages);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading packages:', error);
+            packageSelect.innerHTML = '<option value="">Error loading packages...</option>';
+            packageSelect.disabled = true;
+            generateBtn.disabled = true;
+        });
+}
+
+function populatePackageDropdown(packages) {
+    const packageSelect = document.getElementById('packageSelect');
+    const generateBtn = document.getElementById('generatePacketBtn');
+    
+    packageSelect.innerHTML = '<option value="">Choose a package...</option>';
+    
+    packages.forEach(package => {
+        const option = document.createElement('option');
+        option.value = package.id;
+        option.textContent = `${package.name} - $${package.base_price} (${package.duration_minutes} min)`;
+        packageSelect.appendChild(option);
+    });
+    
+    packageSelect.disabled = false;
+    
+    // Enable generate button when package is selected
+    packageSelect.addEventListener('change', function() {
+        generateBtn.disabled = !this.value;
+    });
+}
+
 function generateClientPacket() {
-    // This would generate a comprehensive PDF packet
-    alert('Client packet generation will be implemented here. This would create a PDF with all the information, pricing, contract, and policies.');
+    const clientId = document.getElementById('clientSelect').value;
+    const packageId = document.getElementById('packageSelect').value;
+    
+    if (!clientId) {
+        showAlert('Please select a client first', 'warning');
+        return;
+    }
+    
+    if (!packageId) {
+        showAlert('Please select a package first', 'warning');
+        return;
+    }
+    
+    // Open the client packet in a new window with both client and package info
+    window.open(`/api/client-packet/${clientId}?package_id=${packageId}`, '_blank');
+}
+
+function getClientIdFromContext() {
+    // Try to get client ID from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientId = urlParams.get('client_id');
+    if (clientId) return clientId;
+    
+    // Try to get from URL path (e.g., /customer-info/123)
+    const pathParts = window.location.pathname.split('/');
+    const clientIdFromPath = pathParts[pathParts.length - 1];
+    if (clientIdFromPath && clientIdFromPath !== 'customer-info') {
+        return clientIdFromPath;
+    }
+    
+    // Try to get from current page context
+    const clientIdElement = document.querySelector('[data-client-id]');
+    if (clientIdElement) return clientIdElement.dataset.clientId;
+    
+    // Try to get from template variable
+    {% if client_id %}
+    return '{{ client_id }}';
+    {% endif %}
+    
+    return null;
 }
 
 function downloadContract() {
@@ -568,6 +762,23 @@ function downloadChecklist() {
 
 function printPage() {
     window.print();
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
 }
 
 // Add any additional JavaScript functionality here
