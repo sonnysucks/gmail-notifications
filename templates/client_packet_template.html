@@ -148,35 +148,100 @@
         {% endif %}
 
         <!-- Selected Package (if any) -->
-        {% if selected_package %}
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card border-success">
-                    <div class="card-header bg-success text-white">
-                        <h4 class="mb-0"><i class="fas fa-star me-2"></i>Selected Package</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h5 class="text-success">{{ selected_package.name }}</h5>
-                                <p class="text-muted mb-2">{{ selected_package.description }}</p>
-                                <div class="d-flex gap-2">
-                                    <span class="badge bg-primary">{{ selected_package.category.title() }}</span>
-                                    {% if selected_package.is_featured %}
-                                    <span class="badge bg-warning">Featured</span>
-                                    {% endif %}
-                                </div>
+    {% if selected_packages %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Selected Packages</h4>
+                </div>
+                <div class="card-body">
+                    {% for package in selected_packages %}
+                    <div class="row align-items-center mb-3 {% if not loop.last %}border-bottom pb-3{% endif %}">
+                        <div class="col-md-6">
+                            <h5 class="text-success">{{ package.name }}</h5>
+                            <p class="text-muted mb-2">{{ package.description }}</p>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-primary">{{ package.category.title() }}</span>
+                                {% if package.is_featured %}
+                                <span class="badge bg-warning">Featured</span>
+                                {% endif %}
                             </div>
-                            <div class="col-md-4 text-end">
-                                <div class="h3 text-success mb-1">${{ "%.2f"|format(selected_package.base_price) }}</div>
-                                <small class="text-muted">{{ selected_package.duration_minutes }} minutes</small>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="h6 text-info mb-1">Quantity</div>
+                            <div class="h4 text-primary">{{ package.quantity or 1 }}</div>
+                            <small class="text-muted">{{ package.duration_minutes }} min each</small>
+                        </div>
+                        <div class="col-md-3 text-end">
+                            <div class="h6 text-muted mb-1">${{ "%.2f"|format(package.base_price) }} each</div>
+                            <div class="h4 text-success mb-1">${{ "%.2f"|format(package.base_price * (package.quantity or 1)) }}</div>
+                            <small class="text-muted">Total</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">Package Summary</h6>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="h6 mb-1">Total Packages</div>
+                                        <div class="h4 text-primary">{{ selected_packages|length }}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="h6 mb-1">Total Items</div>
+                                        <div class="h4 text-info">{{ selected_packages|sum(attribute='quantity') or selected_packages|length }}</div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="h6 mb-1">Grand Total</div>
+                                        <div class="h3 text-success">
+                                            {% set total = 0 %}
+                                            {% for package in selected_packages %}
+                                                {% set total = total + (package.base_price * (package.quantity or 1)) %}
+                                            {% endfor %}
+                                            ${{ "%.2f"|format(total) }}
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        {% endif %}
+    </div>
+    {% elif selected_package %}
+    <!-- Legacy support for single package -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="fas fa-star me-2"></i>Selected Package</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="text-success">{{ selected_package.name }}</h5>
+                            <p class="text-muted mb-2">{{ selected_package.description }}</p>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-primary">{{ selected_package.category.title() }}</span>
+                                {% if selected_package.is_featured %}
+                                <span class="badge bg-warning">Featured</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="h3 text-success mb-1">${{ "%.2f"|format(selected_package.base_price) }}</div>
+                            <small class="text-muted">{{ selected_package.duration_minutes }} minutes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
         <!-- Recommended Packages -->
         <div class="row mb-4">

@@ -172,6 +172,11 @@
     /* Custom colors will be applied via JavaScript */
 }
 
+/* Additional Gradient Classes */
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8b5cf6, #a855f7) !important;
+}
+
 /* Responsive Theme Gallery */
 @media (max-width: 768px) {
     .theme-card {

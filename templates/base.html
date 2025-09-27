@@ -405,43 +405,47 @@
                         </div>
                         <nav class="nav flex-column">
                             <a class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" href="{{ url_for('dashboard') }}">
-                                <i class="fas fa-tachometer-alt"></i>
+                                <i class="fas fa-tachometer-alt" data-fallback="📊"></i>
                                 Dashboard
                             </a>
                             <a class="nav-link {% if request.endpoint == 'appointments' %}active{% endif %}" href="{{ url_for('appointments') }}">
-                                <i class="fas fa-calendar-check"></i>
+                                <i class="fas fa-calendar-check" data-fallback="📅"></i>
                                 Appointments
                             </a>
                             <a class="nav-link {% if request.endpoint == 'clients' %}active{% endif %}" href="{{ url_for('clients') }}">
-                                <i class="fas fa-users"></i>
+                                <i class="fas fa-users" data-fallback="👥"></i>
                                 Clients
                             </a>
                             <a class="nav-link {% if request.endpoint == 'packages' %}active{% endif %}" href="{{ url_for('packages') }}">
-                                <i class="fas fa-box"></i>
+                                <i class="fas fa-box" data-fallback="📦"></i>
                                 Packages
                             </a>
+                            <a class="nav-link {% if request.endpoint == 'correspondence' %}active{% endif %}" href="{{ url_for('correspondence') }}">
+                                <i class="fas fa-envelope" data-fallback="📧"></i>
+                                Correspondence
+                            </a>
                             <a class="nav-link {% if request.endpoint == 'calendar' %}active{% endif %}" href="{{ url_for('calendar') }}">
-                                <i class="fas fa-calendar-alt"></i>
+                                <i class="fas fa-calendar-alt" data-fallback="📅"></i>
                                 Calendar
                             </a>
-                                                          <a class="nav-link {% if request.endpoint == 'analytics' %}active{% endif %}" href="{{ url_for('analytics') }}">
-                                  <i class="fas fa-chart-bar"></i>
-                                  Analytics
-                              </a>
-                              <a class="nav-link {% if request.endpoint == 'google_calendar_config' %}active{% endif %}" href="{{ url_for('google_calendar_config') }}">
-                                  <i class="fas fa-calendar-alt"></i>
-                                  Google Calendar
-                              </a>
-                              <a class="nav-link {% if request.endpoint == 'backup_restore' %}active{% endif %}" href="{{ url_for('backup_restore') }}">
-                                  <i class="fas fa-database"></i>
-                                  Backup & Restore
-                              </a>
-                              <a class="nav-link {% if request.endpoint == 'customer_info' %}active{% endif %}" href="{{ url_for('customer_info') }}">
-                                  <i class="fas fa-info-circle"></i>
-                                  Customer Info
-                              </a>
+                            <a class="nav-link {% if request.endpoint == 'analytics' %}active{% endif %}" href="{{ url_for('analytics') }}">
+                                <i class="fas fa-chart-bar" data-fallback="📊"></i>
+                                Analytics
+                            </a>
+                            <a class="nav-link {% if request.endpoint == 'google_calendar_config' %}active{% endif %}" href="{{ url_for('google_calendar_config') }}">
+                                <i class="fas fa-calendar-alt" data-fallback="📅"></i>
+                                Google Calendar
+                            </a>
+                            <a class="nav-link {% if request.endpoint == 'backup_restore' %}active{% endif %}" href="{{ url_for('backup_restore') }}">
+                                <i class="fas fa-database" data-fallback="💾"></i>
+                                Backup & Restore
+                            </a>
+                            <a class="nav-link {% if request.endpoint == 'customer_info' %}active{% endif %}" href="{{ url_for('customer_info') }}">
+                                <i class="fas fa-info-circle" data-fallback="ℹ️"></i>
+                                Customer Info
+                            </a>
                             <a class="nav-link {% if request.endpoint == 'setup' %}active{% endif %}" href="{{ url_for('setup') }}">
-                                <i class="fas fa-cog"></i>
+                                <i class="fas fa-cog" data-fallback="⚙️"></i>
                                 Setup
                             </a>
                         </nav>
@@ -657,23 +661,38 @@
         
         // Check Font Awesome loading and provide fallbacks
         function checkFontAwesome() {
+            // Check if Font Awesome CSS is loaded
+            const fontAwesomeLink = document.querySelector('link[href*="font-awesome"]');
+            if (!fontAwesomeLink) {
+                console.warn('Font Awesome CSS not found, using emoji fallbacks');
+                document.querySelectorAll('.fas').forEach(icon => {
+                    icon.classList.add('font-awesome-fallback');
+                });
+                return;
+            }
+            
+            // Test if Font Awesome icons are actually rendering
             const testIcon = document.createElement('i');
             testIcon.className = 'fas fa-check';
             testIcon.style.position = 'absolute';
             testIcon.style.left = '-9999px';
+            testIcon.style.visibility = 'hidden';
             document.body.appendChild(testIcon);
             
             const computedStyle = window.getComputedStyle(testIcon, ':before');
             const fontFamily = computedStyle.getPropertyValue('font-family');
+            const content = computedStyle.getPropertyValue('content');
             
             document.body.removeChild(testIcon);
             
-            if (!fontFamily.includes('Font Awesome')) {
-                console.warn('Font Awesome not loaded, using emoji fallbacks');
-                // Add fallback class to all icons
+            // If Font Awesome is not working, use fallbacks
+            if (!fontFamily.includes('Font Awesome') || content === 'none' || content === '""') {
+                console.warn('Font Awesome not rendering properly, using emoji fallbacks');
                 document.querySelectorAll('.fas').forEach(icon => {
                     icon.classList.add('font-awesome-fallback');
                 });
+            } else {
+                console.log('Font Awesome loaded successfully');
             }
         }
         

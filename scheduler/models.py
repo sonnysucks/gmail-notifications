@@ -702,6 +702,116 @@ class Reminder:
 
 
 @dataclass
+class Correspondence:
+    """Email correspondence tracking for appointments"""
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    appointment_id: str = ""
+    client_id: str = ""
+    client_name: str = ""
+    client_email: str = ""
+    
+    # Email Details
+    email_type: str = ""  # contract_checklist, session_package, reminder, thank_you
+    subject: str = ""
+    body: str = ""
+    html_body: str = ""
+    
+    # Scheduling
+    scheduled_time: datetime = field(default_factory=datetime.now)
+    sent_time: Optional[datetime] = None
+    status: str = "pending"  # pending, sent, failed, cancelled
+    
+    # Email Tracking
+    email_message_id: Optional[str] = None
+    gmail_thread_id: Optional[str] = None
+    
+    # Attachments and Content
+    attachments: List[str] = field(default_factory=list)  # File paths or URLs
+    template_used: str = ""
+    
+    # Business Context
+    session_type: str = ""
+    appointment_date: datetime = field(default_factory=datetime.now)
+    
+    # Timestamps
+    created_at: datetime = field(default_factory=datetime.now)
+    updated_at: datetime = field(default_factory=datetime.now)
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert correspondence to dictionary"""
+        return {
+            'id': self.id,
+            'appointment_id': self.appointment_id,
+            'client_id': self.client_id,
+            'client_name': self.client_name,
+            'client_email': self.client_email,
+            'email_type': self.email_type,
+            'subject': self.subject,
+            'body': self.body,
+            'html_body': self.html_body,
+            'scheduled_time': self.scheduled_time.isoformat(),
+            'sent_time': self.sent_time.isoformat() if self.sent_time else None,
+            'status': self.status,
+            'email_message_id': self.email_message_id,
+            'gmail_thread_id': self.gmail_thread_id,
+            'attachments': self.attachments,
+            'template_used': self.template_used,
+            'session_type': self.session_type,
+            'appointment_date': self.appointment_date.isoformat(),
+            'created_at': self.created_at.isoformat(),
+            'updated_at': self.updated_at.isoformat()
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'Correspondence':
+        """Create correspondence from dictionary"""
+        return cls(
+            id=data.get('id', str(uuid.uuid4())),
+            appointment_id=data.get('appointment_id', ''),
+            client_id=data.get('client_id', ''),
+            client_name=data.get('client_name', ''),
+            client_email=data.get('client_email', ''),
+            email_type=data.get('email_type', ''),
+            subject=data.get('subject', ''),
+            body=data.get('body', ''),
+            html_body=data.get('html_body', ''),
+            scheduled_time=datetime.fromisoformat(data.get('scheduled_time', datetime.now().isoformat())),
+            sent_time=datetime.fromisoformat(data.get('sent_time')) if data.get('sent_time') else None,
+            status=data.get('status', 'pending'),
+            email_message_id=data.get('email_message_id'),
+            gmail_thread_id=data.get('gmail_thread_id'),
+            attachments=data.get('attachments', []),
+            template_used=data.get('template_used', ''),
+            session_type=data.get('session_type', ''),
+            appointment_date=datetime.fromisoformat(data.get('appointment_date', datetime.now().isoformat())),
+            created_at=datetime.fromisoformat(data.get('created_at', datetime.now().isoformat())),
+            updated_at=datetime.fromisoformat(data.get('updated_at', datetime.now().isoformat()))
+        )
+    
+    @property
+    def is_due(self) -> bool:
+        """Check if correspondence is due to be sent"""
+        return self.status == 'pending' and self.scheduled_time <= datetime.now()
+    
+    @property
+    def days_until_send(self) -> int:
+        """Days until scheduled send time"""
+        delta = self.scheduled_time.date() - datetime.now().date()
+        return delta.days
+    
+    @property
+    def email_type_display(self) -> str:
+        """Human-readable email type"""
+        type_mapping = {
+            'contract_checklist': 'Contract & Checklist',
+            'session_package': 'Session Package',
+            'reminder': 'Reminder',
+            'thank_you': 'Thank You & Marketing'
+        }
+        return type_mapping.get(self.email_type, self.email_type.title())
+
+
+@dataclass
 class ClientNote:
     """Individual client notes for better organization"""
     id: str = field(default_factory=lambda: str(uuid.uuid4()))

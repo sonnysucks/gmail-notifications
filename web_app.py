@@ -21,15 +21,20 @@ import yaml
 from datetime import datetime, timedelta
 import uuid
 from typing import Dict, Any, List, Optional
+import logging
 
 # Import ICS generator
 from utils.ics_generator import ICSGenerator, ICSAppointment
 
+# Set up logging
+logger = logging.getLogger(__name__)
+
 # Import our existing modules
 try:
-    from scheduler.models import Client, Appointment, BabyMilestone, BirthdaySession, ClientNote, Package
+    from scheduler.models import Client, Appointment, BabyMilestone, BirthdaySession, ClientNote, Package, Correspondence
     from scheduler.crm_manager import CRMManager
     from scheduler.appointment_scheduler import AppointmentScheduler
+    from scheduler.correspondence_manager import CorrespondenceManager
     from gmail.gmail_manager import GmailManager
     from calendar_integration.calendar_manager import CalendarManager
     from config.config_manager import ConfigManager
@@ -96,6 +101,7 @@ try:
     config_manager = ConfigManager()
     crm_manager = CRMManager(config_manager)
     appointment_scheduler = AppointmentScheduler(config_manager)
+    correspondence_manager = CorrespondenceManager(config_manager)
     gmail_manager = GmailManager(config_manager)
     calendar_manager = CalendarManager(config_manager)
 except NameError:
@@ -406,6 +412,13 @@ def new_appointment():
                 **additional_params  # Pass any additional parameters
             )
             
+            # Schedule correspondence emails for the new appointment
+            try:
+                correspondence_manager.schedule_appointment_emails(appointment)
+                logger.info(f"Scheduled correspondence emails for appointment {appointment.id}")
+            except Exception as e:
+                logger.error(f"Failed to schedule correspondence emails for appointment {appointment.id}: {e}")
+            
             # Generate ICS file as fallback for calendar integration
             try:
                 ics_generator = ICSGenerator(config_manager.get('business.name', 'Photography Business'))
@@ -630,19 +643,8 @@ def analytics():
 @login_required
 def customer_info(client_id=None):
     """Customer information and pricing page"""
-    # Get session types for pricing display
-    session_types_dict = config_manager.get('appointments.session_types', {})
-    
-    # Convert session types dictionary to template format
-    session_types = {}
-    for key, session in session_types_dict.items():
-        session_types[key] = {
-            'name': session.get('name', ''),
-            'duration': session.get('duration', 60),
-            'base_price': session.get('base_price', 0.0),
-            'description': session.get('description', ''),
-            'props': session.get('props', [])
-        }
+    # Get all packages instead of session types
+    packages = crm_manager.get_all_packages()
     
     # Get client data if client_id is provided
     client = None
@@ -650,7 +652,7 @@ def customer_info(client_id=None):
         client = crm_manager.get_client(client_id)
     
     return render_template('customer_info.html', 
-                         session_types=session_types, 
+                         packages=packages, 
                          client=client,
                          client_id=client_id)
 
@@ -691,6 +693,7 @@ def delete_appointment(appointment_id):
             return jsonify({'success': False, 'error': 'Failed to delete appointment'}), 500
             
     except Exception as e:
+        logger.error(f"Error deleting appointment {appointment_id}: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/api/clients')
@@ -766,6 +769,12 @@ def backup_restore():
     """Backup and restore system page"""
     return render_template('backup_restore.html')
 
+@app.route('/correspondence')
+@login_required
+def correspondence():
+    """Correspondence management page"""
+    return render_template('correspondence.html')
+
 @app.route('/packages')
 @login_required
 def packages():
@@ -791,18 +800,47 @@ def generate_client_packet(client_id):
         if not packages:
             packages = crm_manager.get_active_packages()[:3]  # Get top 3 packages
         
-        # Get selected package if provided
-        selected_package = None
-        package_id = request.args.get('package_id')
-        if package_id:
-            selected_package = crm_manager.get_package(package_id)
+        # Get selected packages if provided
+        selected_packages = []
+        package_data = request.args.get('package_data')
+        package_ids = request.args.get('package_ids')
+        package_id = request.args.get('package_id')  # Legacy support
+        
+        if package_data:
+            # New format with quantities
+            try:
+                import json
+                package_list = json.loads(package_data)
+                for pkg_info in package_list:
+                    pkg = crm_manager.get_package(pkg_info['id'])
+                    if pkg:
+                        # Add quantity information to package
+                        pkg.quantity = pkg_info.get('quantity', 1)
+                        selected_packages.append(pkg)
+            except (json.JSONDecodeError, KeyError) as e:
+                logger.error(f"Error parsing package data: {e}")
+        elif package_ids:
+            # Multiple packages selected (legacy)
+            package_id_list = package_ids.split(',')
+            for pkg_id in package_id_list:
+                pkg = crm_manager.get_package(pkg_id.strip())
+                if pkg:
+                    pkg.quantity = 1  # Default quantity
+                    selected_packages.append(pkg)
+        elif package_id:
+            # Single package selected (legacy)
+            pkg = crm_manager.get_package(package_id)
+            if pkg:
+                pkg.quantity = 1  # Default quantity
+                selected_packages.append(pkg)
         
         # Generate HTML content for PDF
         html_content = render_template('client_packet_template.html', 
                                      client=client, 
                                      appointments=appointments,
                                      packages=packages,
-                                     selected_package=selected_package,
+                                     selected_packages=selected_packages,
+                                     selected_package=selected_packages[0] if selected_packages else None,  # Legacy support
                                      business=config_manager.get_business_info())
         
         # For now, return the HTML content (in production, you'd use a PDF library like WeasyPrint)
@@ -1383,6 +1421,216 @@ def delete_package(package_id):
             return jsonify({'success': False, 'error': 'Failed to delete package'}), 500
             
     except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+# Correspondence API endpoints
+
+@app.route('/api/correspondence')
+@login_required
+def api_correspondence():
+    """Get all correspondence"""
+    try:
+        # Get all appointments to get their correspondence
+        appointments = crm_manager.get_all_appointments()
+        all_correspondence = []
+        
+        for appointment in appointments:
+            correspondence = crm_manager.get_appointment_correspondence(appointment.id)
+            all_correspondence.extend(correspondence)
+        
+        # Sort by scheduled time
+        all_correspondence.sort(key=lambda x: x.scheduled_time)
+        
+        return jsonify({
+            'success': True,
+            'correspondence': [corr.to_dict() for corr in all_correspondence]
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting correspondence: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/<correspondence_id>/send', methods=['POST'])
+@login_required
+def send_correspondence_email(correspondence_id):
+    """Send a specific correspondence email immediately"""
+    try:
+        correspondence = crm_manager.get_correspondence(correspondence_id)
+        if not correspondence:
+            return jsonify({'success': False, 'error': 'Correspondence not found'}), 404
+        
+        # Try to send the email
+        if correspondence_manager._is_gmail_configured():
+            success = correspondence_manager._send_via_gmail(correspondence)
+        else:
+            success = correspondence_manager._send_via_smtp(correspondence)
+        
+        if success:
+            crm_manager.update_correspondence_status(correspondence_id, 'sent', correspondence.email_message_id)
+            return jsonify({'success': True, 'message': 'Email sent successfully'})
+        else:
+            crm_manager.update_correspondence_status(correspondence_id, 'failed')
+            return jsonify({'success': False, 'error': 'Failed to send email'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error sending correspondence email: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/<correspondence_id>/cancel', methods=['POST'])
+@login_required
+def cancel_correspondence_email(correspondence_id):
+    """Cancel a pending correspondence email"""
+    try:
+        success = crm_manager.update_correspondence_status(correspondence_id, 'cancelled')
+        if success:
+            return jsonify({'success': True, 'message': 'Email cancelled successfully'})
+        else:
+            return jsonify({'success': False, 'error': 'Failed to cancel email'}), 500
+            
+    except Exception as e:
+        logger.error(f"Error cancelling correspondence email: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/send-pending', methods=['POST'])
+@login_required
+def send_pending_correspondence():
+    """Send all pending correspondence emails"""
+    try:
+        sent_count = correspondence_manager.send_pending_emails()
+        return jsonify({
+            'success': True,
+            'message': f'Sent {sent_count} pending emails',
+            'sent_count': sent_count
+        })
+        
+    except Exception as e:
+        logger.error(f"Error sending pending correspondence: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/<appointment_id>')
+@login_required
+def get_appointment_correspondence(appointment_id):
+    """Get correspondence for a specific appointment"""
+    try:
+        correspondence = crm_manager.get_appointment_correspondence(appointment_id)
+        return jsonify({
+            'success': True,
+            'correspondence': [corr.to_dict() for corr in correspondence]
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting appointment correspondence: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/backfill', methods=['POST'])
+@login_required
+def backfill_correspondence():
+    """Backfill correspondence for all appointments that don't have it"""
+    try:
+        # Get all appointments
+        appointments = crm_manager.get_all_appointments()
+        
+        # Filter to only future appointments
+        now = datetime.now()
+        future_appointments = [apt for apt in appointments if apt.start_time > now]
+        
+        processed_count = 0
+        generated_count = 0
+        skipped_count = 0
+        
+        for appointment in future_appointments:
+            # Check if correspondence already exists
+            existing_correspondence = crm_manager.get_appointment_correspondence(appointment.id)
+            if existing_correspondence:
+                skipped_count += 1
+                continue
+            
+            # Get client information
+            client = crm_manager.get_client(appointment.client_id)
+            if not client:
+                continue
+            
+            # Generate correspondence emails
+            correspondence_list = correspondence_manager.schedule_appointment_emails(appointment)
+            
+            if correspondence_list:
+                generated_count += len(correspondence_list)
+                processed_count += 1
+        
+        return jsonify({
+            'success': True,
+            'message': f'Backfill completed successfully',
+            'processed_appointments': processed_count,
+            'generated_count': generated_count,
+            'skipped_count': skipped_count,
+            'total_future_appointments': len(future_appointments)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error backfilling correspondence: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/<appointment_id>/send-all', methods=['POST'])
+@login_required
+def send_all_appointment_emails(appointment_id):
+    """Send all pending emails for a specific appointment"""
+    try:
+        correspondence = crm_manager.get_appointment_correspondence(appointment_id)
+        pending_correspondence = [corr for corr in correspondence if corr.status == 'pending']
+        
+        sent_count = 0
+        for corr in pending_correspondence:
+            try:
+                # Try to send the email
+                if correspondence_manager._is_gmail_configured():
+                    success = correspondence_manager._send_via_gmail(corr)
+                else:
+                    success = correspondence_manager._send_via_smtp(corr)
+                
+                if success:
+                    crm_manager.update_correspondence_status(corr.id, 'sent', corr.email_message_id)
+                    sent_count += 1
+                else:
+                    crm_manager.update_correspondence_status(corr.id, 'failed')
+                    
+            except Exception as e:
+                logger.error(f"Error sending correspondence {corr.id}: {e}")
+                crm_manager.update_correspondence_status(corr.id, 'failed')
+        
+        return jsonify({
+            'success': True,
+            'message': f'Sent {sent_count} emails for appointment',
+            'sent_count': sent_count,
+            'total_pending': len(pending_correspondence)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error sending all appointment emails: {e}")
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/correspondence/<appointment_id>/cancel-all', methods=['POST'])
+@login_required
+def cancel_all_appointment_emails(appointment_id):
+    """Cancel all pending emails for a specific appointment"""
+    try:
+        correspondence = crm_manager.get_appointment_correspondence(appointment_id)
+        pending_correspondence = [corr for corr in correspondence if corr.status == 'pending']
+        
+        cancelled_count = 0
+        for corr in pending_correspondence:
+            success = crm_manager.update_correspondence_status(corr.id, 'cancelled')
+            if success:
+                cancelled_count += 1
+        
+        return jsonify({
+            'success': True,
+            'message': f'Cancelled {cancelled_count} emails for appointment',
+            'cancelled_count': cancelled_count,
+            'total_pending': len(pending_correspondence)
+        })
+        
+    except Exception as e:
+        logger.error(f"Error cancelling all appointment emails: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 # Error handlers

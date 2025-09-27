@@ -10,10 +10,16 @@
             <h1 class="h2 mb-1">Package Management</h1>
             <p class="text-muted mb-0">Create and manage photography packages with customizable pricing</p>
         </div>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#packageModal" onclick="openPackageModal()">
-            <i class="fas fa-plus me-2"></i>
-            New Package
-        </button>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-info" onclick="syncPackages()" title="Sync packages across all pages">
+                <i class="fas fa-sync me-2"></i>
+                Sync Packages
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#packageModal" onclick="openPackageModal()">
+                <i class="fas fa-plus me-2"></i>
+                New Package
+            </button>
+        </div>
     </div>
 
     <!-- Package Categories -->
@@ -691,6 +697,48 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
         });
     }
 });
+
+function syncPackages() {
+    // Show loading state
+    const syncBtn = document.querySelector('[onclick="syncPackages()"]');
+    const originalText = syncBtn.innerHTML;
+    syncBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Syncing...';
+    syncBtn.disabled = true;
+    
+    // Reload packages to ensure consistency
+    fetch('/api/packages')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update the display
+                displayPackages(data.packages);
+                
+                // Show success message
+                showAlert(`✅ Packages synchronized successfully! Found ${data.packages.length} packages.`, 'success');
+                
+                // Log package details for verification
+                console.log('📦 Synchronized packages:', data.packages.map(pkg => ({
+                    name: pkg.name,
+                    category: pkg.category,
+                    price: pkg.base_price,
+                    active: pkg.is_active,
+                    featured: pkg.is_featured
+                })));
+                
+            } else {
+                throw new Error(data.error || 'Failed to sync packages');
+            }
+        })
+        .catch(error => {
+            console.error('Error syncing packages:', error);
+            showAlert('❌ Failed to sync packages: ' + error.message, 'danger');
+        })
+        .finally(() => {
+            // Restore button state
+            syncBtn.innerHTML = originalText;
+            syncBtn.disabled = false;
+        });
+}
 
 function showAlert(message, type) {
     const alertDiv = document.createElement('div');

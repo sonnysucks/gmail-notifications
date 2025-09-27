@@ -10,7 +10,7 @@ from pathlib import Path
 import sqlite3
 from collections import defaultdict
 
-from .models import Client, Appointment, ClientNote, MarketingCampaign, Package
+from .models import Client, Appointment, ClientNote, MarketingCampaign, Package, Correspondence
 from config.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
@@ -158,6 +158,32 @@ class CRMManager:
                     is_active BOOLEAN,
                     is_featured BOOLEAN,
                     display_order INTEGER,
+                    created_at TEXT,
+                    updated_at TEXT
+                )
+            ''')
+            
+            # Correspondence table
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS correspondence (
+                    id TEXT PRIMARY KEY,
+                    appointment_id TEXT,
+                    client_id TEXT,
+                    client_name TEXT,
+                    client_email TEXT,
+                    email_type TEXT,
+                    subject TEXT,
+                    body TEXT,
+                    html_body TEXT,
+                    scheduled_time TEXT,
+                    sent_time TEXT,
+                    status TEXT,
+                    email_message_id TEXT,
+                    gmail_thread_id TEXT,
+                    attachments TEXT,
+                    template_used TEXT,
+                    session_type TEXT,
+                    appointment_date TEXT,
                     created_at TEXT,
                     updated_at TEXT
                 )
@@ -809,6 +835,25 @@ class CRMManager:
             logger.error(f"Failed to get all appointments: {e}")
             return []
     
+    def get_appointment(self, appointment_id: str) -> Optional[Appointment]:
+        """Get a specific appointment by ID"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM appointments WHERE id = ?', (appointment_id,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return self._row_to_appointment(row)
+            else:
+                return None
+                
+        except Exception as e:
+            logger.error(f"Failed to get appointment {appointment_id}: {e}")
+            return None
+
     def delete_appointment(self, appointment_id: str) -> bool:
         """Delete an appointment from the database"""
         try:
@@ -1080,6 +1125,195 @@ class CRMManager:
             is_active=bool(row[15]),
             is_featured=bool(row[16]),
             display_order=row[17] or 0,
+            created_at=datetime.fromisoformat(row[18]) if row[18] else datetime.now(),
+            updated_at=datetime.fromisoformat(row[19]) if row[19] else datetime.now()
+        )
+    
+    # Correspondence Management Methods
+    
+    def add_correspondence(self, correspondence: Correspondence) -> bool:
+        """Add a new correspondence record"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                INSERT INTO correspondence (
+                    id, appointment_id, client_id, client_name, client_email,
+                    email_type, subject, body, html_body, scheduled_time,
+                    sent_time, status, email_message_id, gmail_thread_id,
+                    attachments, template_used, session_type, appointment_date,
+                    created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                correspondence.id,
+                correspondence.appointment_id,
+                correspondence.client_id,
+                correspondence.client_name,
+                correspondence.client_email,
+                correspondence.email_type,
+                correspondence.subject,
+                correspondence.body,
+                correspondence.html_body,
+                correspondence.scheduled_time.isoformat(),
+                correspondence.sent_time.isoformat() if correspondence.sent_time else None,
+                correspondence.status,
+                correspondence.email_message_id,
+                correspondence.gmail_thread_id,
+                json.dumps(correspondence.attachments),
+                correspondence.template_used,
+                correspondence.session_type,
+                correspondence.appointment_date.isoformat(),
+                correspondence.created_at.isoformat(),
+                correspondence.updated_at.isoformat()
+            ))
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Correspondence {correspondence.id} added successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to add correspondence: {e}")
+            return False
+    
+    def get_correspondence(self, correspondence_id: str) -> Optional[Correspondence]:
+        """Get a specific correspondence by ID"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM correspondence WHERE id = ?', (correspondence_id,))
+            row = cursor.fetchone()
+            conn.close()
+            
+            if row:
+                return self._row_to_correspondence(row)
+            else:
+                return None
+                
+        except Exception as e:
+            logger.error(f"Failed to get correspondence {correspondence_id}: {e}")
+            return None
+    
+    def get_appointment_correspondence(self, appointment_id: str) -> List[Correspondence]:
+        """Get all correspondence for a specific appointment"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('SELECT * FROM correspondence WHERE appointment_id = ? ORDER BY scheduled_time', (appointment_id,))
+            rows = cursor.fetchall()
+            conn.close()
+            
+            correspondence = []
+            for row in rows:
+                try:
+                    corr = self._row_to_correspondence(row)
+                    correspondence.append(corr)
+                except Exception as e:
+                    logger.warning(f"Failed to convert correspondence row: {e}")
+                    continue
+            
+            return correspondence
+            
+        except Exception as e:
+            logger.error(f"Failed to get appointment correspondence: {e}")
+            return []
+    
+    def get_pending_correspondence(self) -> List[Correspondence]:
+        """Get all pending correspondence that should be sent"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            now = datetime.now().isoformat()
+            cursor.execute('SELECT * FROM correspondence WHERE status = "pending" AND scheduled_time <= ? ORDER BY scheduled_time', (now,))
+            rows = cursor.fetchall()
+            conn.close()
+            
+            correspondence = []
+            for row in rows:
+                try:
+                    corr = self._row_to_correspondence(row)
+                    correspondence.append(corr)
+                except Exception as e:
+                    logger.warning(f"Failed to convert correspondence row: {e}")
+                    continue
+            
+            return correspondence
+            
+        except Exception as e:
+            logger.error(f"Failed to get pending correspondence: {e}")
+            return []
+    
+    def update_correspondence_status(self, correspondence_id: str, status: str, email_message_id: str = None) -> bool:
+        """Update correspondence status and email message ID"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('''
+                UPDATE correspondence 
+                SET status = ?, email_message_id = ?, sent_time = ?, updated_at = ?
+                WHERE id = ?
+            ''', (status, email_message_id, datetime.now().isoformat(), datetime.now().isoformat(), correspondence_id))
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Correspondence {correspondence_id} status updated to {status}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to update correspondence status: {e}")
+            return False
+    
+    def delete_correspondence(self, correspondence_id: str) -> bool:
+        """Delete a correspondence record"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            cursor = conn.cursor()
+            
+            cursor.execute('DELETE FROM correspondence WHERE id = ?', (correspondence_id,))
+            
+            if cursor.rowcount == 0:
+                conn.close()
+                logger.warning(f"Correspondence {correspondence_id} not found for deletion")
+                return False
+            
+            conn.commit()
+            conn.close()
+            
+            logger.info(f"Correspondence {correspondence_id} deleted successfully")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Failed to delete correspondence {correspondence_id}: {e}")
+            return False
+    
+    def _row_to_correspondence(self, row: Tuple) -> Correspondence:
+        """Convert database row to Correspondence object"""
+        return Correspondence(
+            id=row[0],
+            appointment_id=row[1] or '',
+            client_id=row[2] or '',
+            client_name=row[3] or '',
+            client_email=row[4] or '',
+            email_type=row[5] or '',
+            subject=row[6] or '',
+            body=row[7] or '',
+            html_body=row[8] or '',
+            scheduled_time=datetime.fromisoformat(row[9]) if row[9] else datetime.now(),
+            sent_time=datetime.fromisoformat(row[10]) if row[10] else None,
+            status=row[11] or 'pending',
+            email_message_id=row[12],
+            gmail_thread_id=row[13],
+            attachments=json.loads(row[14]) if row[14] else [],
+            template_used=row[15] or '',
+            session_type=row[16] or '',
+            appointment_date=datetime.fromisoformat(row[17]) if row[17] else datetime.now(),
             created_at=datetime.fromisoformat(row[18]) if row[18] else datetime.now(),
             updated_at=datetime.fromisoformat(row[19]) if row[19] else datetime.now()
         )

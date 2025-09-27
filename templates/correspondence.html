@@ -1,0 +1,727 @@
+{% extends "base.html" %}
+
+{% block title %}Correspondence - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Correspondence</h1>
+            <p class="text-muted mb-0">Track and manage appointment emails</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-info" onclick="refreshCorrespondence()" title="Refresh correspondence data">
+                <i class="fas fa-sync me-2"></i>
+                Refresh
+            </button>
+            <button class="btn btn-outline-warning" onclick="backfillCorrespondence()" title="Generate correspondence for all appointments">
+                <i class="fas fa-magic me-2"></i>
+                Backfill All
+            </button>
+            <button class="btn btn-outline-warning" onclick="sendPendingEmails()" title="Send all pending emails">
+                <i class="fas fa-paper-plane me-2"></i>
+                Send Pending
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="statusFilter" class="form-label">Status</label>
+                            <select class="form-select" id="statusFilter" onchange="filterCorrespondence()">
+                                <option value="">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="sent">Sent</option>
+                                <option value="failed">Failed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="typeFilter" class="form-label">Email Type</label>
+                            <select class="form-select" id="typeFilter" onchange="filterCorrespondence()">
+                                <option value="">All Types</option>
+                                <option value="contract_checklist">Contract & Checklist</option>
+                                <option value="session_package">Session Package</option>
+                                <option value="reminder">Reminder</option>
+                                <option value="thank_you">Thank You & Marketing</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="clientFilter" class="form-label">Client</label>
+                            <select class="form-select" id="clientFilter" onchange="filterCorrespondence()">
+                                <option value="">All Clients</option>
+                                <!-- Clients will be loaded dynamically -->
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="dateFilter" class="form-label">Date Range</label>
+                            <select class="form-select" id="dateFilter" onchange="filterCorrespondence()">
+                                <option value="">All Dates</option>
+                                <option value="today">Today</option>
+                                <option value="week">This Week</option>
+                                <option value="month">This Month</option>
+                                <option value="upcoming">Upcoming</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Correspondence Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-envelope me-2"></i>
+                Email Correspondence
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="correspondenceTable">
+                    <thead>
+                        <tr>
+                            <th>Client & Session</th>
+                            <th>Email Schedule</th>
+                            <th>Status Overview</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="correspondenceTableBody">
+                        <!-- Correspondence will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Empty State -->
+            <div class="text-center py-5 d-none" id="emptyState">
+                <i class="fas fa-envelope-open fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No correspondence found</h5>
+                <p class="text-muted">Create appointments to generate automated emails</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Email Preview Modal -->
+<div class="modal fade" id="emailPreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="emailPreviewModalLabel">Email Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <strong>To:</strong> <span id="previewTo"></span><br>
+                    <strong>Subject:</strong> <span id="previewSubject"></span><br>
+                    <strong>Scheduled:</strong> <span id="previewScheduled"></span>
+                </div>
+                <div class="border rounded p-3" style="max-height: 400px; overflow-y: auto;">
+                    <div id="previewContent"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendEmailNow()" id="sendNowBtn">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Send Now
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send Email Modal -->
+<div class="modal fade" id="sendEmailModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send Email</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to send this email now?</p>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    This will send the email immediately, regardless of the scheduled time.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="confirmSendEmail()">
+                    <i class="fas fa-paper-plane me-2"></i>
+                    Send Email
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.status-badge {
+    font-size: 0.8rem;
+}
+
+.email-type-badge {
+    font-size: 0.75rem;
+}
+
+.correspondence-row {
+    cursor: pointer;
+}
+
+.correspondence-row:hover {
+    background-color: #f8f9fa;
+}
+
+.action-buttons {
+    white-space: nowrap;
+}
+
+.action-buttons .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.8rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let correspondenceData = [];
+let currentCorrespondenceId = null;
+
+// Load correspondence on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadCorrespondence();
+    loadClients();
+});
+
+function loadCorrespondence() {
+    fetch('/api/correspondence')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                correspondenceData = data.correspondence;
+                displayCorrespondence(correspondenceData);
+            } else {
+                showAlert('Failed to load correspondence: ' + data.error, 'danger');
+            }
+        })
+        .catch(error => {
+            console.error('Error loading correspondence:', error);
+            showAlert('Error loading correspondence', 'danger');
+        });
+}
+
+function loadClients() {
+    fetch('/api/clients')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                populateClientFilter(data.clients);
+            }
+        })
+        .catch(error => {
+            console.error('Error loading clients:', error);
+        });
+}
+
+function populateClientFilter(clients) {
+    const clientFilter = document.getElementById('clientFilter');
+    clientFilter.innerHTML = '<option value="">All Clients</option>';
+    
+    clients.forEach(client => {
+        const option = document.createElement('option');
+        option.value = client.id;
+        option.textContent = client.name;
+        clientFilter.appendChild(option);
+    });
+}
+
+function displayCorrespondence(correspondence) {
+    const tbody = document.getElementById('correspondenceTableBody');
+    const emptyState = document.getElementById('emptyState');
+    
+    if (correspondence.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('d-none');
+        return;
+    }
+    
+    emptyState.classList.add('d-none');
+    
+    // Group correspondence by appointment
+    const groupedCorrespondence = {};
+    correspondence.forEach(corr => {
+        if (!groupedCorrespondence[corr.appointment_id]) {
+            groupedCorrespondence[corr.appointment_id] = {
+                appointment_id: corr.appointment_id,
+                client_name: corr.client_name,
+                client_email: corr.client_email,
+                session_type: corr.session_type,
+                appointment_date: corr.appointment_date,
+                emails: []
+            };
+        }
+        groupedCorrespondence[corr.appointment_id].emails.push(corr);
+    });
+    
+    // Sort emails within each group by scheduled time
+    Object.values(groupedCorrespondence).forEach(group => {
+        group.emails.sort((a, b) => new Date(a.scheduled_time) - new Date(b.scheduled_time));
+    });
+    
+    // Convert to array and sort by appointment date
+    const appointmentGroups = Object.values(groupedCorrespondence).sort((a, b) => 
+        new Date(a.appointment_date) - new Date(b.appointment_date)
+    );
+    
+    tbody.innerHTML = appointmentGroups.map(group => {
+        const pendingCount = group.emails.filter(email => email.status === 'pending').length;
+        const sentCount = group.emails.filter(email => email.status === 'sent').length;
+        const failedCount = group.emails.filter(email => email.status === 'failed').length;
+        const cancelledCount = group.emails.filter(email => email.status === 'cancelled').length;
+        
+        return `
+            <tr class="correspondence-row" onclick="toggleEmailDetails('${group.appointment_id}')">
+                <td>
+                    <div class="d-flex align-items-center">
+                        <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                            ${group.client_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                            <div class="fw-bold">${group.client_name}</div>
+                            <small class="text-muted">${group.client_email}</small>
+                            <div class="small text-muted mt-1">
+                                ${group.session_type} • ${formatDate(group.appointment_date)}
+                            </div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <div class="email-schedule">
+                        ${group.emails.map(email => `
+                            <div class="d-flex align-items-center mb-1">
+                                <span class="badge email-type-badge ${getEmailTypeClass(email.email_type)} me-2">
+                                    ${getEmailTypeDisplay(email.email_type)}
+                                </span>
+                                <small class="text-muted">${formatDateTime(email.scheduled_time)}</small>
+                            </div>
+                        `).join('')}
+                    </div>
+                </td>
+                <td>
+                    <div class="status-overview">
+                        ${pendingCount > 0 ? `<span class="badge bg-warning me-1">${pendingCount} Pending</span>` : ''}
+                        ${sentCount > 0 ? `<span class="badge bg-success me-1">${sentCount} Sent</span>` : ''}
+                        ${failedCount > 0 ? `<span class="badge bg-danger me-1">${failedCount} Failed</span>` : ''}
+                        ${cancelledCount > 0 ? `<span class="badge bg-secondary me-1">${cancelledCount} Cancelled</span>` : ''}
+                    </div>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <button class="btn btn-outline-primary btn-sm" onclick="event.stopPropagation(); viewAppointmentEmails('${group.appointment_id}')" title="View All Emails">
+                            <i class="fas fa-list"></i>
+                        </button>
+                        ${pendingCount > 0 ? `
+                            <button class="btn btn-outline-success btn-sm" onclick="event.stopPropagation(); sendAllPendingEmails('${group.appointment_id}')" title="Send All Pending">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        ` : ''}
+                        ${pendingCount > 0 ? `
+                            <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); cancelAllPendingEmails('${group.appointment_id}')" title="Cancel All Pending">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function getEmailTypeClass(emailType) {
+    const classes = {
+        'contract_checklist': 'bg-primary',
+        'session_package': 'bg-info',
+        'reminder': 'bg-warning',
+        'thank_you': 'bg-success'
+    };
+    return classes[emailType] || 'bg-secondary';
+}
+
+function getEmailTypeDisplay(emailType) {
+    const displays = {
+        'contract_checklist': 'Contract & Checklist',
+        'session_package': 'Session Package',
+        'reminder': 'Reminder',
+        'thank_you': 'Thank You & Marketing'
+    };
+    return displays[emailType] || emailType;
+}
+
+function getStatusClass(status) {
+    const classes = {
+        'pending': 'bg-warning',
+        'sent': 'bg-success',
+        'failed': 'bg-danger',
+        'cancelled': 'bg-secondary'
+    };
+    return classes[status] || 'bg-secondary';
+}
+
+function formatDateTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+}
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+}
+
+function getTimeUntil(dateString) {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = date - now;
+    const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+        return `${Math.abs(diffDays)} days ago`;
+    } else if (diffDays === 0) {
+        return 'Today';
+    } else {
+        return `In ${diffDays} days`;
+    }
+}
+
+function filterCorrespondence() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const typeFilter = document.getElementById('typeFilter').value;
+    const clientFilter = document.getElementById('clientFilter').value;
+    const dateFilter = document.getElementById('dateFilter').value;
+    
+    let filtered = correspondenceData;
+    
+    if (statusFilter) {
+        filtered = filtered.filter(corr => corr.status === statusFilter);
+    }
+    
+    if (typeFilter) {
+        filtered = filtered.filter(corr => corr.email_type === typeFilter);
+    }
+    
+    if (clientFilter) {
+        filtered = filtered.filter(corr => corr.client_id === clientFilter);
+    }
+    
+    if (dateFilter) {
+        const now = new Date();
+        filtered = filtered.filter(corr => {
+            const scheduledDate = new Date(corr.scheduled_time);
+            
+            switch (dateFilter) {
+                case 'today':
+                    return scheduledDate.toDateString() === now.toDateString();
+                case 'week':
+                    const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    return scheduledDate >= weekAgo;
+                case 'month':
+                    const monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    return scheduledDate >= monthAgo;
+                case 'upcoming':
+                    return scheduledDate > now;
+                default:
+                    return true;
+            }
+        });
+    }
+    
+    displayCorrespondence(filtered);
+}
+
+function previewEmail(correspondenceId) {
+    const correspondence = correspondenceData.find(corr => corr.id === correspondenceId);
+    if (!correspondence) return;
+    
+    document.getElementById('previewTo').textContent = correspondence.client_email;
+    document.getElementById('previewSubject').textContent = correspondence.subject;
+    document.getElementById('previewScheduled').textContent = formatDateTime(correspondence.scheduled_time);
+    document.getElementById('previewContent').innerHTML = correspondence.html_body || correspondence.body;
+    
+    currentCorrespondenceId = correspondenceId;
+    
+    const modal = new bootstrap.Modal(document.getElementById('emailPreviewModal'));
+    modal.show();
+}
+
+function sendEmailNow(correspondenceId) {
+    currentCorrespondenceId = correspondenceId;
+    const modal = new bootstrap.Modal(document.getElementById('sendEmailModal'));
+    modal.show();
+}
+
+function confirmSendEmail() {
+    if (!currentCorrespondenceId) return;
+    
+    fetch(`/api/correspondence/${currentCorrespondenceId}/send`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Email sent successfully', 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to send email: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending email:', error);
+        showAlert('Error sending email', 'danger');
+    })
+    .finally(() => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('sendEmailModal'));
+        modal.hide();
+    });
+}
+
+function cancelEmail(correspondenceId) {
+    if (!confirm('Are you sure you want to cancel this email?')) return;
+    
+    fetch(`/api/correspondence/${correspondenceId}/cancel`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert('Email cancelled successfully', 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to cancel email: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error cancelling email:', error);
+        showAlert('Error cancelling email', 'danger');
+    });
+}
+
+function refreshCorrespondence() {
+    loadCorrespondence();
+    showAlert('Correspondence refreshed', 'info');
+}
+
+function sendPendingEmails() {
+    fetch('/api/correspondence/send-pending', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`Sent ${data.sent_count} pending emails`, 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to send pending emails: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending pending emails:', error);
+        showAlert('Error sending pending emails', 'danger');
+    });
+}
+
+function backfillCorrespondence() {
+    if (!confirm('This will generate correspondence emails for all appointments that don\'t have them. Continue?')) {
+        return;
+    }
+    
+    // Show loading state
+    const backfillBtn = document.querySelector('[onclick="backfillCorrespondence()"]');
+    const originalText = backfillBtn.innerHTML;
+    backfillBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Backfilling...';
+    backfillBtn.disabled = true;
+    
+    fetch('/api/correspondence/backfill', {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`Backfill completed! Generated ${data.generated_count} emails for ${data.processed_appointments} appointments`, 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to backfill correspondence: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error backfilling correspondence:', error);
+        showAlert('Error backfilling correspondence', 'danger');
+    })
+    .finally(() => {
+        // Restore button state
+        backfillBtn.innerHTML = originalText;
+        backfillBtn.disabled = false;
+    });
+}
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.querySelector('.container-fluid').insertBefore(alertDiv, document.querySelector('.container-fluid').firstChild);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function viewAppointmentEmails(appointmentId) {
+    // Get correspondence for this specific appointment
+    fetch(`/api/correspondence/${appointmentId}`)
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAppointmentEmailsModal(data.correspondence);
+        } else {
+            showAlert('Failed to load appointment emails: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error loading appointment emails:', error);
+        showAlert('Error loading appointment emails', 'danger');
+    });
+}
+
+function showAppointmentEmailsModal(correspondence) {
+    const modalHtml = `
+        <div class="modal fade" id="appointmentEmailsModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Email Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        ${correspondence.map(email => `
+                            <div class="card mb-3">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge ${getEmailTypeClass(email.email_type)} me-2">
+                                            ${getEmailTypeDisplay(email.email_type)}
+                                        </span>
+                                        <span class="badge ${getStatusClass(email.status)}">
+                                            ${email.status.charAt(0).toUpperCase() + email.status.slice(1)}
+                                        </span>
+                                    </div>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-outline-primary" onclick="previewEmail('${email.id}')" title="Preview">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        ${email.status === 'pending' ? `
+                                            <button class="btn btn-outline-success" onclick="sendEmailNow('${email.id}')" title="Send Now">
+                                                <i class="fas fa-paper-plane"></i>
+                                            </button>
+                                            <button class="btn btn-outline-danger" onclick="cancelEmail('${email.id}')" title="Cancel">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="card-title">${email.subject}</h6>
+                                    <p class="card-text text-muted small">
+                                        Scheduled: ${formatDateTime(email.scheduled_time)}
+                                        ${email.sent_time ? `<br>Sent: ${formatDateTime(email.sent_time)}` : ''}
+                                    </p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('appointmentEmailsModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('appointmentEmailsModal'));
+    modal.show();
+}
+
+function sendAllPendingEmails(appointmentId) {
+    if (!confirm('Send all pending emails for this appointment?')) {
+        return;
+    }
+    
+    fetch(`/api/correspondence/${appointmentId}/send-all`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`Sent ${data.sent_count} emails for this appointment`, 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to send emails: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error sending emails:', error);
+        showAlert('Error sending emails', 'danger');
+    });
+}
+
+function cancelAllPendingEmails(appointmentId) {
+    if (!confirm('Cancel all pending emails for this appointment?')) {
+        return;
+    }
+    
+    fetch(`/api/correspondence/${appointmentId}/cancel-all`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showAlert(`Cancelled ${data.cancelled_count} emails for this appointment`, 'success');
+            loadCorrespondence(); // Refresh the list
+        } else {
+            showAlert('Failed to cancel emails: ' + data.error, 'danger');
+        }
+    })
+    .catch(error => {
+        console.error('Error cancelling emails:', error);
+        showAlert('Error cancelling emails', 'danger');
+    });
+}
+
+function toggleEmailDetails(appointmentId) {
+    // This could be expanded to show/hide email details inline
+    viewAppointmentEmails(appointmentId);
+}
+</script>
+{% endblock %}

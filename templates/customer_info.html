@@ -17,9 +17,13 @@
             {% endif %}
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-success" onclick="generateClientPacket()">
-                <i class="fas fa-download me-2"></i>
-                Generate Client Packet
+            <button class="btn btn-outline-primary" onclick="downloadContract()">
+                <i class="fas fa-file-contract me-2"></i>
+                Contract
+            </button>
+            <button class="btn btn-outline-success" onclick="downloadChecklist()">
+                <i class="fas fa-list-check me-2"></i>
+                Checklist
             </button>
             <button class="btn btn-primary" onclick="printPage()">
                 <i class="fas fa-print me-2"></i>
@@ -28,36 +32,61 @@
         </div>
     </div>
 
-    <!-- Client Selection Section -->
+    <!-- Client Selection & Package Building Section -->
     <div class="card mb-4">
         <div class="card-header">
             <h5 class="mb-0">
                 <i class="fas fa-user me-2"></i>
-                Select Client & Package
+                Select Client & Build Custom Package
             </h5>
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="clientSelect" class="form-label">Select Client</label>
                     <select class="form-select" id="clientSelect" onchange="loadClientPackages()">
                         <option value="">Choose a client...</option>
                         <!-- Clients will be loaded dynamically -->
                     </select>
                 </div>
-                <div class="col-md-6">
-                    <label for="packageSelect" class="form-label">Select Package</label>
-                    <select class="form-select" id="packageSelect" disabled>
-                        <option value="">First select a client...</option>
-                    </select>
+                <div class="col-md-4">
+                    <label for="packageSelect" class="form-label">Available Packages</label>
+                    <div class="input-group">
+                        <select class="form-select" id="packageSelect" disabled onchange="addPackageToSelection()">
+                            <option value="">First select a client...</option>
+                        </select>
+                        <button class="btn btn-outline-info" type="button" onclick="syncPackagesFromCustomerInfo()" title="Sync packages with packages page">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Actions</label>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-primary btn-sm" onclick="showCustomPackageBuilder()" disabled id="customBuilderBtn">
+                            <i class="fas fa-plus me-1"></i>
+                            Custom Package
+                        </button>
+                        <button class="btn btn-success btn-sm" id="generatePacketBtn" onclick="generateClientPacket()" disabled>
+                            <i class="fas fa-download me-1"></i>
+                            Generate Packet
+                        </button>
+                    </div>
                 </div>
             </div>
-            <div class="mt-3">
-                <button class="btn btn-primary" id="generatePacketBtn" onclick="generateClientPacket()" disabled>
-                    <i class="fas fa-download me-2"></i>
-                    Generate Client Packet
-                </button>
-                <small class="text-muted ms-3">Select a client and package to generate a customized packet</small>
+            
+            <!-- Selected Packages Display -->
+            <div class="mt-4" id="selectedPackagesSection" style="display: none;">
+                <h6 class="text-muted mb-3">Selected Packages for Client Packet:</h6>
+                <div id="selectedPackagesList" class="row g-2">
+                    <!-- Selected packages will be displayed here -->
+                </div>
+                <div class="mt-3">
+                    <button class="btn btn-outline-danger btn-sm" onclick="clearAllPackages()">
+                        <i class="fas fa-trash me-1"></i>
+                        Clear All Packages
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -71,68 +100,74 @@
             </h5>
         </div>
         <div class="card-body">
+            <!-- Regular Packages -->
             <div class="row g-4">
-                {% for key, session in session_types.items() %}
-                <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body text-center p-4">
-                            <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 80px; height: 80px;">
-                                <i class="fas fa-camera text-primary" style="font-size: 2rem;"></i>
+                {% for package in packages %}
+                    {% if package.is_active and not package.is_featured %}
+                    <div class="col-lg-4 col-md-6">
+                        <div class="card h-100 border-0 shadow-sm">
+                            <div class="card-body text-center p-4">
+                                <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex align-items-center justify-content-center mb-3 mx-auto" style="width: 80px; height: 80px;">
+                                    <i class="fas fa-camera text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <h5 class="card-title fw-bold">{{ package.name }}</h5>
+                                <div class="display-6 text-primary fw-bold mb-2">${{ "%.0f"|format(package.base_price) }}</div>
+                                <p class="text-muted mb-3">{{ package.description }}</p>
+                                
+                                {% if package.includes %}
+                                <div class="text-start">
+                                    <h6 class="fw-bold mb-2">What's Included:</h6>
+                                    <ul class="list-unstyled">
+                                        {% for item in package.includes %}
+                                        <li class="mb-1">
+                                            <i class="fas fa-check text-success me-2"></i>
+                                            {{ item }}
+                                        </li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mt-3">
+                                    <span class="badge bg-info">{{ package.duration_minutes }} minutes</span>
+                                    {% if package.recommended_age %}
+                                        <span class="badge bg-warning">{{ package.recommended_age }}</span>
+                                    {% endif %}
+                                    {% if package.recommended_weeks %}
+                                        <span class="badge bg-secondary">{{ package.recommended_weeks }}</span>
+                                    {% endif %}
+                                    <span class="badge bg-primary">{{ package.category.title() }}</span>
+                                </div>
                             </div>
-                            <h5 class="card-title fw-bold">{{ session.name }}</h5>
-                            <div class="display-6 text-primary fw-bold mb-2">${{ session.base_price }}</div>
-                            <p class="text-muted mb-3">{{ session.description }}</p>
-                            
-                            <div class="text-start">
-                                <h6 class="fw-bold mb-2">What's Included:</h6>
-                                <ul class="list-unstyled">
-                                    {% for item in session.includes %}
-                                    <li class="mb-1">
-                                        <i class="fas fa-check text-success me-2"></i>
-                                        {{ item }}
-                                    </li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                            
-                            <div class="mt-3">
-                                <span class="badge bg-info">{{ session.duration }} minutes</span>
-                                {% if session.recommended_age %}
-                                    <span class="badge bg-warning">{{ session.recommended_age }}</span>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            
+            <!-- Featured Package Deals -->
+            {% set featured_packages = packages | selectattr('is_featured') | list %}
+            {% if featured_packages %}
+            <div class="mt-4">
+                <h6 class="text-center mb-3">Special Package Deals</h6>
+                <div class="row g-3">
+                    {% for package in featured_packages %}
+                    <div class="col-md-6">
+                        <div class="card border-success">
+                            <div class="card-body text-center">
+                                <h6 class="text-success fw-bold">{{ package.name }}</h6>
+                                <div class="display-6 text-success fw-bold">${{ "%.0f"|format(package.base_price) }}</div>
+                                <p class="text-muted">{{ package.description }}</p>
+                                {% if package.includes %}
+                                <small class="text-muted">Includes: {{ package.includes | join(', ') }}</small>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                </div>
-                {% endfor %}
-            </div>
-            
-            <!-- Package Deals -->
-            <div class="mt-4">
-                <h6 class="text-center mb-3">Special Package Deals</h6>
-                <div class="row g-3">
-                    <div class="col-md-6">
-                        <div class="card border-success">
-                            <div class="card-body text-center">
-                                <h6 class="text-success fw-bold">Milestone Package (3, 6, 9, 12 months)</h6>
-                                <div class="display-6 text-success fw-bold">$800</div>
-                                <p class="text-muted">Save $200 when you book all 4 milestone sessions!</p>
-                                <small class="text-muted">Includes: 4 milestone sessions, 100+ edited images, online galleries, print releases</small>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="card border-warning">
-                            <div class="card-body text-center">
-                                <h6 class="text-warning fw-bold">Newborn + Milestone Package</h6>
-                                <div class="display-6 text-warning fw-bold">$1,100</div>
-                                <p class="text-muted">Save $150 when you book newborn + 3 milestone sessions!</p>
-                                <small class="text-muted">Includes: Newborn session, 3 milestone sessions, 125+ edited images, online galleries, print releases</small>
-                            </div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </div>
     </div>
 
@@ -457,73 +492,6 @@
         </div>
     </div>
 
-    <!-- Download Section -->
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">
-                <i class="fas fa-download me-2"></i>
-                Download Complete Client Packet
-            </h5>
-        </div>
-        <div class="card-body text-center">
-            <p class="lead mb-4">Get everything you need in one comprehensive packet!</p>
-            <div class="row g-3 justify-content-center">
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <i class="fas fa-file-pdf text-danger" style="font-size: 2rem;"></i>
-                        <h6 class="mt-2">Complete Packet</h6>
-                        <small class="text-muted">All information in one PDF</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <i class="fas fa-file-contract text-primary" style="font-size: 2rem;"></i>
-                        <h6 class="mt-2">Contract</h6>
-                        <small class="text-muted">Session agreement</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <i class="fas fa-calendar-alt text-success" style="font-size: 2rem;"></i>
-                        <h6 class="mt-2">Session Checklist</h6>
-                        <small class="text-muted">What to bring & expect</small>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="text-center p-3">
-                        <i class="fas fa-dollar-sign text-warning" style="font-size: 2rem;"></i>
-                        <h6 class="mt-2">Pricing Guide</h6>
-                        <small class="text-muted">Complete pricing breakdown</small>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <div class="row g-3 justify-content-center">
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-primary w-100" onclick="downloadContract()">
-                            <i class="fas fa-download me-2"></i>
-                            Download Contract
-                        </button>
-                    </div>
-                    <div class="col-md-4">
-                        <button class="btn btn-outline-success w-100" onclick="downloadChecklist()">
-                            <i class="fas fa-download me-2"></i>
-                            Download Checklist
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4">
-                <button class="btn btn-success btn-lg" onclick="generateClientPacket()">
-                    <i class="fas fa-download me-2"></i>
-                    Download Complete Client Packet
-                </button>
-                <p class="text-muted mt-2">Includes all pricing, policies, contracts, and session information</p>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- Custom CSS for timeline -->
@@ -585,6 +553,10 @@
 
 {% block extra_js %}
 <script>
+// Global variables for package management
+let selectedPackages = [];
+let availablePackages = [];
+
 // Load clients and packages on page load
 document.addEventListener('DOMContentLoaded', function() {
     loadClients();
@@ -636,46 +608,31 @@ function loadClientPackages() {
     const clientId = document.getElementById('clientSelect').value;
     const packageSelect = document.getElementById('packageSelect');
     const generateBtn = document.getElementById('generatePacketBtn');
+    const customBuilderBtn = document.getElementById('customBuilderBtn');
+    
+    // Clear previous selections
+    selectedPackages = [];
+    updateSelectedPackagesDisplay();
     
     if (!clientId) {
         packageSelect.innerHTML = '<option value="">First select a client...</option>';
         packageSelect.disabled = true;
         generateBtn.disabled = true;
+        customBuilderBtn.disabled = true;
         return;
     }
     
-    // Get client data to determine family type
-    fetch(`/api/clients/${clientId}`)
+    // Load ALL packages (same as packages page) for consistency
+    fetch('/api/packages')
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                const client = data.client;
-                const familyType = client.family_type || 'family';
-                
-                // Load packages for this client's family type
-                return fetch(`/api/packages/category/${familyType}`);
+                // Filter to only show active packages for customer selection
+                const activePackages = data.packages.filter(pkg => pkg.is_active);
+                availablePackages = activePackages;
+                populatePackageDropdown(activePackages);
             } else {
-                throw new Error('Failed to load client data');
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success && data.packages.length > 0) {
-                populatePackageDropdown(data.packages);
-            } else {
-                // If no packages for specific category, load all active packages
-                return fetch('/api/packages/active');
-            }
-        })
-        .then(response => {
-            if (response) {
-                return response.json();
-            }
-            return null;
-        })
-        .then(data => {
-            if (data && data.success) {
-                populatePackageDropdown(data.packages);
+                throw new Error('Failed to load packages');
             }
         })
         .catch(error => {
@@ -683,46 +640,281 @@ function loadClientPackages() {
             packageSelect.innerHTML = '<option value="">Error loading packages...</option>';
             packageSelect.disabled = true;
             generateBtn.disabled = true;
+            customBuilderBtn.disabled = true;
         });
 }
 
 function populatePackageDropdown(packages) {
     const packageSelect = document.getElementById('packageSelect');
     const generateBtn = document.getElementById('generatePacketBtn');
+    const customBuilderBtn = document.getElementById('customBuilderBtn');
     
-    packageSelect.innerHTML = '<option value="">Choose a package...</option>';
+    packageSelect.innerHTML = '<option value="">Choose a package to add...</option>';
     
-    packages.forEach(package => {
+    if (packages && packages.length > 0) {
+        packages.forEach(pkg => {
+            const option = document.createElement('option');
+            option.value = pkg.id;
+            option.textContent = `${pkg.name} - $${pkg.base_price}`;
+            option.dataset.package = JSON.stringify(pkg);
+            packageSelect.appendChild(option);
+        });
+        
+        packageSelect.disabled = false;
+        customBuilderBtn.disabled = false;
+    } else {
         const option = document.createElement('option');
-        option.value = package.id;
-        option.textContent = `${package.name} - $${package.base_price} (${package.duration_minutes} min)`;
+        option.value = '';
+        option.textContent = 'No packages available';
+        option.disabled = true;
         packageSelect.appendChild(option);
+        packageSelect.disabled = true;
+        customBuilderBtn.disabled = true;
+    }
+}
+
+function addPackageToSelection() {
+    const packageSelect = document.getElementById('packageSelect');
+    const selectedOption = packageSelect.options[packageSelect.selectedIndex];
+    
+    if (!selectedOption.value) return;
+    
+    const packageData = JSON.parse(selectedOption.dataset.package);
+    
+    // Check if package is already selected
+    const existingPackage = selectedPackages.find(pkg => pkg.id === packageData.id);
+    if (existingPackage) {
+        // Increment quantity if package already exists
+        existingPackage.quantity = (existingPackage.quantity || 1) + 1;
+        showAlert(`Increased quantity of "${packageData.name}" to ${existingPackage.quantity}`, 'success');
+    } else {
+        // Add new package with quantity 1
+        packageData.quantity = 1;
+        selectedPackages.push(packageData);
+        showAlert(`Added "${packageData.name}" to client packet`, 'success');
+    }
+    
+    updateSelectedPackagesDisplay();
+    
+    // Reset dropdown
+    packageSelect.selectedIndex = 0;
+    
+    // Enable generate button
+    document.getElementById('generatePacketBtn').disabled = false;
+}
+
+function updateSelectedPackagesDisplay() {
+    const section = document.getElementById('selectedPackagesSection');
+    const list = document.getElementById('selectedPackagesList');
+    
+    if (selectedPackages.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    
+    section.style.display = 'block';
+    list.innerHTML = '';
+    
+    selectedPackages.forEach((pkg, index) => {
+        const quantity = pkg.quantity || 1;
+        const totalPrice = pkg.base_price * quantity;
+        
+        const packageCard = document.createElement('div');
+        packageCard.className = 'col-md-6 col-lg-4';
+        packageCard.innerHTML = `
+            <div class="card border-success">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="flex-grow-1">
+                            <h6 class="card-title mb-1">${pkg.name}</h6>
+                            <p class="card-text text-muted small mb-2">${pkg.description || 'Professional photography session'}</p>
+                            <div class="d-flex gap-1 mb-2">
+                                <span class="badge bg-primary">${pkg.category}</span>
+                                <span class="badge bg-info">$${pkg.base_price} each</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" onclick="removePackage(${index})" title="Remove package">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- Quantity Controls -->
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-2">
+                            <label class="form-label mb-0 small">Qty:</label>
+                            <div class="input-group input-group-sm" style="width: 100px;">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="decreaseQuantity(${index})" ${quantity <= 1 ? 'disabled' : ''}>
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number" class="form-control text-center" value="${quantity}" min="1" max="10" onchange="updateQuantity(${index}, this.value)">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" onclick="increaseQuantity(${index})" ${quantity >= 10 ? 'disabled' : ''}>
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <div class="h6 text-success mb-0">$${totalPrice.toFixed(2)}</div>
+                            <small class="text-muted">${quantity} × $${pkg.base_price}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        list.appendChild(packageCard);
     });
     
-    packageSelect.disabled = false;
+    // Add total section
+    const totalSection = document.createElement('div');
+    totalSection.className = 'col-12 mt-3';
+    const grandTotal = selectedPackages.reduce((sum, pkg) => sum + (pkg.base_price * (pkg.quantity || 1)), 0);
+    const totalItems = selectedPackages.reduce((sum, pkg) => sum + (pkg.quantity || 1), 0);
     
-    // Enable generate button when package is selected
-    packageSelect.addEventListener('change', function() {
-        generateBtn.disabled = !this.value;
-    });
+    totalSection.innerHTML = `
+        <div class="card border-primary">
+            <div class="card-body text-center">
+                <h5 class="text-primary mb-2">Package Summary</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="h6 mb-1">Total Packages</div>
+                        <div class="h4 text-primary">${selectedPackages.length}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h6 mb-1">Total Items</div>
+                        <div class="h4 text-info">${totalItems}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="h6 mb-1">Grand Total</div>
+                        <div class="h3 text-success">$${grandTotal.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    list.appendChild(totalSection);
+}
+
+function removePackage(index) {
+    const removedPackage = selectedPackages[index];
+    selectedPackages.splice(index, 1);
+    updateSelectedPackagesDisplay();
+    
+    // Disable generate button if no packages selected
+    if (selectedPackages.length === 0) {
+        document.getElementById('generatePacketBtn').disabled = true;
+    }
+    
+    showAlert(`Removed "${removedPackage.name}" from client packet`, 'info');
+}
+
+function increaseQuantity(index) {
+    const pkg = selectedPackages[index];
+    if (pkg.quantity < 10) {
+        pkg.quantity = (pkg.quantity || 1) + 1;
+        updateSelectedPackagesDisplay();
+        showAlert(`Increased quantity of "${pkg.name}" to ${pkg.quantity}`, 'success');
+    }
+}
+
+function decreaseQuantity(index) {
+    const pkg = selectedPackages[index];
+    if (pkg.quantity > 1) {
+        pkg.quantity = pkg.quantity - 1;
+        updateSelectedPackagesDisplay();
+        showAlert(`Decreased quantity of "${pkg.name}" to ${pkg.quantity}`, 'info');
+    }
+}
+
+function updateQuantity(index, newQuantity) {
+    const pkg = selectedPackages[index];
+    const quantity = parseInt(newQuantity);
+    
+    if (quantity >= 1 && quantity <= 10) {
+        pkg.quantity = quantity;
+        updateSelectedPackagesDisplay();
+        showAlert(`Updated quantity of "${pkg.name}" to ${quantity}`, 'success');
+    } else {
+        // Reset to previous value if invalid
+        updateSelectedPackagesDisplay();
+        showAlert('Quantity must be between 1 and 10', 'warning');
+    }
+}
+
+function clearAllPackages() {
+    selectedPackages = [];
+    updateSelectedPackagesDisplay();
+    document.getElementById('generatePacketBtn').disabled = true;
+    showAlert('Cleared all packages from client packet', 'info');
+}
+
+function showCustomPackageBuilder() {
+    // For now, show an alert. In production, this would open a custom package builder modal
+    showAlert('Custom package builder will be implemented', 'info');
 }
 
 function generateClientPacket() {
     const clientId = document.getElementById('clientSelect').value;
-    const packageId = document.getElementById('packageSelect').value;
     
     if (!clientId) {
         showAlert('Please select a client first', 'warning');
         return;
     }
     
-    if (!packageId) {
-        showAlert('Please select a package first', 'warning');
+    if (selectedPackages.length === 0) {
+        showAlert('Please select at least one package', 'warning');
         return;
     }
     
-    // Open the client packet in a new window with both client and package info
-    window.open(`/api/client-packet/${clientId}?package_id=${packageId}`, '_blank');
+    // Create package data with quantities
+    const packageData = selectedPackages.map(pkg => ({
+        id: pkg.id,
+        quantity: pkg.quantity || 1
+    }));
+    
+    // Encode package data as JSON
+    const packageDataJson = encodeURIComponent(JSON.stringify(packageData));
+    
+    // Generate the client packet with selected packages and quantities
+    const url = `/api/client-packet/${clientId}?package_data=${packageDataJson}`;
+    window.open(url, '_blank');
+}
+
+function syncPackagesFromCustomerInfo() {
+    // Show loading state
+    const packageSelect = document.getElementById('packageSelect');
+    const originalContent = packageSelect.innerHTML;
+    packageSelect.innerHTML = '<option value="">Syncing packages...</option>';
+    packageSelect.disabled = true;
+    
+    // Reload packages from the same source as packages page
+    fetch('/api/packages')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Filter to only show active packages for customer selection
+                const activePackages = data.packages.filter(pkg => pkg.is_active);
+                availablePackages = activePackages;
+                populatePackageDropdown(activePackages);
+                
+                // Show success message
+                showAlert(`✅ Packages synchronized! Found ${activePackages.length} active packages.`, 'success');
+                
+                // Log package details for verification
+                console.log('📦 Synchronized packages for customer info:', activePackages.map(pkg => ({
+                    name: pkg.name,
+                    category: pkg.category,
+                    price: pkg.base_price,
+                    active: pkg.is_active
+                })));
+                
+            } else {
+                throw new Error(data.error || 'Failed to sync packages');
+            }
+        })
+        .catch(error => {
+            console.error('Error syncing packages:', error);
+            packageSelect.innerHTML = '<option value="">Error syncing packages...</option>';
+            showAlert('❌ Failed to sync packages: ' + error.message, 'danger');
+        });
 }
 
 function getClientIdFromContext() {

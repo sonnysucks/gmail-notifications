@@ -287,12 +287,8 @@ class AppointmentScheduler:
     
     def _get_appointment_from_crm(self, appointment_id: str) -> Optional[Appointment]:
         """Get appointment from CRM database"""
-        # This is a simplified version - in production, you'd add a method to CRMManager
-        # to get appointments by ID
         try:
-            # For now, we'll search through all appointments
-            # In production, add a proper get_appointment_by_id method to CRMManager
-            return None
+            return self.crm_manager.get_appointment(appointment_id)
         except Exception as e:
             logger.error(f"Failed to get appointment from CRM: {e}")
             return None
