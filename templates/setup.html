@@ -26,6 +26,9 @@
                     <button class="nav-link" id="theme-tab" data-bs-toggle="tab" data-bs-target="#theme" type="button" role="tab">Themes & Design</button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="emailers-tab" data-bs-toggle="tab" data-bs-target="#emailers" type="button" role="tab">Email Templates</button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="account-tab" data-bs-toggle="tab" data-bs-target="#account" type="button" role="tab">Account Settings</button>
                 </li>
             </ul>
@@ -314,6 +317,149 @@
                     </div>
                 </div>
 
+                <!-- Email Templates Tab -->
+                <div class="tab-pane fade" id="emailers" role="tabpanel">
+                    <h5 class="mb-4">Email Templates</h5>
+                    
+                    <!-- Email Template Settings -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="mb-0">Automated Email Templates</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p class="text-muted mb-4">Customize the email templates that are automatically sent to clients at different intervals before and after their appointments.</p>
+                                    
+                                    <!-- 14 Days Before - Contract & Checklist -->
+                                    <div class="email-template-section mb-4">
+                                        <h6 class="text-primary mb-3">
+                                            <i class="fas fa-file-contract me-2"></i>
+                                            14 Days Before - Contract & Checklist
+                                        </h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="contractSubject" class="form-label">Subject Line</label>
+                                                <input type="text" class="form-control" id="contractSubject" 
+                                                       value="{{ config.email_templates.contract_checklist.subject if config.email_templates and config.email_templates.contract_checklist else 'Your Photography Session Contract & Checklist - {{ client_name }}' }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="contractBody" class="form-label">Message Body</label>
+                                                <textarea class="form-control" id="contractBody" rows="8" 
+                                                          placeholder="Enter your email message here. Use {{ client_name }}, {{ session_type }}, {{ appointment_date }}, etc. as placeholders.">{{ config.email_templates.contract_checklist.body if config.email_templates and config.email_templates.contract_checklist else 'Dear {{ client_name }},
+
+Thank you for booking your {{ session_type }} session with us! Your appointment is scheduled for {{ appointment_date }}.
+
+Please find attached your photography contract and session checklist. Please review and sign the contract, and use the checklist to prepare for your session.
+
+If you have any questions, please don\'t hesitate to contact us.
+
+Best regards,
+{{ business_name }}' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 7 Days Before - Session Package -->
+                                    <div class="email-template-section mb-4">
+                                        <h6 class="text-info mb-3">
+                                            <i class="fas fa-box me-2"></i>
+                                            7 Days Before - Session Package
+                                        </h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="packageSubject" class="form-label">Subject Line</label>
+                                                <input type="text" class="form-control" id="packageSubject" 
+                                                       value="{{ config.email_templates.session_package.subject if config.email_templates and config.email_templates.session_package else 'Your Session Package & Preparation Guide - {{ client_name }}' }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="packageBody" class="form-label">Message Body</label>
+                                                <textarea class="form-control" id="packageBody" rows="8" 
+                                                          placeholder="Enter your email message here. Use {{ client_name }}, {{ session_type }}, {{ appointment_date }}, etc. as placeholders.">{{ config.email_templates.session_package.body if config.email_templates and config.email_templates.session_package else 'Dear {{ client_name }},
+
+Your {{ session_type }} session is coming up in just 7 days! We\'re excited to work with you.
+
+Please find your session package attached, which includes:
+- Session preparation guide
+- What to expect during your session
+- Wardrobe suggestions
+- Location information
+
+Your appointment is scheduled for {{ appointment_date }}. Please arrive 10 minutes early.
+
+See you soon!
+{{ business_name }}' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- 3 Days Before - Reminder -->
+                                    <div class="email-template-section mb-4">
+                                        <h6 class="text-warning mb-3">
+                                            <i class="fas fa-bell me-2"></i>
+                                            3 Days Before - Reminder
+                                        </h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="reminderSubject" class="form-label">Subject Line</label>
+                                                <input type="text" class="form-control" id="reminderSubject" 
+                                                       value="{{ config.email_templates.reminder.subject if config.email_templates and config.email_templates.reminder else 'Reminder: Your Photography Session is in 3 Days - {{ client_name }}' }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="reminderBody" class="form-label">Message Body</label>
+                                                <textarea class="form-control" id="reminderBody" rows="6" 
+                                                          placeholder="Enter your email message here. Use {{ client_name }}, {{ session_type }}, {{ appointment_date }}, etc. as placeholders.">{{ config.email_templates.reminder.body if config.email_templates and config.email_templates.reminder else 'Hi {{ client_name }},
+
+Just a friendly reminder that your {{ session_type }} session is scheduled for {{ appointment_date }}.
+
+Please make sure you\'ve reviewed the preparation materials we sent earlier. If you have any last-minute questions, feel free to reach out.
+
+We\'re looking forward to capturing beautiful memories for you!
+
+Best,
+{{ business_name }}' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Day Of - Thank You & Marketing -->
+                                    <div class="email-template-section mb-4">
+                                        <h6 class="text-success mb-3">
+                                            <i class="fas fa-heart me-2"></i>
+                                            Day Of - Thank You & Marketing
+                                        </h6>
+                                        <div class="row g-3">
+                                            <div class="col-12">
+                                                <label for="thankYouSubject" class="form-label">Subject Line</label>
+                                                <input type="text" class="form-control" id="thankYouSubject" 
+                                                       value="{{ config.email_templates.thank_you.subject if config.email_templates and config.email_templates.thank_you else 'Thank You for Your Session! - {{ client_name }}' }}">
+                                            </div>
+                                            <div class="col-12">
+                                                <label for="thankYouBody" class="form-label">Message Body</label>
+                                                <textarea class="form-control" id="thankYouBody" rows="8" 
+                                                          placeholder="Enter your email message here. Use {{ client_name }}, {{ session_type }}, {{ appointment_date }}, etc. as placeholders.">{{ config.email_templates.thank_you.body if config.email_templates and config.email_templates.thank_you else 'Dear {{ client_name }},
+
+Thank you so much for choosing us for your {{ session_type }} session! We had a wonderful time working with you and your family.
+
+Your photos will be ready for review in approximately 2-3 weeks. We\'ll send you a link to your private online gallery as soon as they\'re ready.
+
+In the meantime, feel free to follow us on social media for photography tips and to see some of our recent work:
+- Instagram: @yourphotography
+- Facebook: Your Photography Business
+
+Thank you again for trusting us with your precious memories!
+
+Warm regards,
+{{ business_name }}' }}</textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Account Settings Tab -->
                 <div class="tab-pane fade" id="account" role="tabpanel">
                     <h5 class="mb-4">Account Settings</h5>
@@ -498,6 +644,24 @@ function saveAllSettings() {
                 start: document.getElementById('dailyStart').value,
                 end: document.getElementById('dailyEnd').value,
                 weekly: workingDays
+            }
+        },
+        email_templates: {
+            contract_checklist: {
+                subject: document.getElementById('contractSubject').value,
+                body: document.getElementById('contractBody').value
+            },
+            session_package: {
+                subject: document.getElementById('packageSubject').value,
+                body: document.getElementById('packageBody').value
+            },
+            reminder: {
+                subject: document.getElementById('reminderSubject').value,
+                body: document.getElementById('reminderBody').value
+            },
+            thank_you: {
+                subject: document.getElementById('thankYouSubject').value,
+                body: document.getElementById('thankYouBody').value
             }
         },
         baby_photography: {

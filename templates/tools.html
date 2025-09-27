@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+
+{% block title %}Tools - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Tools</h1>
+            <p class="text-muted mb-0">Utility tools for your photography business</p>
+        </div>
+    </div>
+
+    <!-- Age Calculator Section -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-calculator me-2"></i>
+                        Age Calculator
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <!-- Input Method Selection -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="inputMethod" id="manualInput" value="manual" checked>
+                                <label class="btn btn-outline-primary" for="manualInput">
+                                    <i class="fas fa-keyboard me-2"></i>
+                                    Manual Input
+                                </label>
+                                
+                                <input type="radio" class="btn-check" name="inputMethod" id="clientDropdown" value="client">
+                                <label class="btn btn-outline-primary" for="clientDropdown">
+                                    <i class="fas fa-users me-2"></i>
+                                    Client & Family
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Manual Input Form -->
+                    <div id="manualInputForm" class="input-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="manualName" class="form-label">Name</label>
+                                    <input type="text" class="form-control" id="manualName" placeholder="Enter name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="manualBirthday" class="form-label">Birthday</label>
+                                    <input type="date" class="form-control" id="manualBirthday">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="calculateAge('manual')">
+                                <i class="fas fa-calculator me-2"></i>
+                                Calculate Age
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Client & Family Form -->
+                    <div id="clientDropdownForm" class="input-form d-none">
+                        <div class="mb-3">
+                            <label for="clientSelect" class="form-label">Select Client</label>
+                            <select class="form-select" id="clientSelect" onchange="loadClientFamily()">
+                                <option value="">Choose a client...</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Client Age Display -->
+                        <div id="clientAgeDisplay" class="d-none">
+                            <div class="card bg-light mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-title">
+                                        <i class="fas fa-user me-2"></i>
+                                        <span id="clientName"></span>
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="display-6 text-primary fw-bold" id="clientAgeDays">0</div>
+                                                <small class="text-muted">Days</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="display-6 text-info fw-bold" id="clientAgeWeeks">0</div>
+                                                <small class="text-muted">Weeks</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="display-6 text-success fw-bold" id="clientAgeMonths">0</div>
+                                                <small class="text-muted">Months</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <div class="display-6 text-warning fw-bold" id="clientAgeYears">0</div>
+                                                <small class="text-muted">Years</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2 text-center">
+                                        <small class="text-muted">
+                                            Birthday: <span id="clientBirthday"></span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Children Ages Display -->
+                        <div id="childrenAgesDisplay" class="d-none">
+                            <h6 class="mb-3">
+                                <i class="fas fa-baby me-2"></i>
+                                Children Ages
+                            </h6>
+                            <div id="childrenAgesList">
+                                <!-- Children ages will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results Section -->
+                    <div id="ageResults" class="mt-4 d-none">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-user me-2"></i>
+                                    <span id="resultName"></span>
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="display-6 text-primary fw-bold" id="ageDays">0</div>
+                                            <small class="text-muted">Days</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="display-6 text-info fw-bold" id="ageWeeks">0</div>
+                                            <small class="text-muted">Weeks</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="display-6 text-success fw-bold" id="ageMonths">0</div>
+                                            <small class="text-muted">Months</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="text-center">
+                                            <div class="display-6 text-warning fw-bold" id="ageYears">0</div>
+                                            <small class="text-muted">Years</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-3 text-center">
+                                    <small class="text-muted">
+                                        Birthday: <span id="resultBirthday"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Reference -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Photography Milestones
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="milestone-guide">
+                        <div class="milestone-item">
+                            <span class="badge bg-warning">0-14 days</span>
+                            <strong>Newborn</strong>
+                            <small class="text-muted d-block">Best for sleepy, curled poses</small>
+                        </div>
+                        <div class="milestone-item mt-2">
+                            <span class="badge bg-info">3 months</span>
+                            <strong>Smiling & Head Control</strong>
+                            <small class="text-muted d-block">Great for tummy time shots</small>
+                        </div>
+                        <div class="milestone-item mt-2">
+                            <span class="badge bg-primary">6 months</span>
+                            <strong>Sitting Up</strong>
+                            <small class="text-muted d-block">Perfect for sitting poses</small>
+                        </div>
+                        <div class="milestone-item mt-2">
+                            <span class="badge bg-success">9 months</span>
+                            <strong>Crawling</strong>
+                            <small class="text-muted d-block">Action shots and movement</small>
+                        </div>
+                        <div class="milestone-item mt-2">
+                            <span class="badge bg-danger">12 months</span>
+                            <strong>First Birthday</strong>
+                            <small class="text-muted d-block">Cake smash and standing</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Calculations -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Calculations
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div id="recentCalculations">
+                        <p class="text-muted text-center">No recent calculations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.milestone-item {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.milestone-item:last-child {
+    border-bottom: none;
+}
+
+.input-form {
+    transition: all 0.3s ease;
+}
+
+.recent-calculation {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+}
+
+.recent-calculation:last-child {
+    border-bottom: none;
+}
+</style>
+
+<script>
+let clients = [];
+let recentCalculations = JSON.parse(localStorage.getItem('recentCalculations') || '[]');
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadClients();
+    updateRecentCalculations();
+    
+    // Handle input method changes
+    document.querySelectorAll('input[name="inputMethod"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            showInputForm(this.value);
+        });
+    });
+});
+
+function showInputForm(method) {
+    // Hide all forms
+    document.querySelectorAll('.input-form').forEach(form => {
+        form.classList.add('d-none');
+    });
+    
+    // Show selected form
+    if (method === 'manual') {
+        document.getElementById('manualInputForm').classList.remove('d-none');
+    } else if (method === 'client') {
+        document.getElementById('clientDropdownForm').classList.remove('d-none');
+    }
+    
+    // Hide results
+    document.getElementById('ageResults').classList.add('d-none');
+}
+
+function loadClients() {
+    fetch('/api/clients')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                clients = data.clients;
+                const clientSelect = document.getElementById('clientSelect');
+                clientSelect.innerHTML = '<option value="">Choose a client...</option>';
+                
+                clients.forEach(client => {
+                    const option = document.createElement('option');
+                    option.value = client.id;
+                    option.textContent = client.name;
+                    clientSelect.appendChild(option);
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error loading clients:', error);
+        });
+}
+
+function loadClientFamily() {
+    const clientId = document.getElementById('clientSelect').value;
+    const client = clients.find(c => c.id == clientId);
+    
+    if (!client) {
+        // Hide all displays
+        document.getElementById('clientAgeDisplay').classList.add('d-none');
+        document.getElementById('childrenAgesDisplay').classList.add('d-none');
+        return;
+    }
+    
+    // Show client age if they have a birthday
+    if (client.client_birthday) {
+        calculateAndDisplayClientAge(client);
+        document.getElementById('clientAgeDisplay').classList.remove('d-none');
+    } else {
+        document.getElementById('clientAgeDisplay').classList.add('d-none');
+    }
+    
+    // Show children ages if they have children
+    if (client.children_info && Array.isArray(client.children_info) && client.children_info.length > 0) {
+        displayChildrenAges(client);
+        document.getElementById('childrenAgesDisplay').classList.remove('d-none');
+    } else {
+        document.getElementById('childrenAgesDisplay').classList.add('d-none');
+    }
+}
+
+function calculateAndDisplayClientAge(client) {
+    const birthDate = new Date(client.client_birthday);
+    const today = new Date();
+    
+    const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+    const ageInWeeks = Math.floor(ageInDays / 7);
+    const ageInMonths = Math.floor(ageInDays / 30.44);
+    const ageInYears = Math.floor(ageInDays / 365.25);
+    
+    document.getElementById('clientName').textContent = client.name;
+    document.getElementById('clientAgeDays').textContent = ageInDays;
+    document.getElementById('clientAgeWeeks').textContent = ageInWeeks;
+    document.getElementById('clientAgeMonths').textContent = ageInMonths;
+    document.getElementById('clientAgeYears').textContent = ageInYears;
+    document.getElementById('clientBirthday').textContent = birthDate.toLocaleDateString();
+}
+
+function displayChildrenAges(client) {
+    const childrenList = document.getElementById('childrenAgesList');
+    childrenList.innerHTML = '';
+    
+    client.children_info.forEach(child => {
+        if (child.birth_date) {
+            const birthDate = new Date(child.birth_date);
+            const today = new Date();
+            
+            const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+            const ageInWeeks = Math.floor(ageInDays / 7);
+            const ageInMonths = Math.floor(ageInDays / 30.44);
+            const ageInYears = Math.floor(ageInDays / 365.25);
+            
+            const childCard = document.createElement('div');
+            childCard.className = 'card bg-light mb-2';
+            childCard.innerHTML = `
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-baby me-2"></i>
+                        ${child.name}
+                    </h6>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-primary fw-bold">${ageInDays}</div>
+                                <small class="text-muted">Days</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-info fw-bold">${ageInWeeks}</div>
+                                <small class="text-muted">Weeks</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-success fw-bold">${ageInMonths}</div>
+                                <small class="text-muted">Months</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <div class="display-6 text-warning fw-bold">${ageInYears}</div>
+                                <small class="text-muted">Years</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-2 text-center">
+                        <small class="text-muted">
+                            Birthday: ${birthDate.toLocaleDateString()}
+                        </small>
+                    </div>
+                </div>
+            `;
+            childrenList.appendChild(childCard);
+        }
+    });
+}
+
+function calculateAge(method) {
+    if (method !== 'manual') return; // Only manual input uses this function now
+    
+    const name = document.getElementById('manualName').value;
+    const birthday = document.getElementById('manualBirthday').value;
+    
+    if (!name || !birthday) {
+        alert('Please enter both name and birthday');
+        return;
+    }
+    
+    const birthDate = new Date(birthday);
+    const today = new Date();
+    
+    // Calculate age
+    const ageInDays = Math.floor((today - birthDate) / (1000 * 60 * 60 * 24));
+    const ageInWeeks = Math.floor(ageInDays / 7);
+    const ageInMonths = Math.floor(ageInDays / 30.44); // Average days per month
+    const ageInYears = Math.floor(ageInDays / 365.25); // Account for leap years
+    
+    // Display results
+    document.getElementById('resultName').textContent = name;
+    document.getElementById('ageDays').textContent = ageInDays;
+    document.getElementById('ageWeeks').textContent = ageInWeeks;
+    document.getElementById('ageMonths').textContent = ageInMonths;
+    document.getElementById('ageYears').textContent = ageInYears;
+    document.getElementById('resultBirthday').textContent = birthDate.toLocaleDateString();
+    
+    document.getElementById('ageResults').classList.remove('d-none');
+    
+    // Add to recent calculations
+    const calculation = {
+        name: name,
+        birthday: birthday,
+        ageInDays: ageInDays,
+        ageInWeeks: ageInWeeks,
+        ageInMonths: ageInMonths,
+        ageInYears: ageInYears,
+        timestamp: new Date().toISOString()
+    };
+    
+    recentCalculations.unshift(calculation);
+    recentCalculations = recentCalculations.slice(0, 5); // Keep only last 5
+    localStorage.setItem('recentCalculations', JSON.stringify(recentCalculations));
+    updateRecentCalculations();
+}
+
+function updateRecentCalculations() {
+    const container = document.getElementById('recentCalculations');
+    
+    if (recentCalculations.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center">No recent calculations</p>';
+        return;
+    }
+    
+    container.innerHTML = recentCalculations.map(calc => `
+        <div class="recent-calculation">
+            <div class="d-flex justify-content-between">
+                <strong>${calc.name}</strong>
+                <small class="text-muted">${calc.ageInDays}d, ${calc.ageInWeeks}w, ${calc.ageInMonths}m</small>
+            </div>
+            <small class="text-muted">${new Date(calc.birthday).toLocaleDateString()}</small>
+        </div>
+    `).join('');
+}
+</script>
+{% endblock %}

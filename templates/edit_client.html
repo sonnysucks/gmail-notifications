@@ -46,16 +46,8 @@
                                 <input type="tel" class="form-control" id="phone" name="phone" value="{{ client.phone or '' }}">
                             </div>
                             <div class="col-md-6">
-                                <label for="family_type" class="form-label">Family Type</label>
-                                <select class="form-select" id="family_type" name="family_type">
-                                    <option value="">Select family type</option>
-                                    <option value="newborn" {% if client.family_type == 'newborn' %}selected{% endif %}>Newborn</option>
-                                    <option value="milestone" {% if client.family_type == 'milestone' %}selected{% endif %}>Milestone</option>
-                                    <option value="birthday" {% if client.birthday == 'birthday' %}selected{% endif %}>Birthday</option>
-                                    <option value="family" {% if client.family_type == 'family' %}selected{% endif %}>Family</option>
-                                    <option value="maternity" {% if client.family_type == 'maternity' %}selected{% endif %}>Maternity</option>
-                                    <option value="other" {% if client.family_type == 'other' %}selected{% endif %}>Other</option>
-                                </select>
+                                <label for="client_birthday" class="form-label">Client Birthday (Optional)</label>
+                                <input type="date" class="form-control" id="client_birthday" name="client_birthday" value="{{ client.client_birthday.strftime('%Y-%m-%d') if client.client_birthday else '' }}">
                             </div>
                         </div>
 
@@ -129,17 +121,6 @@
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="budget" class="form-label">Budget Range</label>
-                                <select class="form-select" id="budget" name="budget">
-                                    <option value="">Select budget range</option>
-                                    <option value="under_200" {% if client.budget == 'under_200' %}selected{% endif %}>Under $200</option>
-                                    <option value="200_400" {% if client.budget == '200_400' %}selected{% endif %}>$200 - $400</option>
-                                    <option value="400_600" {% if client.budget == '400_600' %}selected{% endif %}>$400 - $600</option>
-                                    <option value="600_800" {% if client.budget == '600_800' %}selected{% endif %}>$600 - $800</option>
-                                    <option value="over_800" {% if client.budget == 'over_800' %}selected{% endif %}>Over $800</option>
-                                </select>
-                            </div>
                             <div class="col-md-6">
                                 <label for="preferred_style" class="form-label">Preferred Style</label>
                                 <select class="form-select" id="preferred_style" name="preferred_style">

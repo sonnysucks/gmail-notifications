@@ -46,16 +46,8 @@
                                 <input type="tel" class="form-control" id="phone" name="phone">
                             </div>
                             <div class="col-md-6">
-                                <label for="family_type" class="form-label">Family Type</label>
-                                <select class="form-select" id="family_type" name="family_type">
-                                    <option value="">Select family type</option>
-                                    <option value="newborn">Newborn</option>
-                                    <option value="milestone">Milestone</option>
-                                    <option value="birthday">Birthday</option>
-                                    <option value="family">Family</option>
-                                    <option value="maternity">Maternity</option>
-                                    <option value="other">Other</option>
-                                </select>
+                                <label for="client_birthday" class="form-label">Client Birthday (Optional)</label>
+                                <input type="date" class="form-control" id="client_birthday" name="client_birthday">
                             </div>
                         </div>
 
@@ -140,27 +132,6 @@
                         </div>
 
                         <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label for="budget" class="form-label">Budget Range</label>
-                                <select class="form-select" id="budget" name="budget" onchange="handleOtherOption(this, 'budget')">
-                                    <option value="">Select budget range</option>
-                                    <option value="under_200">Under $200</option>
-                                    <option value="200_400">$200 - $400</option>
-                                    <option value="400_600">$400 - $600</option>
-                                    <option value="600_800">$600 - $800</option>
-                                    <option value="over_800">Over $800</option>
-                                    <option value="other">Other</option>
-                                </select>
-                                <div id="budget_other" class="mt-2" style="display: none;">
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" id="budget_custom" name="budget_custom" 
-                                               placeholder="Please specify budget range"
-                                               onkeypress="handleCustomInputKeypress(event, 'budget')">
-                                        <button type="button" class="btn btn-outline-primary" onclick="submitCustomOption('budget')">
-                                            <i class="fas fa-plus"></i>
-                                        </div>
-                                    </div>
-                            </div>
                             <div class="col-md-6">
                                 <label for="preferred_style" class="form-label">Preferred Style</label>
                                 <select class="form-select" id="preferred_style" name="preferred_style" onchange="handleOtherOption(this, 'preferred_style')">
@@ -448,7 +419,7 @@ function createClient() {
     }
     
     // Handle custom "Other" values and save them
-    const fieldsWithOther = ['referral_source', 'photography_experience', 'budget', 'preferred_style'];
+    const fieldsWithOther = ['referral_source', 'photography_experience', 'preferred_style'];
     
     fieldsWithOther.forEach(fieldName => {
         const selectValue = document.getElementById(fieldName).value;
@@ -572,7 +543,7 @@ function handleOtherOption(selectElement, fieldName) {
 
 // Load dynamic options from localStorage
 function loadDynamicOptions() {
-    const fields = ['referral_source', 'photography_experience', 'budget', 'preferred_style'];
+    const fields = ['referral_source', 'photography_experience', 'preferred_style'];
     
     fields.forEach(fieldName => {
         const savedOptions = JSON.parse(localStorage.getItem(`${fieldName}_options`) || '[]');
@@ -591,7 +562,6 @@ function displayCustomOptions() {
     const fields = [
         { name: 'referral_source', label: 'Referral Sources' },
         { name: 'photography_experience', label: 'Experience Levels' },
-        { name: 'budget', label: 'Budget Ranges' },
         { name: 'preferred_style', label: 'Preferred Styles' }
     ];
     
@@ -684,13 +654,6 @@ function getOriginalOptions(fieldName) {
             { value: 'experienced', text: 'Experienced' },
             { value: 'professional', text: 'Professional' }
         ],
-        budget: [
-            { value: 'under_200', text: 'Under $200' },
-            { value: '200_400', text: '$200 - $400' },
-            { value: '400_600', text: '$400 - $600' },
-            { value: '600_800', text: '$600 - $800' },
-            { value: 'over_800', text: 'Over $800' }
-        ],
         preferred_style: [
             { value: 'natural', text: 'Natural/Lifestyle' },
             { value: 'posed', text: 'Posed/Classic' },
@@ -776,7 +739,7 @@ function removeCustomOption(fieldName, optionValue) {
 // Clear all custom options
 function clearAllCustomOptions() {
     if (confirm('Are you sure you want to clear all custom options? This action cannot be undone.')) {
-        const fields = ['referral_source', 'photography_experience', 'budget', 'preferred_style'];
+        const fields = ['referral_source', 'photography_experience', 'preferred_style'];
         
         fields.forEach(fieldName => {
             localStorage.removeItem(`${fieldName}_options`);

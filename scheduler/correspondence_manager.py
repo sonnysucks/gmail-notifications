@@ -46,6 +46,27 @@ class CorrespondenceManager:
             'from_name': self.config.get('email.from_name', 'Sass and Whimsy Photography')
         }
     
+    def _replace_template_placeholders(self, template: str, appointment: Appointment, client: Client) -> str:
+        """Replace template placeholders with actual values"""
+        business_name = self.business_info.get('name', 'Your Photography Business')
+        
+        replacements = {
+            '{{ client_name }}': client.name,
+            '{{ session_type }}': appointment.session_type,
+            '{{ appointment_date }}': appointment.start_time.strftime('%A, %B %d, %Y at %I:%M %p'),
+            '{{ business_name }}': business_name,
+            '{{ client_email }}': client.email,
+            '{{ client_phone }}': client.phone or '',
+            '{{ appointment_duration }}': str(appointment.duration),
+            '{{ appointment_location }}': appointment.location or 'Studio'
+        }
+        
+        result = template
+        for placeholder, value in replacements.items():
+            result = result.replace(placeholder, value)
+        
+        return result
+    
     def schedule_appointment_emails(self, appointment: Appointment) -> List[Correspondence]:
         """Schedule all emails for a new appointment"""
         try:
@@ -96,28 +117,26 @@ class CorrespondenceManager:
         try:
             scheduled_time = appointment.start_time - timedelta(days=14)
             
-            subject = f"Contract & Checklist - {appointment.session_type} Session - {appointment.start_time.strftime('%B %d, %Y')}"
+            # Get email template from config
+            email_templates = self.config.get('email_templates', {})
+            contract_template = email_templates.get('contract_checklist', {})
             
-            body = f"""Dear {client.name},
+            # Use template or fallback to default
+            subject_template = contract_template.get('subject', 'Your Photography Session Contract & Checklist - {{ client_name }}')
+            body_template = contract_template.get('body', '''Dear {{ client_name }},
 
-Thank you for booking your {appointment.session_type} session with Sass and Whimsy Photography!
+Thank you for booking your {{ session_type }} session with us! Your appointment is scheduled for {{ appointment_date }}.
 
-Your session is scheduled for {appointment.start_time.strftime('%A, %B %d, %Y at %I:%M %p')}.
-
-Please find attached:
-- Photography Contract
-- Session Checklist
-- Preparation Guide
-
-Please review and sign the contract, and use the checklist to prepare for your session.
+Please find attached your photography contract and session checklist. Please review and sign the contract, and use the checklist to prepare for your session.
 
 If you have any questions, please don't hesitate to contact us.
 
 Best regards,
-Sass and Whimsy Photography
-{self.business_info.get('phone', '')}
-{self.business_info.get('email', '')}
-"""
+{{ business_name }}''')
+            
+            # Replace placeholders
+            subject = self._replace_template_placeholders(subject_template, appointment, client)
+            body = self._replace_template_placeholders(body_template, appointment, client)
             
             html_body = f"""
 <html>
@@ -182,31 +201,30 @@ Sass and Whimsy Photography
         try:
             scheduled_time = appointment.start_time - timedelta(days=7)
             
-            subject = f"Session Package & Details - {appointment.session_type} Session - {appointment.start_time.strftime('%B %d, %Y')}"
+            # Get email template from config
+            email_templates = self.config.get('email_templates', {})
+            package_template = email_templates.get('session_package', {})
             
-            body = f"""Dear {client.name},
+            # Use template or fallback to default
+            subject_template = package_template.get('subject', 'Your Session Package & Preparation Guide - {{ client_name }}')
+            body_template = package_template.get('body', '''Dear {{ client_name }},
 
-Your {appointment.session_type} session is coming up in one week!
+Your {{ session_type }} session is coming up in just 7 days! We're excited to work with you.
 
-Session Details:
-- Date: {appointment.start_time.strftime('%A, %B %d, %Y')}
-- Time: {appointment.start_time.strftime('%I:%M %p')}
-- Duration: {appointment.duration} minutes
-- Location: {appointment.location or 'Studio'}
-
-Please find attached your personalized session package with:
-- Session details and timeline
-- What to expect during the session
+Please find your session package attached, which includes:
+- Session preparation guide
+- What to expect during your session
 - Wardrobe suggestions
-- Props and setup information
+- Location information
 
-We're excited to capture these special moments for you!
+Your appointment is scheduled for {{ appointment_date }}. Please arrive 10 minutes early.
 
-Best regards,
-Sass and Whimsy Photography
-{self.business_info.get('phone', '')}
-{self.business_info.get('email', '')}
-"""
+See you soon!
+{{ business_name }}''')
+            
+            # Replace placeholders
+            subject = self._replace_template_placeholders(subject_template, appointment, client)
+            body = self._replace_template_placeholders(body_template, appointment, client)
             
             html_body = f"""
 <html>
@@ -271,27 +289,26 @@ Sass and Whimsy Photography
         try:
             scheduled_time = appointment.start_time - timedelta(days=3)
             
-            subject = f"Reminder - {appointment.session_type} Session Tomorrow - {appointment.start_time.strftime('%B %d, %Y')}"
+            # Get email template from config
+            email_templates = self.config.get('email_templates', {})
+            reminder_template = email_templates.get('reminder', {})
             
-            body = f"""Dear {client.name},
+            # Use template or fallback to default
+            subject_template = reminder_template.get('subject', 'Reminder: Your Photography Session is in 3 Days - {{ client_name }}')
+            body_template = reminder_template.get('body', '''Hi {{ client_name }},
 
-This is a friendly reminder about your {appointment.session_type} session:
+Just a friendly reminder that your {{ session_type }} session is scheduled for {{ appointment_date }}.
 
-Date: {appointment.start_time.strftime('%A, %B %d, %Y')}
-Time: {appointment.start_time.strftime('%I:%M %p')}
-Location: {appointment.location or 'Studio'}
+Please make sure you've reviewed the preparation materials we sent earlier. If you have any last-minute questions, feel free to reach out.
 
-Please arrive 10 minutes early to allow time for setup and preparation.
+We're looking forward to capturing beautiful memories for you!
 
-If you need to reschedule or have any questions, please contact us as soon as possible.
-
-We look forward to seeing you!
-
-Best regards,
-Sass and Whimsy Photography
-{self.business_info.get('phone', '')}
-{self.business_info.get('email', '')}
-"""
+Best,
+{{ business_name }}''')
+            
+            # Replace placeholders
+            subject = self._replace_template_placeholders(subject_template, appointment, client)
+            body = self._replace_template_placeholders(body_template, appointment, client)
             
             html_body = f"""
 <html>
@@ -350,31 +367,30 @@ Sass and Whimsy Photography
         try:
             scheduled_time = appointment.start_time + timedelta(minutes=15)
             
-            subject = f"Thank You! - {appointment.session_type} Session Complete"
+            # Get email template from config
+            email_templates = self.config.get('email_templates', {})
+            thank_you_template = email_templates.get('thank_you', {})
             
-            body = f"""Dear {client.name},
+            # Use template or fallback to default
+            subject_template = thank_you_template.get('subject', 'Thank You for Your Session! - {{ client_name }}')
+            body_template = thank_you_template.get('body', '''Dear {{ client_name }},
 
-Thank you for choosing Sass and Whimsy Photography for your {appointment.session_type} session!
+Thank you so much for choosing us for your {{ session_type }} session! We had a wonderful time working with you and your family.
 
-We had a wonderful time capturing these special moments for you. Your photos will be ready for review within 2-3 weeks.
+Your photos will be ready for review in approximately 2-3 weeks. We'll send you a link to your private online gallery as soon as they're ready.
 
-What's Next:
-- We'll send you a link to your online gallery
-- You can select your favorite images
-- Additional prints and products are available
-
-Special Offers:
-- 20% off additional prints when ordered within 30 days
-- Refer a friend and both receive $50 off your next session
-- Follow us on social media for exclusive deals
+In the meantime, feel free to follow us on social media for photography tips and to see some of our recent work:
+- Instagram: @yourphotography
+- Facebook: Your Photography Business
 
 Thank you again for trusting us with your precious memories!
 
-Best regards,
-Sass and Whimsy Photography
-{self.business_info.get('phone', '')}
-{self.business_info.get('email', '')}
-"""
+Warm regards,
+{{ business_name }}''')
+            
+            # Replace placeholders
+            subject = self._replace_template_placeholders(subject_template, appointment, client)
+            body = self._replace_template_placeholders(body_template, appointment, client)
             
             html_body = f"""
 <html>

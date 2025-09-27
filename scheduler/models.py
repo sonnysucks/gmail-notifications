@@ -260,6 +260,7 @@ class Client:
     # Baby Photography Specific Fields
     family_type: str = ""  # expecting, newborn, baby, toddler, multiple_children
     due_date: Optional[datetime] = None
+    client_birthday: Optional[datetime] = None  # Client's birthday for age calculation
     children_count: int = 0
     children_names: str = ""
     children_birth_dates: str = ""
@@ -310,6 +311,7 @@ class Client:
             'tags': self.tags,
             'family_type': self.family_type,
             'due_date': self.due_date.isoformat() if self.due_date else None,
+            'client_birthday': self.client_birthday.isoformat() if self.client_birthday else None,
             'children_info': self.children_info,
             'family_size': self.family_size,
             'previous_photographer': self.previous_photographer,
@@ -351,6 +353,7 @@ class Client:
             tags=data.get('tags', []),
             family_type=data.get('family_type', ''),
             due_date=datetime.fromisoformat(data.get('due_date')) if data.get('due_date') else None,
+            client_birthday=datetime.fromisoformat(data.get('client_birthday')) if data.get('client_birthday') else None,
             children_info=data.get('children_info', []),
             family_size=data.get('family_size', 1),
             previous_photographer=data.get('previous_photographer', ''),

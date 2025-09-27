@@ -769,6 +769,12 @@ def backup_restore():
     """Backup and restore system page"""
     return render_template('backup_restore.html')
 
+@app.route('/tools')
+@login_required
+def tools():
+    """Tools page with age calculator and other utilities"""
+    return render_template('tools.html')
+
 @app.route('/correspondence')
 @login_required
 def correspondence():

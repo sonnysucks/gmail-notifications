@@ -61,6 +61,7 @@ class CRMManager:
                     updated_at TEXT,
                     last_contact TEXT,
                     last_appointment TEXT,
+                    client_birthday TEXT,
                     total_appointments INTEGER,
                     total_spent REAL,
                     average_session_value REAL,
@@ -217,8 +218,8 @@ class CRMManager:
             cursor = conn.cursor()
             
             cursor.execute('''
-                INSERT OR REPLACE INTO clients (name, email, phone, address, children_count, children_names, children_birth_dates, preferences, family_type, created_at, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT OR REPLACE INTO clients (name, email, phone, address, children_count, children_names, children_birth_dates, preferences, family_type, client_birthday, created_at, updated_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 client.name, client.email, client.phone, client.address,
                 getattr(client, 'children_count', 0),
@@ -226,6 +227,7 @@ class CRMManager:
                 getattr(client, 'children_birth_dates', ''),
                 json.dumps(getattr(client, 'preferences', {})),
                 getattr(client, 'family_type', ''),
+                client.client_birthday.isoformat() if client.client_birthday else None,
                 client.created_at.isoformat(), client.updated_at.isoformat()
             ))
             
@@ -779,7 +781,9 @@ class CRMManager:
             children_info=children_info,
             family_size=row[5] or 0,
             preferences=json.loads(row[8]) if row[8] else {},
-            family_type=row[9], created_at=datetime.fromisoformat(row[10]), 
+            family_type=row[9], 
+            client_birthday=datetime.fromisoformat(row[13]) if row[13] else None,
+            created_at=datetime.fromisoformat(row[10]), 
             updated_at=datetime.fromisoformat(row[11])
         )
     

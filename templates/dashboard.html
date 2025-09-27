@@ -212,6 +212,23 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card border-0 bg-gradient-dark text-white h-100 feature-card">
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-tools fa-2x opacity-75" title="Tools" data-fallback="🔧"></i>
+                        </div>
+                        <div class="flex-grow-1 ms-3">
+                            <h6 class="card-title mb-1">🔧 Tools</h6>
+                            <p class="card-text small opacity-75">Age calculator & utilities</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('tools') }}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -389,6 +406,10 @@
                         <a href="{{ url_for('correspondence') }}" class="btn btn-outline-primary btn-sm">
                             <i class="fas fa-envelope me-2"></i>
                             Correspondence
+                        </a>
+                        <a href="{{ url_for('tools') }}" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-tools me-2"></i>
+                            Tools
                         </a>
                     </div>
                 </div>
