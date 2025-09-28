@@ -1,8 +1,8 @@
-# Photography Scheduler Project Summary
+# SnapStudio Project Summary
 ## Professional Photography Business Management System - Complete CRM & Appointment Scheduler
 
-**Project ID**: `photography-scheduler`  
-**Repository**: `gmail-notifications`    
+**Project ID**: `snapstudio`  
+**Repository**: `SnapStudio`    
 **Status**: Active Development - Web Application Complete with Full CRM and Professional Photography Features
 
 ## 🎯 **Project Overview**
@@ -251,7 +251,7 @@ python main.py crm update-client "client_id" --due-date "YYYY-MM-DD"
 
 ### **File Structure**
 ```
-gmail-notifications/
+SnapStudio/
 ├── web_app.py              # Flask web application (main entry point)
 ├── run_web_app.py         # Web application launcher
 ├── main.py                # CLI application (legacy)
@@ -382,7 +382,7 @@ git push origin main
 
 ---
 
-**This project represents a comprehensive baby photography business management system with CRM capabilities, automated scheduling, and specialized workflows for capturing life's precious moments.** 🎯📸👶
+**This project represents SnapStudio - a comprehensive professional photography business management system with CRM capabilities, automated scheduling, and specialized workflows for capturing life's precious moments.** 🎯📸✨
 
 **Last Updated**: December 2024  
 **Next Review**: After major feature additions or architectural changes

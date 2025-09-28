@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple test script for the Gmail Photography Appointment Scheduler
+Simple test script for SnapStudio
 """
 
 import sys
@@ -125,7 +125,7 @@ def test_template_rendering():
 
 def main():
     """Run all tests"""
-    print("Gmail Photography Appointment Scheduler - Test Suite")
+    print("SnapStudio - Test Suite")
     print("=" * 60)
     
     try:

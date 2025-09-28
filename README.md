@@ -1,5 +1,6 @@
-# Professional Photography Business Management System
-## Complete CRM & Appointment Scheduler for Professional Photographers & Retouchers
+# SnapStudio
+## Professional Photography Business Management System
+### Complete CRM & Appointment Scheduler for Professional Photographers & Retouchers
 
 A comprehensive **web-based** appointment scheduling and Customer Relationship Management (CRM) system **designed for professional photography businesses**. Features a modern Flask web application with interactive calendar, business analytics, and complete backup/restore functionality.
 
@@ -133,7 +134,7 @@ This system is **designed for professional photographers** specializing in:
 1. **Clone and setup**:
 ```bash
 git clone <your-repo-url>
-cd gmail-notifications
+cd SnapStudio
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
@@ -266,7 +267,7 @@ python test_photography_business.py
 ## 📁 **Project Structure**
 
 ```
-gmail-notifications/
+SnapStudio/
 ├── web_app.py              # Flask web application (main entry point)
 ├── run_web_app.py         # Web application launcher
 ├── main.py                # CLI application (legacy)
@@ -387,4 +388,4 @@ For support and questions:
 
 ---
 
-**Transform your professional photography business with comprehensive appointment scheduling and CRM management designed specifically for capturing life's most important moments!** 🎯📸✨
+**Transform your professional photography business with SnapStudio - comprehensive appointment scheduling and CRM management designed specifically for capturing life's most important moments!** 🎯📸✨

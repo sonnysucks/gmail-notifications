@@ -1,5 +1,5 @@
 """
-Configuration management for the Gmail Photography Appointment Scheduler
+Configuration management for SnapStudio - Professional Photography Business Management System
 """
 
 import os

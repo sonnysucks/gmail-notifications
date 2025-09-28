@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CRM Test Script for Gmail Photography Appointment Scheduler
+CRM Test Script for SnapStudio
 Tests the CRM functionality and database operations
 """
 
@@ -269,7 +269,7 @@ def test_marketing_campaigns():
 
 def main():
     """Run all CRM tests"""
-    print("Gmail Photography Appointment Scheduler - CRM Test Suite")
+    print("SnapStudio - CRM Test Suite")
     print("=" * 70)
     
     all_tests_passed = True

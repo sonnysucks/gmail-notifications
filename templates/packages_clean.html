@@ -97,8 +97,8 @@
                             </select>
                         </div>
                         <div class="col-12">
-                            <label for="editPackageDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="editPackageDescription" name="description" rows="3"></textarea>
+                            <label for="editPackageDescription" class="form-label">Package Description</label>
+                            <textarea class="form-control" id="editPackageDescription" name="description" rows="4" placeholder="e.g., A 30-minute professional photography session featuring our artistic and creative eye for capturing beautiful moments. We'll work with natural locations or carefully selected props to create stunning images that tell your story. This session includes digital images with professional post-processing and optional print packages to preserve your memories."></textarea>
                         </div>
                         <div class="col-md-6">
                             <label for="editBasePrice" class="form-label">Base Price *</label>
@@ -120,6 +120,14 @@
                             </div>
                         </div>
                         <div class="col-12">
+                            <label for="editIncludes" class="form-label">What's Included</label>
+                            <textarea class="form-control" id="editIncludes" name="includes" rows="4" placeholder="e.g., 30-minute professional photography session with artistic direction, Digital images with professional post-processing and color correction, Online gallery for viewing and sharing, Basic retouching and enhancement, Consultation on natural locations or prop selection, High-resolution digital files for personal use"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label for="editAddOns" class="form-label">Add-Ons & Print Options</label>
+                            <textarea class="form-control" id="editAddOns" name="add_ons" rows="3" placeholder="e.g., Professional print packages in various sizes, Canvas prints and wall art, Photo books and albums, Extended session time (additional 30 minutes), Premium retouching services, Custom prop rental, Location scouting service"></textarea>
+                        </div>
+                        <div class="col-12">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="editIsActive" name="is_active" checked>
                                 <label class="form-check-label" for="editIsActive">
@@ -131,6 +139,7 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-danger me-auto" onclick="deletePackage()">Delete Package</button>
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="savePackage()">Save Changes</button>
             </div>
@@ -171,9 +180,28 @@ fetch('/api/packages', {
                         <div class="card-body">
                             <div class="mb-2">
                                 <span class="h5 text-success">$${pkg.base_price}</span>
-                                <small class="text-muted">${pkg.duration_minutes} min</small>
+                                <small class="text-muted">${pkg.duration_minutes} min session</small>
                             </div>
-                            <p class="text-muted small">${pkg.description || 'No description'}</p>
+                            <p class="text-muted small">${pkg.description || 'A 30-minute professional photography session featuring our artistic and creative eye for capturing beautiful moments. We work with natural locations or carefully selected props to create stunning images that tell your story.'}</p>
+                            
+                            ${pkg.includes && pkg.includes.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted fw-bold">Includes:</small>
+                                    <ul class="small text-muted mb-0">
+                                        ${pkg.includes.map(item => `<li>${item}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            
+                            ${pkg.add_ons && pkg.add_ons.length > 0 ? `
+                                <div class="mb-2">
+                                    <small class="text-muted fw-bold">Add-ons & Print Options:</small>
+                                    <ul class="small text-muted mb-0">
+                                        ${pkg.add_ons.map(item => `<li>${item}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            
                             <div class="d-flex gap-1">
                                 ${pkg.is_customizable ? '<span class="badge bg-info">Customizable</span>' : ''}
                                 ${!pkg.is_active ? '<span class="badge bg-secondary">Inactive</span>' : ''}
@@ -228,6 +256,8 @@ function editPackage(packageId) {
             document.getElementById('editDurationMinutes').value = pkg.duration_minutes || '';
             document.getElementById('editIsCustomizable').checked = pkg.is_customizable || false;
             document.getElementById('editIsActive').checked = pkg.is_active !== false;
+            document.getElementById('editIncludes').value = (pkg.includes || []).join('\n');
+            document.getElementById('editAddOns').value = (pkg.add_ons || []).join('\n');
             
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('editPackageModal'));
@@ -251,7 +281,9 @@ function savePackage() {
         base_price: parseFloat(document.getElementById('editBasePrice').value),
         duration_minutes: parseInt(document.getElementById('editDurationMinutes').value),
         is_customizable: document.getElementById('editIsCustomizable').checked,
-        is_active: document.getElementById('editIsActive').checked
+        is_active: document.getElementById('editIsActive').checked,
+        includes: document.getElementById('editIncludes').value.split('\n').map(item => item.trim()).filter(item => item !== ''),
+        add_ons: document.getElementById('editAddOns').value.split('\n').map(item => item.trim()).filter(item => item !== '')
     };
     
     console.log('Saving package:', packageData);
@@ -279,6 +311,43 @@ function savePackage() {
     .catch(error => {
         console.error('Error saving package:', error);
         alert('Error saving package: ' + error.message);
+    });
+}
+
+function deletePackage() {
+    const packageId = document.getElementById('editPackageId').value;
+    const packageName = document.getElementById('editPackageName').value;
+    
+    if (!packageId) {
+        alert('No package selected for deletion');
+        return;
+    }
+    
+    if (!confirm(`Are you sure you want to delete the package "${packageName}"? This action cannot be undone.`)) {
+        return;
+    }
+    
+    console.log('Deleting package:', packageId);
+    
+    fetch(`/api/packages/${packageId}`, {
+        method: 'DELETE',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Package deleted successfully!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editPackageModal'));
+            modal.hide();
+            // Reload packages
+            location.reload();
+        } else {
+            alert('Failed to delete package: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error deleting package:', error);
+        alert('Error deleting package: ' + error.message);
     });
 }
 

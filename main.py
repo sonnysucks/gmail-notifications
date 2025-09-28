@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Gmail Photography Appointment Scheduler with CRM
+SnapStudio - Professional Photography Business Management System
 Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
 Main application entry point
 """
@@ -26,7 +26,7 @@ from utils.logger import setup_logging
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose logging')
 @click.pass_context
 def cli(ctx, config, verbose):
-    """Gmail Photography Appointment Scheduler with CRM - Specialized for Baby Photography"""
+    """SnapStudio - Professional Photography Business Management System"""
     ctx.ensure_object(dict)
     ctx.obj['config'] = config
     ctx.obj['verbose'] = verbose
@@ -55,7 +55,7 @@ def setup(ctx):
         gmail_manager = GmailManager(config_manager)
         calendar_manager = CalendarManager(config_manager)
         
-        click.echo("Setting up Gmail Baby Photography Appointment Scheduler with CRM...")
+        click.echo("Setting up SnapStudio - Professional Photography Business Management System...")
         
         # Authenticate with Google
         click.echo("Authenticating with Google...")

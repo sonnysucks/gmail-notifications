@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Baby Photography Test Script for Gmail Photography Appointment Scheduler
+Baby Photography Test Script for SnapStudio
 Tests specialized baby photography functionality including milestones, baby tracking, and specialized sessions
 """
 
@@ -361,7 +361,7 @@ def test_baby_crm_integration():
 
 def main():
     """Run all baby photography tests"""
-    print("Gmail Photography Appointment Scheduler - Baby Photography Test Suite")
+    print("SnapStudio - Baby Photography Test Suite")
     print("=" * 80)
     
     all_tests_passed = True

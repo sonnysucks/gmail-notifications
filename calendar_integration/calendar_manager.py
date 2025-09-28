@@ -154,7 +154,7 @@ Duration: {appointment.duration} minutes
         if appointment.notes:
             description += f"Notes: {appointment.notes}\n\n"
         
-        description += f"Created by Gmail Photography Appointment Scheduler"
+        description += f"Created by SnapStudio"
         return description.strip()
     
     def _get_color_id(self, session_type: str) -> str:

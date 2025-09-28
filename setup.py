@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Setup script for Gmail Photography Appointment Scheduler
+Setup script for SnapStudio
 """
 
 from setuptools import setup, find_packages

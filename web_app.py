@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 """
-Gmail Photography Appointment Scheduler Web Application
-Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
+SnapStudio Web Application
+Professional Photography Business Management System
 
 A comprehensive web interface for photographers to:
 - Configure and set up the system
 - Manage appointments and clients
-- Handle baby photography workflows
+- Handle professional photography workflows
 - Access CRM and business analytics
 """
 
