@@ -446,6 +446,7 @@ function createClient() {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(clientData)
     })
     .then(response => response.json())

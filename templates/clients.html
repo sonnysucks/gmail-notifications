@@ -26,7 +26,7 @@
                         <option value="">All Types</option>
                         <option value="expecting">Expecting</option>
                         <option value="newborn">Newborn</option>
-                        <option value="baby">Baby (0-1 year)</option>
+                        <option value="child">Child (0-1 year)</option>
                         <option value="toddler">Toddler (1-3 years)</option>
                         <option value="multiple_children">Multiple Children</option>
                     </select>
@@ -100,7 +100,7 @@
                     <!-- Family Information -->
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-{{ 'warning' if client.family_type == 'expecting' else 'success' if client.family_type == 'newborn' else 'primary' if client.family_type == 'baby' else 'info' if client.family_type == 'toddler' else 'secondary' }}">
+                            <span class="badge bg-{{ 'warning' if client.family_type == 'expecting' else 'success' if client.family_type == 'newborn' else 'primary' if client.family_type == 'child' else 'info' if client.family_type == 'toddler' else 'secondary' }}">
                                 {{ client.family_type.title() if client.family_type else 'New Client' }}
                             </span>
                             {% if client.due_date %}
@@ -130,7 +130,7 @@
                     {% if client.children_info %}
                         <div class="mb-3">
                             <h6 class="text-muted mb-2">
-                                <i class="fas fa-baby me-2"></i>
+                                <i class="fas fa-child me-2"></i>
                                 Children
                             </h6>
                             {% for child in client.children_info %}
@@ -351,7 +351,7 @@ function getFamilyTypeFromCard(card) {
         const badgeText = badge.textContent.toLowerCase();
         if (badgeText.includes('expecting')) return 'maternity';
         if (badgeText.includes('newborn')) return 'newborn';
-        if (badgeText.includes('baby')) return 'milestone';
+        if (badgeText.includes('child')) return 'milestone';
         if (badgeText.includes('toddler')) return 'birthday';
     }
     return 'family'; // Default fallback
@@ -361,14 +361,18 @@ function loadRecommendedPackages(clientId, familyType) {
     const packageContainer = document.getElementById(`clientPackages-${clientId}`);
     
     // Load packages by category
-    fetch(`/api/packages/category/${familyType}`)
+    fetch(`/api/packages/category/${familyType}`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success && data.packages.length > 0) {
                 displayPackages(packageContainer, data.packages, clientId);
             } else {
                 // If no packages for specific category, load all active packages
-                return fetch('/api/packages/active');
+                return fetch('/api/packages/active', {
+                    credentials: 'include'
+                });
             }
         })
         .then(response => {
@@ -408,7 +412,9 @@ function customizePackageForClient(packageId, clientId) {
     currentCustomizeClient = clientId;
     
     // Fetch package details
-    fetch(`/api/packages/${packageId}`)
+    fetch(`/api/packages/${packageId}`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -681,7 +687,8 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {

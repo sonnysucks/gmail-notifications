@@ -1,7 +1,7 @@
-# Gmail Photography Appointment Scheduler with CRM
-## Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
+# Professional Photography Business Management System
+## Complete CRM & Appointment Scheduler for Professional Photographers & Retouchers
 
-A comprehensive **web-based** appointment scheduling and Customer Relationship Management (CRM) system **specifically designed for baby photography businesses**. Features a modern Flask web application with interactive calendar, business analytics, and complete backup/restore functionality.
+A comprehensive **web-based** appointment scheduling and Customer Relationship Management (CRM) system **designed for professional photography businesses**. Features a modern Flask web application with interactive calendar, business analytics, and complete backup/restore functionality.
 
 ## 🌐 **Web Application (Primary Interface)**
 
@@ -10,57 +10,57 @@ A comprehensive **web-based** appointment scheduling and Customer Relationship M
 ### **Key Web Features**
 - **📊 Dashboard**: Business overview with metrics and quick actions
 - **📅 Interactive Calendar**: Visual appointment management with clickable days
-- **👥 Client Management**: Complete CRM with family and baby tracking
+- **👥 Client Management**: Complete CRM with client and project tracking
 - **📈 Analytics**: Revenue tracking, session statistics, client metrics
 - **💾 Backup & Restore**: Complete system backup and data management
 - **⚙️ Configuration**: Comprehensive business setup and customization
 
-## 🍼 **Baby Photography Specialization**
+## 📸 **Professional Photography Services**
 
-This system is **tailor-made** for photographers specializing in:
-- **Maternity Photography** - Beautiful pregnancy sessions (28-36 weeks)
-- **Newborn Photography** - Precious first 14 days of life
-- **Baby Milestone Sessions** - 3, 6, 9, 12, 18, 24 months
-- **Smash Cake Photography** - 1st birthday celebrations
-- **Birthday Photography** - Themed sessions for all ages
-- **Family Portraits** - Growing family memories
+This system is **designed for professional photographers** specializing in:
+- **Portrait Photography** - Professional headshots and personal branding
+- **Family Photography** - Milestone sessions and family portraits
+- **Event Photography** - Weddings, corporate events, and celebrations
+- **Commercial Photography** - Product shots and business photography
+- **Retouching Services** - Professional photo editing and enhancement
+- **Session Packages** - Customized photography packages for all occasions
 
-## 🚀 **Specialized Baby Photography Features**
+## 🚀 **Professional Photography Business Features**
 
-### **Milestone Tracking & Automation**
-- **Automatic Age Calculations**: Track baby age in days, weeks, and months
-- **Milestone Reminders**: Automated notifications for upcoming milestones
-- **Session Planning**: Age-appropriate session recommendations
-- **Package Management**: Complete first-year milestone packages
+### **Client & Project Management**
+- **Client Tracking**: Comprehensive client database with project history
+- **Milestone Sessions**: Automated tracking for family milestones and events
+- **Session Planning**: Professional session recommendations and scheduling
+- **Package Management**: Customizable photography packages and pricing
 
-### **Baby-Specific Client Management**
-- **Family Type Tracking**: Expecting, newborn, baby, toddler, multiple children
-- **Due Date Management**: Countdown to baby's arrival
-- **Children Database**: Track multiple children per family
-- **Photography Experience**: First-time vs. experienced parents
-- **Referral Sources**: Pediatrician, hospital, daycare referrals
+### **Professional Client Management**
+- **Client Type Tracking**: Individual, family, corporate, event clients
+- **Project Management**: Track multiple projects and sessions per client
+- **Client Database**: Comprehensive client information and preferences
+- **Photography Experience**: Client experience level and preferences
+- **Referral Sources**: Social media, word of mouth, business partnerships
 
-### **Specialized Session Types**
-- **Maternity Sessions**: 90-minute sessions with props included
-- **Newborn Sessions**: 3-hour sessions with backup date flexibility
-- **Milestone Sessions**: Age-specific timing and duration
-- **Smash Cake Sessions**: Cake included with cleanup service
-- **Birthday Sessions**: Theme selection with props and colors
-- **Package Deals**: Discounted milestone packages
+### **Professional Session Types**
+- **Portrait Sessions**: Professional headshots and personal branding
+- **Family Sessions**: Milestone and family portrait sessions
+- **Event Sessions**: Wedding, corporate, and celebration photography
+- **Commercial Sessions**: Product photography and business branding
+- **Retouching Services**: Professional photo editing and enhancement
+- **Package Deals**: Customized photography packages with professional pricing
 
-### **Advanced Baby Photography Tools**
-- **Theme Management**: Princess, superhero, farm, space, ocean themes
-- **Color Coordination**: Predefined color palettes for sessions
-- **Props Tracking**: Balloons, banners, crowns, capes, stuffed animals
-- **Cake Management**: Flavors, designs, and dietary preferences
-- **Sibling Integration**: Include siblings in milestone sessions
+### **Advanced Photography Business Tools**
+- **Style Management**: Professional photography styles and themes
+- **Color Coordination**: Brand color palettes and session themes
+- **Equipment Tracking**: Camera gear, lighting, and studio equipment
+- **Retouching Workflow**: Professional editing and enhancement services
+- **Client Collaboration**: Include family members and stakeholders in sessions
 
 ## ✨ **Core Features**
 
 - **Automatic Appointment Scheduling**: Create appointments directly from Gmail
 - **Smart Reminder System**: Automated notifications at 2 weeks, 1 week, 3 days, 2 days, and 1 day before appointments
 - **Google Calendar Integration**: Works with any Google Calendar as the target
-- **Professional Email Templates**: Baby photography-specific email templates for all communications
+- **Professional Email Templates**: Photography business-specific email templates for all communications
 - **Time Zone Handling**: Automatic time zone detection and conversion
 - **Gmail Integration**: Scan emails for appointment requests and manage communication
 
@@ -84,14 +84,14 @@ This system is **tailor-made** for photographers specializing in:
 - **CLI Application** (`main.py`): Command-line interface (still functional)
 - **Modular Design**: Clean separation of concerns (Gmail, Calendar, Scheduler, CRM, Templates)
 - **Scalable**: Can be upgraded to PostgreSQL or MySQL for production use
-- **Baby Photography Focused**: Built specifically for baby photography workflows
+- **Professional Photography Focused**: Built specifically for professional photography business workflows
 
-## 📊 **CRM Capabilities for Baby Photography**
+## 📊 **CRM Capabilities for Professional Photography**
 
 ### **Client Management**
-- Comprehensive client profiles with family information
-- Baby tracking with birth dates and milestone planning
-- Family size and composition management
+- Comprehensive client profiles with project information
+- Client tracking with preferences and milestone planning
+- Project size and scope management
 - Previous photographer and experience level tracking
 - Referral source analysis for marketing optimization
 
@@ -104,9 +104,9 @@ This system is **tailor-made** for photographers specializing in:
 - Follow-up task automation
 
 ### **Business Intelligence**
-- Revenue analytics by session type
+- Revenue analytics by session type and client
 - Client acquisition and retention metrics
-- Milestone package performance analysis
+- Package performance analysis
 - Referral source effectiveness
 - Customer lifetime value calculations
 - Monthly and quarterly reporting
@@ -162,18 +162,18 @@ cp config.example.yaml config.yaml
    - Create OAuth 2.0 credentials
    - Download the credentials JSON file and save as `credentials.json`
 
-## ⚙️ **Configuration for Baby Photography**
+## ⚙️ **Configuration for Professional Photography**
 
 Edit `config.yaml` to configure:
 - **Business Information**: Studio details, contact info, tax information
-- **Session Types & Pricing**: Predefined baby photography services with pricing
-- **Baby Photography Settings**: Milestone tracking, newborn preferences, smash cake options
-- **CRM Settings**: Client tags, referral sources, family types, experience levels
+- **Session Types & Pricing**: Predefined photography services with professional pricing
+- **Photography Settings**: Milestone tracking, client preferences, retouching options
+- **CRM Settings**: Client tags, referral sources, client types, experience levels
 - **Calendar Settings**: Target calendar, business hours, timezone
-- **Email Templates**: Customizable templates for all baby photography communications
+- **Email Templates**: Customizable templates for all photography business communications
 - **Analytics**: KPI tracking and reporting preferences
 
-## 🎯 **Usage for Baby Photography**
+## 🎯 **Usage for Professional Photography**
 
 ### **Web Application Usage (Recommended)**
 
@@ -183,7 +183,7 @@ Edit `config.yaml` to configure:
    - **Dashboard**: Overview of business metrics
    - **Appointments**: Create, edit, view appointments
    - **Calendar**: Interactive calendar with appointment visualization
-   - **Clients**: Manage client information and family details
+   - **Clients**: Manage client information and project details
    - **Analytics**: View business performance and revenue
    - **Setup**: Configure business settings and preferences
    - **Backup & Restore**: Manage system backups
@@ -195,45 +195,45 @@ Edit `config.yaml` to configure:
 python main.py --setup
 ```
 
-#### **Baby Photography Appointment Management**
+#### **Professional Photography Appointment Management**
 ```bash
-# Schedule newborn session with baby details
-python main.py --schedule "Sarah Johnson" "2024-01-15 10:00" "Newborn Session" \
-  --baby-name "Baby Emma" --baby-age-days 7 --milestone-type "newborn" \
-  --parent-names "Sarah, Mike" --email "sarah@email.com" --fee 350.00
+# Schedule portrait session
+python main.py --schedule "Sarah Johnson" "2024-01-15 10:00" "Portrait Session" \
+  --client-name "Sarah Johnson" --session-type "portrait" \
+  --email "sarah@email.com" --fee 350.00
 
-# Schedule milestone session
-python main.py --schedule "Lisa Smith" "2024-02-01 14:00" "6 Month Milestone" \
-  --baby-name "Baby Liam" --baby-age-days 180 --milestone-type "6month" \
+# Schedule family milestone session
+python main.py --schedule "Lisa Smith" "2024-02-01 14:00" "Family Milestone" \
+  --client-name "Lisa Smith" --session-type "family" \
   --email "lisa@email.com" --fee 225.00
 
-# Schedule smash cake session
-python main.py --schedule "Jennifer Davis" "2024-03-15 11:00" "Smash Cake Session" \
-  --baby-name "Baby Ava" --baby-age-days 365 --milestone-type "1year" \
+# Schedule commercial session
+python main.py --schedule "Jennifer Davis" "2024-03-15 11:00" "Commercial Session" \
+  --client-name "Jennifer Davis" --session-type "commercial" \
   --email "jennifer@email.com" --fee 275.00
 ```
 
-### **Baby Photography CRM Operations**
+### **Professional Photography CRM Operations**
 ```bash
-# Add baby information to client
-python main.py baby add-baby "client_id" "Baby Emma" "2024-01-08" \
-  --notes "First baby, very excited parents"
+# Add client information
+python main.py crm add-client "client_id" "Sarah Johnson" "2024-01-08" \
+  --notes "Professional headshot client, prefers natural lighting"
 
-# Check upcoming milestones
-python main.py baby milestones "client_id"
+# Check upcoming sessions
+python main.py crm upcoming-sessions "client_id"
 
-# Update family information
-python main.py baby update-family "client_id" --due-date "2024-06-15" \
-  --family-type "expecting" --photography-experience "first_time"
+# Update client information
+python main.py crm update-client "client_id" --session-type "portrait" \
+  --photography-experience "professional"
 
-# Search for maternity clients
-python main.py crm search "maternity"
+# Search for portrait clients
+python main.py crm search "portrait"
 
-# View client details with baby information
+# View client details with project information
 python main.py crm client "client_id"
 
-# Add client note about baby preferences
-python main.py crm add-note "client_id" "Baby prefers natural lighting" \
+# Add client note about preferences
+python main.py crm add-note "client_id" "Client prefers natural lighting" \
   --title "Lighting Preferences" --type "follow_up"
 ```
 
@@ -246,7 +246,7 @@ python main.py --reminders
 python main.py --sync
 ```
 
-## 🧪 **Testing Baby Photography Features**
+## 🧪 **Testing Professional Photography Features**
 
 ### **Test Basic Functionality**
 ```bash
@@ -258,9 +258,9 @@ python test_scheduler.py
 python test_crm.py
 ```
 
-### **Test Baby Photography Features**
+### **Test Photography Business Features**
 ```bash
-python test_baby_photography.py
+python test_photography_business.py
 ```
 
 ## 📁 **Project Structure**
@@ -271,9 +271,9 @@ gmail-notifications/
 ├── run_web_app.py         # Web application launcher
 ├── main.py                # CLI application (legacy)
 ├── scheduler/             # Core business logic
-│   ├── models.py         # Data models (Client, Appointment, BabyMilestone, BirthdaySession)
+│   ├── models.py         # Data models (Client, Appointment, Milestone, Session)
 │   ├── crm_manager.py    # CRM database operations
-│   └── appointment_scheduler.py  # Scheduling logic with baby photography
+│   └── appointment_scheduler.py  # Scheduling logic with professional photography
 ├── templates/             # Jinja2 HTML templates for web interface
 │   ├── dashboard.html    # Main dashboard
 │   ├── appointments.html # Appointment management
@@ -289,36 +289,36 @@ gmail-notifications/
 ├── data/                  # SQLite database and data storage
 ├── backups/               # System backup files
 ├── logs/                  # Application logs
-├── config.example.yaml    # Example configuration for baby photography
+├── config.example.yaml    # Example configuration for professional photography
 ├── requirements.txt       # Python dependencies
 ├── test_scheduler.py      # Basic functionality tests
 ├── test_crm.py           # CRM system tests
-├── test_baby_photography.py # Baby photography specific tests
+├── test_photography_business.py # Professional photography business tests
 └── README.md             # This file
 ```
 
-## 🔧 **Advanced Baby Photography Features**
+## 🔧 **Advanced Professional Photography Features**
 
 ### **Database Management**
-- SQLite database with proper indexing for baby photography data
+- SQLite database with proper indexing for photography business data
 - Automatic backup and recovery
 - Data export capabilities
 - Migration tools for future upgrades
 
 ### **API Integration Ready**
-- RESTful API structure for baby photography workflows
+- RESTful API structure for photography business workflows
 - JSON data exchange
 - Webhook support for external integrations
 - Third-party service connectors
 
-### **Reporting & Analytics for Baby Photography**
+### **Reporting & Analytics for Professional Photography**
 - Automated report generation by session type
 - Multiple export formats (CSV, PDF, JSON)
 - Scheduled reporting
-- Custom KPI tracking for baby photography business
+- Custom KPI tracking for photography business
 
-### **Marketing Tools for Baby Photography**
-- Email campaign management for milestone reminders
+### **Marketing Tools for Professional Photography**
+- Email campaign management for session reminders
 - Referral program tracking
 - Social media integration
 - Client segmentation for targeted marketing
@@ -331,7 +331,7 @@ gmail-notifications/
 - Environment variable support
 - Role-based access control ready
 
-## 🚀 **Production Deployment for Baby Photography**
+## 🚀 **Production Deployment for Professional Photography**
 
 For production use:
 1. **Database**: Upgrade to PostgreSQL or MySQL
@@ -341,16 +341,16 @@ For production use:
 5. **Backup**: Set up automated backup procedures
 6. **SSL**: Enable HTTPS for web interface
 
-## 📈 **Business Benefits for Baby Photography**
+## 📈 **Business Benefits for Professional Photography**
 
-- **Increased Efficiency**: Automate milestone tracking and session scheduling
-- **Better Client Relationships**: Track baby development and family preferences
+- **Increased Efficiency**: Automate client tracking and session scheduling
+- **Better Client Relationships**: Track client preferences and project history
 - **Revenue Optimization**: Analyze session performance and package sales
 - **Marketing Insights**: Track referral sources and campaign effectiveness
 - **Professional Image**: Automated, consistent communication
 - **Data-Driven Decisions**: Comprehensive analytics and reporting
-- **Milestone Package Sales**: Increase revenue with bundled services
-- **Client Retention**: Keep families coming back for each milestone
+- **Package Sales**: Increase revenue with bundled services
+- **Client Retention**: Keep clients coming back for multiple sessions
 
 ## 🤝 **Contributing**
 
@@ -372,19 +372,19 @@ For support and questions:
 3. Test with the provided test scripts
 4. Open an issue in the repository
 
-## 🔮 **Roadmap for Baby Photography**
+## 🔮 **Roadmap for Professional Photography**
 
 - **Web Interface**: React/Vue.js web application
 - **Mobile App**: iOS/Android mobile applications
-- **Advanced Analytics**: Machine learning insights for milestone timing
+- **Advanced Analytics**: Machine learning insights for client behavior
 - **Payment Integration**: Stripe/PayPal integration
 - **Multi-location Support**: Multiple studio locations
 - **API Marketplace**: Third-party integrations
-- **White-label Solution**: Resell to other baby photographers
-- **Milestone Photography Guides**: Built-in session planning tools
-- **Baby Development Tracking**: Integration with pediatric apps
-- **Family Photo Sharing**: Secure gallery sharing for families
+- **White-label Solution**: Resell to other photographers
+- **Photography Guides**: Built-in session planning tools
+- **Client Development Tracking**: Integration with business apps
+- **Photo Gallery Sharing**: Secure client gallery sharing
 
 ---
 
-**Transform your baby photography business with professional appointment scheduling and comprehensive CRM management designed specifically for capturing life's precious moments!** 🎯📸👶
+**Transform your professional photography business with comprehensive appointment scheduling and CRM management designed specifically for capturing life's most important moments!** 🎯📸✨

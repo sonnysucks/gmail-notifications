@@ -43,7 +43,7 @@
                         <option value="maternity">Maternity</option>
                         <option value="newborn">Newborn</option>
                         <option value="milestone">Milestone</option>
-                        <option value="smash_cake">Smash Cake</option>
+                        <option value="birthday_celebration">Birthday Celebration</option>
                         <option value="birthday">Birthday</option>
                         <option value="family">Family</option>
                         <option value="mini">Mini Session</option>
@@ -339,7 +339,8 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
@@ -371,7 +372,9 @@ document.getElementById('confirmDelete').addEventListener('click', function() {
 
 function exportAllAppointmentsICS() {
     // Export all appointments as ICS file
-    fetch('/api/appointments/export/ics')
+    fetch('/api/appointments/export/ics', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -390,7 +393,9 @@ function exportAllAppointmentsICS() {
 
 function exportAppointmentICS(appointmentId) {
     // Export single appointment as ICS file
-    fetch(`/api/appointments/${appointmentId}/export/ics`)
+    fetch(`/api/appointments/${appointmentId}/export/ics`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

@@ -89,7 +89,7 @@
                         <div class="col-12">
                             <label class="form-label">What types of photography do you offer?</label>
                             <div class="row g-2">
-                                {% set specialties = ['Newborn Photography', 'Maternity Photography', 'Baby Milestones', 'Family Portraits', 'Smash Cake Sessions', 'Birthday Parties', 'Mini Sessions', 'Wedding Photography', 'Event Photography', 'Pet Photography'] %}
+                                {% set specialties = ['Portrait Photography', 'Family Photography', 'Event Photography', 'Commercial Photography', 'Retouching Services', 'Professional Headshots', 'Mini Sessions', 'Wedding Photography', 'Corporate Photography', 'Pet Photography'] %}
                                 {% for specialty in specialties %}
                                 <div class="col-md-4">
                                     <div class="form-check">
@@ -694,6 +694,7 @@ function saveAllSettings() {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(config)
     })
     .then(response => response.json())
@@ -770,6 +771,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                },
+                credentials: 'include',
                 },
                 body: JSON.stringify({
                     current_password: currentPassword,

@@ -328,7 +328,7 @@ function createBackup(event) {
         headers: {
             'Content-Type': 'application/json',
         },
-        credentials: 'same-origin',
+        credentials: 'include',
         signal: controller.signal
     })
     .then(response => {
@@ -380,7 +380,8 @@ document.getElementById('restoreForm').addEventListener('submit', function(e) {
     
     fetch('/api/restore', {
         method: 'POST',
-        body: formData
+        body: formData,
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -455,7 +456,8 @@ document.getElementById('executeRestoreBtn').addEventListener('click', function(
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-        }
+        },
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -497,7 +499,9 @@ function refreshBackupList() {
         <p class="mt-2 text-muted">Loading backup files...</p>
     `;
     
-    fetch('/api/backup/list')
+    fetch('/api/backup/list', {
+        credentials: 'include'
+    })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -598,7 +602,8 @@ function deleteBackup(filename) {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
-            }
+            },
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {

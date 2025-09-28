@@ -303,7 +303,7 @@
                     <div class="alert alert-light">
                         <h6 class="fw-bold">For Milestone Sessions:</h6>
                         <ul class="mb-2">
-                            <li>Schedule at exact milestone age</li>
+                            <li>Schedule at appropriate milestone age</li>
                             <li>Bring favorite toys or blankets</li>
                             <li>Plan around nap schedules</li>
                             <li>Include siblings if desired</li>
@@ -314,7 +314,7 @@
                         <ul class="mb-0">
                             <li>Choose theme and colors in advance</li>
                             <li>Bring special outfits or props</li>
-                            <li>Consider cake smash timing</li>
+                            <li>Consider cake celebration timing</li>
                             <li>Plan for cleanup after</li>
                         </ul>
                     </div>
@@ -563,7 +563,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadClients() {
-    fetch('/api/clients')
+    fetch('/api/clients', {
+        credentials: 'include'
+    })
         .then(response => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -623,7 +625,9 @@ function loadClientPackages() {
     }
     
     // Load ALL packages (same as packages page) for consistency
-    fetch('/api/packages')
+    fetch('/api/packages', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -886,7 +890,9 @@ function syncPackagesFromCustomerInfo() {
     packageSelect.disabled = true;
     
     // Reload packages from the same source as packages page
-    fetch('/api/packages')
+    fetch('/api/packages', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

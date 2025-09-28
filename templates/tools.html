@@ -122,7 +122,7 @@
                         <!-- Children Ages Display -->
                         <div id="childrenAgesDisplay" class="d-none">
                             <h6 class="mb-3">
-                                <i class="fas fa-baby me-2"></i>
+                                <i class="fas fa-child me-2"></i>
                                 Children Ages
                             </h6>
                             <div id="childrenAgesList">
@@ -169,6 +169,7 @@
                                     <small class="text-muted">
                                         Birthday: <span id="resultBirthday"></span>
                                     </small>
+                                    <div class="mt-1" id="manualBirthdayCountdown"></div>
                                 </div>
                             </div>
                         </div>
@@ -190,7 +191,7 @@
                     <div class="milestone-guide">
                         <div class="milestone-item">
                             <span class="badge bg-warning">0-14 days</span>
-                            <strong>Newborn</strong>
+                            <strong>Infant</strong>
                             <small class="text-muted d-block">Best for sleepy, curled poses</small>
                         </div>
                         <div class="milestone-item mt-2">
@@ -211,7 +212,7 @@
                         <div class="milestone-item mt-2">
                             <span class="badge bg-danger">12 months</span>
                             <strong>First Birthday</strong>
-                            <small class="text-muted d-block">Cake smash and standing</small>
+                            <small class="text-muted d-block">Cake celebration and standing</small>
                         </div>
                     </div>
                 </div>
@@ -295,7 +296,9 @@ function showInputForm(method) {
 }
 
 function loadClients() {
-    fetch('/api/clients')
+    fetch('/api/clients', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             console.log('API response:', data);
@@ -426,7 +429,7 @@ function displayChildrenAges(client) {
             childCard.innerHTML = `
                 <div class="card-body">
                     <h6 class="card-title">
-                        <i class="fas fa-baby me-2"></i>
+                        <i class="fas fa-child me-2"></i>
                         ${child.name}
                         ${birthdayBadge}
                     </h6>
@@ -479,7 +482,9 @@ function calculateAge(method) {
         return;
     }
     
-    const birthDate = new Date(birthday);
+    // Parse birthday correctly to avoid timezone issues
+    const [year, month, day] = birthday.split('-').map(Number);
+    const birthDate = new Date(year, month - 1, day); // month is 0-indexed
     const today = new Date();
     
     // Calculate age
@@ -488,6 +493,13 @@ function calculateAge(method) {
     const ageInMonths = Math.floor(ageInDays / 30.44); // Average days per month
     const ageInYears = Math.floor(ageInDays / 365.25); // Account for leap years
     
+    // Calculate days until next birthday
+    const nextBirthday = new Date(today.getFullYear(), month - 1, day);
+    if (nextBirthday < today) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+    }
+    const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+    
     // Display results
     document.getElementById('resultName').textContent = name;
     document.getElementById('ageDays').textContent = ageInDays;
@@ -495,6 +507,19 @@ function calculateAge(method) {
     document.getElementById('ageMonths').textContent = ageInMonths;
     document.getElementById('ageYears').textContent = ageInYears;
     document.getElementById('resultBirthday').textContent = birthDate.toLocaleDateString();
+    
+    // Add birthday countdown
+    const birthdayCountdown = document.getElementById('manualBirthdayCountdown');
+    
+    if (birthdayCountdown) {
+        if (daysUntilBirthday === 0) {
+            birthdayCountdown.innerHTML = '<span class="badge bg-success">🎉 Birthday Today!</span>';
+        } else if (daysUntilBirthday === 1) {
+            birthdayCountdown.innerHTML = '<span class="badge bg-warning">🎂 Birthday Tomorrow!</span>';
+        } else {
+            birthdayCountdown.innerHTML = `<span class="badge bg-info">${daysUntilBirthday} days until birthday</span>`;
+        }
+    }
     
     document.getElementById('ageResults').classList.remove('d-none');
     

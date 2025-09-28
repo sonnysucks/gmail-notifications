@@ -1,13 +1,13 @@
 # Photography Scheduler Project Summary
-## Gmail Photography Appointment Scheduler with CRM - Specialized for Baby Photography
+## Professional Photography Business Management System - Complete CRM & Appointment Scheduler
 
 **Project ID**: `photography-scheduler`  
 **Repository**: `gmail-notifications`    
-**Status**: Active Development - Web Application Complete with Full CRM and Baby Photography Features
+**Status**: Active Development - Web Application Complete with Full CRM and Professional Photography Features
 
 ## 🎯 **Project Overview**
 
-A comprehensive appointment scheduling and Customer Relationship Management (CRM) system **specifically designed for baby photography businesses** that integrates with Gmail and Google Calendar to automatically manage client appointments, send reminder notifications, and track customer relationships through every precious milestone.
+A comprehensive appointment scheduling and Customer Relationship Management (CRM) system **designed for professional photography businesses** that integrates with Gmail and Google Calendar to automatically manage client appointments, send reminder notifications, and track customer relationships through every important milestone.
 
 ## 🏗️ **Current Architecture**
 
@@ -19,7 +19,7 @@ A comprehensive appointment scheduling and Customer Relationship Management (CRM
 
 ### **Core Components**
 - **CRM System** (`scheduler/crm_manager.py`): SQLite-based customer relationship management
-- **Data Models** (`scheduler/models.py`): Specialized models for baby photography
+- **Data Models** (`scheduler/models.py`): Specialized models for professional photography
 - **Appointment Scheduler** (`scheduler/appointment_scheduler.py`): Scheduling logic with CRM integration
 - **Configuration Management** (`config/config_manager.py`): YAML-based configuration
 - **Legacy CLI Application** (`main.py`): Command-line interface (still functional)
@@ -37,8 +37,8 @@ A comprehensive appointment scheduling and Customer Relationship Management (CRM
 - ✅ **Interactive Calendar**: Visual calendar with appointment banners and clickable days
 - ✅ **Business Analytics**: Revenue tracking, session statistics, client metrics with Chart.js
 - ✅ **Backup & Restore**: Complete system backup and restore functionality
-- ✅ **Complete CRM System**: Client management with family and baby tracking
-- ✅ **Baby Photography Specialized Models**: BabyMilestone, BirthdaySession models
+- ✅ **Complete CRM System**: Client management with family and project tracking
+- ✅ **Professional Photography Specialized Models**: Milestone, Session models
 - ✅ **Appointment Scheduling**: Full appointment management with milestone tracking
 - ✅ **Session-Based Authentication**: Secure login system
 - ✅ **Responsive Design**: Bootstrap 5 with mobile-friendly interface
@@ -61,11 +61,11 @@ A comprehensive appointment scheduling and Customer Relationship Management (CRM
 
 ### **Appointment Model**
 - Session details: type, duration, location, priority
-- Baby-specific: baby_age_days, milestone_type, baby_name, parent_names
+- Client-specific: client_age_days, milestone_type, client_name, family_names
 - Financial: session_fee, additional_charges, discount, total_amount
 - Status tracking: confirmed, cancelled, completed, rescheduled
 
-### **BabyMilestone Model**
+### **Milestone Model**
 - Milestone tracking: newborn, 3month, 6month, 9month, 1year
 - Age calculations: days, weeks, months
 - Next milestone recommendations
@@ -165,11 +165,11 @@ python main.py crm analytics              # View business analytics
 python main.py crm follow-ups             # Check follow-up tasks
 ```
 
-### **Baby Photography Commands**
+### **Professional Photography Commands**
 ```bash
-python main.py baby add-baby "client_id" "Baby Name" "Birth Date"
-python main.py baby milestones "client_id"        # Check milestones
-python main.py baby update-family "client_id" --due-date "YYYY-MM-DD"
+python main.py crm add-client "client_id" "Client Name" "Birth Date"
+python main.py crm milestones "client_id"        # Check milestones
+python main.py crm update-client "client_id" --due-date "YYYY-MM-DD"
 ```
 
 ## ⚙️ **Configuration**
@@ -177,7 +177,7 @@ python main.py baby update-family "client_id" --due-date "YYYY-MM-DD"
 ### **Current Configuration File**
 - **Source**: `config.example.yaml`
 - **Target**: `config.yaml` (create from example)
-- **Key Sections**: business, calendar, appointments, baby_photography, crm, email
+- **Key Sections**: business, calendar, appointments, photography_business, crm, email
 
 ### **Calendar Configuration**
 - **Target Calendar**: Any Google Calendar (not limited to API owner)

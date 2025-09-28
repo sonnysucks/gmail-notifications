@@ -203,7 +203,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadCorrespondence() {
-    fetch('/api/correspondence')
+    fetch('/api/correspondence', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -220,7 +222,9 @@ function loadCorrespondence() {
 }
 
 function loadClients() {
-    fetch('/api/clients')
+    fetch('/api/clients', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -471,7 +475,8 @@ function confirmSendEmail() {
     if (!currentCorrespondenceId) return;
     
     fetch(`/api/correspondence/${currentCorrespondenceId}/send`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -496,7 +501,8 @@ function cancelEmail(correspondenceId) {
     if (!confirm('Are you sure you want to cancel this email?')) return;
     
     fetch(`/api/correspondence/${correspondenceId}/cancel`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -520,7 +526,8 @@ function refreshCorrespondence() {
 
 function sendPendingEmails() {
     fetch('/api/correspondence/send-pending', {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -549,7 +556,8 @@ function backfillCorrespondence() {
     backfillBtn.disabled = true;
     
     fetch('/api/correspondence/backfill', {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -590,7 +598,9 @@ function showAlert(message, type) {
 
 function viewAppointmentEmails(appointmentId) {
     // Get correspondence for this specific appointment
-    fetch(`/api/correspondence/${appointmentId}`)
+    fetch(`/api/correspondence/${appointmentId}`, {
+        credentials: 'include'
+    })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -682,7 +692,8 @@ function sendAllPendingEmails(appointmentId) {
     }
     
     fetch(`/api/correspondence/${appointmentId}/send-all`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {
@@ -705,7 +716,8 @@ function cancelAllPendingEmails(appointmentId) {
     }
     
     fetch(`/api/correspondence/${appointmentId}/cancel-all`, {
-        method: 'POST'
+        method: 'POST',
+        credentials: 'include'
     })
     .then(response => response.json())
     .then(data => {

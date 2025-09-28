@@ -256,7 +256,9 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadPackages() {
-    fetch('/api/packages')
+    fetch('/api/packages', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -397,7 +399,9 @@ function openPackageModal(packageId = null) {
 }
 
 function loadPackageData(packageId) {
-    fetch(`/api/packages/${packageId}`)
+    fetch(`/api/packages/${packageId}`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -433,7 +437,9 @@ function editPackage(packageId) {
 
 function customizePackage(packageId) {
     // Open package customization modal (similar to client customization)
-    fetch(`/api/packages/${packageId}`)
+    fetch(`/api/packages/${packageId}`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -564,6 +570,7 @@ function savePackageCustomization(packageId) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(packageData)
     })
     .then(response => response.json())
@@ -584,7 +591,9 @@ function savePackageCustomization(packageId) {
 }
 
 function duplicatePackage(packageId) {
-    fetch(`/api/packages/${packageId}`)
+    fetch(`/api/packages/${packageId}`, {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
@@ -596,6 +605,8 @@ function duplicatePackage(packageId) {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
                     },
                     body: JSON.stringify(package)
                 });
@@ -652,6 +663,7 @@ document.getElementById('packageForm').addEventListener('submit', function(e) {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(packageData)
     })
     .then(response => response.json())
@@ -675,7 +687,8 @@ document.getElementById('packageForm').addEventListener('submit', function(e) {
 document.getElementById('confirmDelete').addEventListener('click', function() {
     if (currentDeleteId) {
         fetch(`/api/packages/${currentDeleteId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
         })
         .then(response => response.json())
         .then(data => {
@@ -706,7 +719,9 @@ function syncPackages() {
     syncBtn.disabled = true;
     
     // Reload packages to ensure consistency
-    fetch('/api/packages')
+    fetch('/api/packages', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

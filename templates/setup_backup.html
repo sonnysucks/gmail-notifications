@@ -473,7 +473,9 @@ let currentSessionType = null;
 // Load session types on page load
 
 function loadSessionTypes() {
-    fetch('/api/session-types')
+    fetch('/api/session-types', {
+        credentials: 'include'
+    })
         .then(response => response.json())
         .then(data => {
             displaySessionTypes(data);
@@ -636,6 +638,7 @@ function saveAllSettings() {
         headers: {
             'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify(config)
     })
     .then(response => response.json())

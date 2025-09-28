@@ -1,5 +1,5 @@
-# Gmail Photography Appointment Scheduler Configuration
-# Specialized for Maternity, Baby, Smash Cake, and Birthday Photography
+# Professional Photography Business Management Configuration
+# Complete CRM & Appointment Scheduler for Professional Photographers & Retouchers
 # Copy this file to config.yaml and customize for your business
 
 # Business Information
@@ -37,12 +37,12 @@ business:
       waiting_area: true
   
   specialties:
-    - "Maternity Photography"
-    - "Newborn Photography"
-    - "Baby Milestone Sessions"
-    - "Smash Cake Photography"
-    - "Birthday Photography"
-    - "Family Portraits"
+    - "Portrait Photography"
+    - "Family Photography"
+    - "Event Photography"
+    - "Commercial Photography"
+    - "Retouching Services"
+    - "Professional Headshots"
 
 # Google Calendar Settings
 calendar:
@@ -250,7 +250,7 @@ appointments:
     - days: 2           # 2 days before
     - days: 1           # 1 day before
   
-  # Specialized Session Types and Pricing for Baby Photography
+  # Professional Session Types and Pricing for Photography Business
   session_types:
     # Maternity Sessions
     maternity:
@@ -275,7 +275,7 @@ appointments:
       name: "3 Month Milestone"
       duration: 60
       base_price: 200.00
-      description: "3 month baby milestone session"
+      description: "3 month milestone session"
       recommended_age: "12-16 weeks"
       includes: ["20 edited images", "Online gallery", "Print release"]
     
@@ -283,7 +283,7 @@ appointments:
       name: "6 Month Milestone"
       duration: 75
       base_price: 225.00
-      description: "6 month baby milestone session"
+      description: "6 month milestone session"
       recommended_age: "24-28 weeks"
       includes: ["25 edited images", "Online gallery", "Print release"]
     
@@ -291,7 +291,7 @@ appointments:
       name: "9 Month Milestone"
       duration: 75
       base_price: 225.00
-      description: "9 month baby milestone session"
+      description: "9 month milestone session"
       recommended_age: "36-40 weeks"
       includes: ["25 edited images", "Online gallery", "Print release"]
     
@@ -351,8 +351,8 @@ appointments:
       description: "Newborn + 3 milestone sessions"
       includes: ["Newborn session", "3 milestone sessions", "125+ edited images", "Online galleries", "Print releases", "15% discount"]
 
-# Baby Photography Specific Settings
-baby_photography:
+# Professional Photography Specific Settings
+photography_business:
   # Milestone Tracking
   milestones:
     enabled: true
@@ -375,7 +375,7 @@ baby_photography:
     preferred_age_days: "5-10"
     requires_consultation: true
     props_included: true
-    backup_dates: true  # Allow rescheduling for baby's mood
+    backup_dates: true  # Allow rescheduling for client needs
   
   # Smash Cake Settings
   smash_cake:
@@ -473,7 +473,7 @@ crm:
   family_types:
     - "Expecting"
     - "Newborn"
-    - "Baby (0-1 year)"
+    - "Child (0-1 year)"
     - "Toddler (1-3 years)"
     - "Multiple Children"
     - "Adoption"
@@ -521,7 +521,7 @@ crm:
 
 # Email Templates
 email:
-  from_name: "Your Baby Photography Studio"
+  from_name: "Your Professional Photography Studio"
   reply_to: "your-email@example.com"
   templates:
     confirmation: "templates/confirmation.html"
@@ -534,7 +534,7 @@ email:
     thank_you: "templates/thank_you.html"
     referral_request: "templates/referral_request.html"
     
-    # Specialized templates for baby photography
+    # Professional templates for photography business
     maternity_reminder: "templates/maternity_reminder.html"
     newborn_prep: "templates/newborn_prep.html"
     milestone_reminder: "templates/milestone_reminder.html"
@@ -544,7 +544,7 @@ email:
 
 # Gmail Settings
 gmail:
-  label_name: "Baby Photography Appointments"
+  label_name: "Professional Photography Appointments"
   search_query: "subject:(appointment OR session OR photoshoot OR maternity OR newborn OR milestone OR birthday) OR body:(appointment OR session OR photoshoot OR maternity OR newborn OR milestone OR birthday)"
 
 # Database Settings
@@ -574,7 +574,7 @@ analytics:
   scheduled_reports: true
   report_frequency: "weekly"  # daily, weekly, monthly, quarterly
   
-  # Key Performance Indicators for Baby Photography
+  # Key Performance Indicators for Professional Photography
   kpis:
     - "Total Revenue"
     - "New Clients per Month"
@@ -583,8 +583,8 @@ analytics:
     - "Referral Rate"
     - "Customer Lifetime Value"
     - "Appointment Conversion Rate"
-    - "Milestone Package Sales"
-    - "Newborn Session Bookings"
-    - "Birthday Session Bookings"
-    - "Smash Cake Session Bookings"
+    - "Package Sales"
+    - "Portrait Session Bookings"
+    - "Family Session Bookings"
+    - "Commercial Session Bookings"
     - "Package Deal Conversion Rate"
