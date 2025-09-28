@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # SnapStudio Installation Script for macOS
-# This script installs SnapStudio and all dependencies on macOS
+# This script installs Podman and sets up SnapStudio
 
 set -e  # Exit on any error
 
@@ -32,97 +32,80 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Check if Python 3 is installed
-print_status "Checking Python 3 installation..."
-if ! command -v python3 &> /dev/null; then
-    print_error "Python 3 is not installed. Please install Python 3.8+ first."
-    print_status "You can install Python 3 using Homebrew:"
-    print_status "brew install python3"
+# Check if Homebrew is installed
+print_status "Checking Homebrew installation..."
+if ! command -v brew &> /dev/null; then
+    print_error "Homebrew is not installed. Please install Homebrew first."
+    print_status "Install Homebrew from: https://brew.sh/"
     exit 1
 fi
+print_success "Homebrew found"
 
-# Check Python version
-PYTHON_VERSION=$(python3 -c 'import sys; print(".".join(map(str, sys.version_info[:2])))')
-print_success "Python $PYTHON_VERSION found"
-
-# Check if pip is installed
-if ! command -v pip3 &> /dev/null; then
-    print_error "pip3 is not installed. Please install pip3 first."
-    exit 1
-fi
-
-# Create virtual environment
-print_status "Creating virtual environment..."
-if [ -d "venv" ]; then
-    print_warning "Virtual environment already exists. Removing old one..."
-    rm -rf venv
-fi
-
-python3 -m venv venv
-print_success "Virtual environment created"
-
-# Activate virtual environment
-print_status "Activating virtual environment..."
-source venv/bin/activate
-print_success "Virtual environment activated"
-
-# Upgrade pip
-print_status "Upgrading pip..."
-pip install --upgrade pip
-print_success "pip upgraded"
-
-# Install dependencies
-print_status "Installing Python dependencies..."
-pip install -r requirements.txt
-print_success "Dependencies installed"
-
-# Create necessary directories
-print_status "Creating necessary directories..."
-mkdir -p data
-mkdir -p logs
-mkdir -p backups
-mkdir -p exports
-mkdir -p uploads
-mkdir -p temp
-print_success "Directories created"
-
-# Set up configuration file
-print_status "Setting up configuration..."
-if [ ! -f "config.yaml" ]; then
-    if [ -f "config.example.yaml" ]; then
-        cp config.example.yaml config.yaml
-        print_success "Configuration file created from example"
-    else
-        print_warning "No config.example.yaml found. You'll need to create config.yaml manually."
-    fi
+# Check for Podman
+print_status "Checking Podman installation..."
+if ! command -v podman &> /dev/null; then
+    print_status "Installing Podman..."
+    brew install podman
+    print_success "Podman installed"
 else
-    print_success "Configuration file already exists"
+    print_success "Podman is already installed"
 fi
 
-# Set permissions
-print_status "Setting file permissions..."
-chmod +x run_web_app.py
-chmod +x main.py
-print_success "Permissions set"
+# Initialize Podman machine if needed
+print_status "Checking Podman machine..."
+if ! podman machine list | grep -q "podman-machine-default"; then
+    print_status "Initializing Podman machine..."
+    podman machine init
+    print_success "Podman machine initialized"
+fi
 
-# Test installation
-print_status "Testing installation..."
-python3 -c "import flask, sqlalchemy, yaml; print('All imports successful')"
-print_success "Installation test passed"
+# Start Podman machine
+print_status "Starting Podman machine..."
+podman machine start
+print_success "Podman machine started"
+
+# Check for Git
+print_status "Checking Git installation..."
+if ! command -v git &> /dev/null; then
+    print_error "Git is not installed. Please install Git first."
+    print_status "You can install Git via Homebrew: brew install git"
+    exit 1
+fi
+print_success "Git found"
+
+# Clone repository if not already present
+if [ ! -d ".git" ]; then
+    print_status "Cloning SnapStudio repository..."
+    git clone https://github.com/sonnysucks/gmail-notifications.git .
+    print_success "Repository cloned"
+else
+    print_success "Repository already present"
+fi
+
+# Make scripts executable
+print_status "Making scripts executable..."
+chmod +x podman_build.sh podman_run.sh
+print_success "Scripts made executable"
+
+# Build and run
+print_status "Building SnapStudio container..."
+./podman_build.sh
+
+print_status "Starting SnapStudio container..."
+./podman_run.sh
 
 echo ""
 echo "🎉 SnapStudio Installation Complete!"
 echo "======================================"
 echo ""
-echo "To start the web application:"
-echo "1. Activate the virtual environment: source venv/bin/activate"
-echo "2. Run the web app: python3 web_app.py"
-echo "3. Open your browser to: http://localhost:5001"
-echo "4. Login with: admin / admin123"
+echo "Access the web interface at: http://localhost:5001"
+echo "Default login: admin / admin123"
 echo ""
-echo "To start the CLI application:"
-echo "1. Activate the virtual environment: source venv/bin/activate"
-echo "2. Run: python3 main.py --help"
+echo "Container management:"
+echo "  View logs:    podman logs -f snapstudio-app"
+echo "  Stop:         podman stop snapstudio-app"
+echo "  Start:        podman start snapstudio-app"
+echo "  Remove:       podman rm -f snapstudio-app"
 echo ""
 echo "For support, contact: snapappdevelopment@gmail.com"
 echo ""

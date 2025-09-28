@@ -1,126 +1,79 @@
 @echo off
 REM SnapStudio Installation Script for Windows
-REM This script installs SnapStudio and all dependencies on Windows
+REM This script installs Podman and sets up SnapStudio
 
 echo 🎯 SnapStudio Installation Script for Windows
-echo =============================================
+echo ==============================================
 
-REM Check if Python 3 is installed
-echo [INFO] Checking Python 3 installation...
-python --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] Python 3 is not installed. Please install Python 3.8+ first.
-    echo [INFO] Download Python 3 from: https://www.python.org/downloads/
-    echo [INFO] Make sure to check "Add Python to PATH" during installation.
-    pause
-    exit /b 1
-)
-
-REM Check Python version
-for /f "tokens=2" %%i in ('python --version 2^>^&1') do set PYTHON_VERSION=%%i
-echo [SUCCESS] Python %PYTHON_VERSION% found
-
-REM Check if pip is installed
-echo [INFO] Checking pip installation...
-pip --version >nul 2>&1
-if %errorlevel% neq 0 (
-    echo [ERROR] pip is not installed. Please install pip first.
-    echo [INFO] pip usually comes with Python 3.4+. Try reinstalling Python.
-    pause
-    exit /b 1
-)
-
-REM Create virtual environment
-echo [INFO] Creating virtual environment...
-if exist venv (
-    echo [WARNING] Virtual environment already exists. Removing old one...
-    rmdir /s /q venv
-)
-
-python -m venv venv
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to create virtual environment.
-    pause
-    exit /b 1
-)
-echo [SUCCESS] Virtual environment created
-
-REM Activate virtual environment
-echo [INFO] Activating virtual environment...
-call venv\Scripts\activate.bat
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to activate virtual environment.
-    pause
-    exit /b 1
-)
-echo [SUCCESS] Virtual environment activated
-
-REM Upgrade pip
-echo [INFO] Upgrading pip...
-python -m pip install --upgrade pip
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to upgrade pip.
-    pause
-    exit /b 1
-)
-echo [SUCCESS] pip upgraded
-
-REM Install dependencies
-echo [INFO] Installing Python dependencies...
-pip install -r requirements.txt
-if %errorlevel% neq 0 (
-    echo [ERROR] Failed to install dependencies.
-    pause
-    exit /b 1
-)
-echo [SUCCESS] Dependencies installed
-
-REM Create necessary directories
-echo [INFO] Creating necessary directories...
-if not exist data mkdir data
-if not exist logs mkdir logs
-if not exist backups mkdir backups
-if not exist exports mkdir exports
-if not exist uploads mkdir uploads
-if not exist temp mkdir temp
-echo [SUCCESS] Directories created
-
-REM Set up configuration file
-echo [INFO] Setting up configuration...
-if not exist config.yaml (
-    if exist config.example.yaml (
-        copy config.example.yaml config.yaml
-        echo [SUCCESS] Configuration file created from example
-    ) else (
-        echo [WARNING] No config.example.yaml found. You'll need to create config.yaml manually.
-    )
+REM Check if running as administrator
+net session >nul 2>&1
+if %errorLevel% == 0 (
+    echo [INFO] Running as administrator
 ) else (
-    echo [SUCCESS] Configuration file already exists
-)
-
-REM Test installation
-echo [INFO] Testing installation...
-python -c "import flask, sqlalchemy, yaml; print('All imports successful')"
-if %errorlevel% neq 0 (
-    echo [ERROR] Installation test failed.
+    echo [ERROR] Please run this script as administrator
+    echo Right-click and select "Run as administrator"
     pause
     exit /b 1
 )
-echo [SUCCESS] Installation test passed
+
+REM Check for Chocolatey
+echo [INFO] Checking Chocolatey installation...
+choco --version >nul 2>&1
+if %errorLevel% == 0 (
+    echo [SUCCESS] Chocolatey found
+) else (
+    echo [INFO] Installing Chocolatey...
+    powershell -Command "Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))"
+    echo [SUCCESS] Chocolatey installed
+)
+
+REM Install Podman
+echo [INFO] Installing Podman...
+choco install podman -y
+echo [SUCCESS] Podman installed
+
+REM Check for Git
+echo [INFO] Checking Git installation...
+git --version >nul 2>&1
+if %errorLevel% == 0 (
+    echo [SUCCESS] Git found
+) else (
+    echo [INFO] Installing Git...
+    choco install git -y
+    echo [SUCCESS] Git installed
+)
+
+REM Clone repository if not already present
+if not exist ".git" (
+    echo [INFO] Cloning SnapStudio repository...
+    git clone https://github.com/sonnysucks/gmail-notifications.git .
+    echo [SUCCESS] Repository cloned
+) else (
+    echo [SUCCESS] Repository already present
+)
+
+REM Make scripts executable (Windows doesn't need chmod, but we'll ensure they're accessible)
+echo [INFO] Setting up scripts...
+
+REM Build and run
+echo [INFO] Building SnapStudio container...
+podman build -t snapstudio:latest .
+
+echo [INFO] Starting SnapStudio container...
+podman run -d --name snapstudio-app -p 5001:5001 -v snapstudio_data:/app/data -v snapstudio_logs:/app/logs -v snapstudio_backups:/app/backups -v snapstudio_exports:/app/exports -v snapstudio_uploads:/app/uploads --restart unless-stopped snapstudio:latest
 
 echo.
 echo 🎉 SnapStudio Installation Complete!
 echo ======================================
 echo.
-echo To start the web application:
-echo 1. Activate the virtual environment: venv\Scripts\activate.bat
-echo 2. Run the web app: python web_app.py
-echo 3. Open your browser to: http://localhost:5001
-echo 4. Login with: admin / admin123
+echo Access the web interface at: http://localhost:5001
+echo Default login: admin / admin123
 echo.
-echo To start the CLI application:
-echo 1. Activate the virtual environment: venv\Scripts\activate.bat
-echo 2. Run: python main.py --help
+echo Container management:
+echo   View logs:    podman logs -f snapstudio-app
+echo   Stop:         podman stop snapstudio-app
+echo   Start:        podman start snapstudio-app
+echo   Remove:       podman rm -f snapstudio-app
 echo.
 echo For support, contact: snapappdevelopment@gmail.com
 echo.
