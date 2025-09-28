@@ -1,0 +1,317 @@
+{% extends "base.html" %}
+
+{% block title %}Package Management - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 mb-1">Package Management</h1>
+            <p class="text-muted mb-0">Create and manage photography packages with customizable pricing</p>
+        </div>
+        <div class="btn-group" role="group">
+            <button class="btn btn-outline-info" onclick="syncPackages()" title="Sync packages across all pages">
+                <i class="fas fa-sync me-2"></i>
+                Sync Packages
+            </button>
+            <button type="button" class="btn btn-primary" onclick="alert('Create new package functionality coming soon')">
+                <i class="fas fa-plus me-2"></i>
+                New Package
+            </button>
+        </div>
+    </div>
+
+    <!-- Package Categories -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <button class="btn btn-outline-primary active" onclick="filterPackages('all')">
+                            All Packages
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterPackages('maternity')">
+                            Maternity
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterPackages('newborn')">
+                            Newborn
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterPackages('milestone')">
+                            Milestone
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterPackages('birthday')">
+                            Birthday
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="filterPackages('family')">
+                            Family
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Packages Grid -->
+    <div class="row g-4" id="packagesGrid">
+        <!-- Packages will be loaded dynamically -->
+    </div>
+
+    <!-- Empty State -->
+    <div class="text-center py-5 d-none" id="emptyState">
+        <i class="fas fa-box text-muted" style="font-size: 4rem;"></i>
+        <h5 class="text-muted mt-3">No packages found</h5>
+        <p class="text-muted">Create your first photography package</p>
+        <button type="button" class="btn btn-primary" onclick="alert('Create new package functionality coming soon')">
+            <i class="fas fa-plus me-2"></i>
+            Create Package
+        </button>
+    </div>
+</div>
+
+<!-- Edit Package Modal -->
+<div class="modal fade" id="editPackageModal" tabindex="-1" aria-labelledby="editPackageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPackageModalLabel">Edit Package</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editPackageForm">
+                    <input type="hidden" id="editPackageId" name="id">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label for="editPackageName" class="form-label">Package Name *</label>
+                            <input type="text" class="form-control" id="editPackageName" name="name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="editPackageCategory" class="form-label">Category *</label>
+                            <select class="form-select" id="editPackageCategory" name="category" required>
+                                <option value="">Select Category</option>
+                                <option value="maternity">Maternity</option>
+                                <option value="newborn">Newborn</option>
+                                <option value="milestone">Milestone</option>
+                                <option value="birthday">Birthday</option>
+                                <option value="family">Family</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="editPackageDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editPackageDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editBasePrice" class="form-label">Base Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="editBasePrice" name="base_price" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="editDurationMinutes" class="form-label">Duration (minutes) *</label>
+                            <input type="number" class="form-control" id="editDurationMinutes" name="duration_minutes" required>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editIsCustomizable" name="is_customizable">
+                                <label class="form-check-label" for="editIsCustomizable">
+                                    Customizable Package
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="editIsActive" name="is_active" checked>
+                                <label class="form-check-label" for="editIsActive">
+                                    Active Package
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="savePackage()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+console.log('=== PACKAGES SCRIPT STARTING ===');
+
+const grid = document.getElementById('packagesGrid');
+if (grid) {
+    grid.innerHTML = '<div class="alert alert-success">✅ Grid found, loading packages...</div>';
+    console.log('✅ Grid found');
+} else {
+    console.error('❌ Grid not found');
+}
+
+fetch('/api/packages', {
+    credentials: 'include'
+})
+.then(response => response.json())
+.then(data => {
+    console.log('API response:', data);
+    if (data.success && data.packages) {
+        console.log('Found', data.packages.length, 'packages');
+        if (grid) {
+            grid.innerHTML = '';
+            data.packages.forEach(pkg => {
+                const div = document.createElement('div');
+                div.className = 'col-lg-4 col-md-6 mb-3';
+                div.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0">${pkg.name}</h6>
+                            <small class="text-muted">${pkg.category}</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <span class="h5 text-success">$${pkg.base_price}</span>
+                                <small class="text-muted">${pkg.duration_minutes} min</small>
+                            </div>
+                            <p class="text-muted small">${pkg.description || 'No description'}</p>
+                            <div class="d-flex gap-1">
+                                ${pkg.is_customizable ? '<span class="badge bg-info">Customizable</span>' : ''}
+                                ${!pkg.is_active ? '<span class="badge bg-secondary">Inactive</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm" onclick="editPackage('${pkg.id}')">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+            console.log('✅ Packages rendered');
+        }
+    } else {
+        console.error('API failed:', data.error);
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">API failed: ' + data.error + '</div>';
+        }
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    }
+});
+
+console.log('=== PACKAGES SCRIPT COMPLETE ===');
+
+// Define functions for buttons
+function editPackage(packageId) {
+    console.log('Edit package:', packageId);
+    
+    // Load package data
+    fetch(`/api/packages/${packageId}`, {
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            const pkg = data.package;
+            
+            // Populate form fields
+            document.getElementById('editPackageId').value = pkg.id;
+            document.getElementById('editPackageName').value = pkg.name || '';
+            document.getElementById('editPackageCategory').value = pkg.category || '';
+            document.getElementById('editPackageDescription').value = pkg.description || '';
+            document.getElementById('editBasePrice').value = pkg.base_price || '';
+            document.getElementById('editDurationMinutes').value = pkg.duration_minutes || '';
+            document.getElementById('editIsCustomizable').checked = pkg.is_customizable || false;
+            document.getElementById('editIsActive').checked = pkg.is_active !== false;
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('editPackageModal'));
+            modal.show();
+        } else {
+            alert('Failed to load package: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error loading package:', error);
+        alert('Error loading package: ' + error.message);
+    });
+}
+
+function savePackage() {
+    const packageId = document.getElementById('editPackageId').value;
+    const packageData = {
+        name: document.getElementById('editPackageName').value,
+        category: document.getElementById('editPackageCategory').value,
+        description: document.getElementById('editPackageDescription').value,
+        base_price: parseFloat(document.getElementById('editBasePrice').value),
+        duration_minutes: parseInt(document.getElementById('editDurationMinutes').value),
+        is_customizable: document.getElementById('editIsCustomizable').checked,
+        is_active: document.getElementById('editIsActive').checked
+    };
+    
+    console.log('Saving package:', packageData);
+    
+    fetch(`/api/packages/${packageId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(packageData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Package updated successfully!');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editPackageModal'));
+            modal.hide();
+            // Reload packages
+            location.reload();
+        } else {
+            alert('Failed to update package: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error saving package:', error);
+        alert('Error saving package: ' + error.message);
+    });
+}
+
+function syncPackages() {
+    console.log('Sync packages');
+    alert('Sync packages functionality coming soon');
+}
+
+function filterPackages(category) {
+    console.log('Filter packages:', category);
+    
+    // Update active button
+    document.querySelectorAll('[onclick*="filterPackages"]').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    event.target.classList.add('active');
+    
+    // Get all package cards
+    const cards = document.querySelectorAll('#packagesGrid .col-lg-4');
+    
+    cards.forEach(card => {
+        const cardCategory = card.querySelector('.text-muted').textContent.toLowerCase();
+        
+        if (category === 'all' || cardCategory === category) {
+            card.style.display = '';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    // Update count
+    const visibleCards = document.querySelectorAll('#packagesGrid .col-lg-4:not([style*="display: none"])');
+    console.log(`Showing ${visibleCards.length} packages for category: ${category}`);
+}
+</script>
+{% endblock %}

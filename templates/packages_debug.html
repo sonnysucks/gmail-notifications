@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Packages Debug{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Packages Debug Test</h1>
+    
+    <div id="debugInfo">
+        <p>Debug info will appear here</p>
+    </div>
+    
+    <div id="packagesGrid">
+        <p>Packages will load here</p>
+    </div>
+</div>
+
+<script>
+console.log('=== PACKAGES DEBUG SCRIPT STARTING ===');
+
+// Test 1: Basic DOM
+const debugInfo = document.getElementById('debugInfo');
+if (debugInfo) {
+    debugInfo.innerHTML = '<div class="alert alert-success">✅ DOM access works</div>';
+    console.log('✅ DOM access works');
+} else {
+    console.error('❌ DOM access failed');
+}
+
+// Test 2: Grid element
+const grid = document.getElementById('packagesGrid');
+if (grid) {
+    grid.innerHTML = '<div class="alert alert-info">✅ Grid element found</div>';
+    console.log('✅ Grid element found');
+} else {
+    console.error('❌ Grid element not found');
+}
+
+// Test 3: API call
+console.log('Making API call...');
+fetch('/api/packages', {
+    credentials: 'include'
+})
+.then(response => {
+    console.log('API response status:', response.status);
+    return response.json();
+})
+.then(data => {
+    console.log('API data received:', data);
+    if (data.success && data.packages) {
+        console.log('✅ API success, found', data.packages.length, 'packages');
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-success">✅ API works! Found ' + data.packages.length + ' packages</div>';
+        }
+        
+        // Test 4: Render packages
+        console.log('Testing package rendering...');
+        if (grid && data.packages.length > 0) {
+            const firstPackage = data.packages[0];
+            console.log('First package:', firstPackage);
+            
+            const testDiv = document.createElement('div');
+            testDiv.className = 'col-12';
+            testDiv.innerHTML = `
+                <div class="card">
+                    <div class="card-body">
+                        <h5>${firstPackage.name}</h5>
+                        <p>Category: ${firstPackage.category}</p>
+                        <p>Price: $${firstPackage.base_price}</p>
+                        <p>Duration: ${firstPackage.duration_minutes} min</p>
+                    </div>
+                </div>
+            `;
+            grid.appendChild(testDiv);
+            console.log('✅ Package rendering test successful');
+        }
+    } else {
+        console.error('❌ API failed:', data.error);
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">❌ API failed: ' + (data.error || 'Unknown error') + '</div>';
+        }
+    }
+})
+.catch(error => {
+    console.error('❌ API error:', error);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-danger">❌ API error: ' + error.message + '</div>';
+    }
+});
+
+console.log('=== PACKAGES DEBUG SCRIPT COMPLETE ===');
+</script>
+{% endblock %}

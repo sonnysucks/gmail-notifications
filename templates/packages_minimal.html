@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Packages - Minimal{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Packages - Minimal Test</h1>
+    
+    <div id="packagesGrid">
+        <p>Loading packages...</p>
+    </div>
+</div>
+
+<script>
+console.log('=== MINIMAL PACKAGES SCRIPT STARTING ===');
+
+const grid = document.getElementById('packagesGrid');
+if (grid) {
+    grid.innerHTML = '<div class="alert alert-success">✅ Grid found, making API call...</div>';
+    console.log('✅ Grid found');
+} else {
+    console.error('❌ Grid not found');
+}
+
+fetch('/api/packages', {
+    credentials: 'include'
+})
+.then(response => response.json())
+.then(data => {
+    console.log('API response:', data);
+    if (data.success && data.packages) {
+        console.log('Found', data.packages.length, 'packages');
+        if (grid) {
+            grid.innerHTML = '';
+            data.packages.forEach(pkg => {
+                const div = document.createElement('div');
+                div.className = 'col-12 mb-3';
+                div.innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5>${pkg.name}</h5>
+                            <p>Category: ${pkg.category}</p>
+                            <p>Price: $${pkg.base_price}</p>
+                            <p>Duration: ${pkg.duration_minutes} min</p>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+            console.log('✅ Packages rendered');
+        }
+    } else {
+        console.error('API failed:', data.error);
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">API failed: ' + data.error + '</div>';
+        }
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    }
+});
+
+console.log('=== MINIMAL PACKAGES SCRIPT COMPLETE ===');
+</script>
+{% endblock %}

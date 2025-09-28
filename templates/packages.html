@@ -243,197 +243,81 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_js %}
 <script>
-let currentPackageId = null;
-let currentDeleteId = null;
+console.log('=== PACKAGES SCRIPT STARTING ===');
 
-// Load packages on page load
-document.addEventListener('DOMContentLoaded', function() {
-    loadPackages();
+const grid = document.getElementById('packagesGrid');
+if (grid) {
+    grid.innerHTML = '<div class="alert alert-success">✅ Grid found, loading packages...</div>';
+    console.log('✅ Grid found');
+} else {
+    console.error('❌ Grid not found');
+}
+
+fetch('/api/packages', {
+    credentials: 'include'
+})
+.then(response => response.json())
+.then(data => {
+    console.log('API response:', data);
+    if (data.success && data.packages) {
+        console.log('Found', data.packages.length, 'packages');
+        if (grid) {
+            grid.innerHTML = '';
+            data.packages.forEach(pkg => {
+                const div = document.createElement('div');
+                div.className = 'col-lg-4 col-md-6 mb-3';
+                div.innerHTML = `
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0">${pkg.name}</h6>
+                            <small class="text-muted">${pkg.category}</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <span class="h5 text-success">$${pkg.base_price}</span>
+                                <small class="text-muted">${pkg.duration_minutes} min</small>
+                            </div>
+                            <p class="text-muted small">${pkg.description || 'No description'}</p>
+                            <div class="d-flex gap-1">
+                                ${pkg.is_customizable ? '<span class="badge bg-info">Customizable</span>' : ''}
+                                ${!pkg.is_active ? '<span class="badge bg-secondary">Inactive</span>' : ''}
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-primary btn-sm" onclick="editPackage('${pkg.id}')">
+                                Edit
+                            </button>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(div);
+            });
+            console.log('✅ Packages rendered');
+        }
+    } else {
+        console.error('API failed:', data.error);
+        if (grid) {
+            grid.innerHTML = '<div class="alert alert-danger">API failed: ' + data.error + '</div>';
+        }
+    }
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-danger">Error: ' + error.message + '</div>';
+    }
 });
 
-function loadPackages() {
-    fetch('/api/packages', {
-        credentials: 'include'
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                displayPackages(data.packages);
-            } else {
-                showAlert('Failed to load packages: ' + data.error, 'danger');
-            }
-        })
-        .catch(error => {
-            console.error('Error loading packages:', error);
-            showAlert('Error loading packages', 'danger');
-        });
-}
+console.log('=== PACKAGES SCRIPT COMPLETE ===');
 
-function displayPackages(packages) {
-    const grid = document.getElementById('packagesGrid');
-    const emptyState = document.getElementById('emptyState');
-    
-    if (packages.length === 0) {
-        grid.innerHTML = '';
-        emptyState.classList.remove('d-none');
-        return;
-    }
-    
-    emptyState.classList.add('d-none');
-    
-    grid.innerHTML = packages.map(package => `
-        <div class="col-lg-4 col-md-6 package-card" data-category="${package.category}">
-            <div class="card h-100 ${package.is_featured ? 'border-warning' : ''}">
-                ${package.is_featured ? '<div class="badge bg-warning position-absolute top-0 end-0 m-2">Featured</div>' : ''}
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <div>
-                        <h6 class="mb-0">${package.name}</h6>
-                        <small class="text-muted">${package.category.charAt(0).toUpperCase() + package.category.slice(1)}</small>
-                    </div>
-                    <div class="dropdown">
-                        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-ellipsis-v"></i>
-                        </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#" onclick="editPackage('${package.id}')">
-                                <i class="fas fa-edit me-2"></i>Edit
-                            </a></li>
-                            <li><a class="dropdown-item" href="#" onclick="duplicatePackage('${package.id}')">
-                                <i class="fas fa-copy me-2"></i>Duplicate
-                            </a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-danger" href="#" onclick="deletePackage('${package.id}')">
-                                <i class="fas fa-trash me-2"></i>Delete
-                            </a></li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="card-body">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="h5 text-success mb-0">$${package.base_price}</span>
-                            <small class="text-muted">${package.duration_minutes} min</small>
-                        </div>
-                        ${package.description ? `<p class="text-muted small mb-2">${package.description}</p>` : ''}
-                    </div>
-                    
-                    ${package.includes && package.includes.length > 0 ? `
-                        <div class="mb-3">
-                            <h6 class="small text-muted mb-2">Includes:</h6>
-                            <ul class="small mb-0">
-                                ${package.includes.slice(0, 3).map(item => `<li>${item}</li>`).join('')}
-                                ${package.includes.length > 3 ? `<li class="text-muted">+${package.includes.length - 3} more items</li>` : ''}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${package.recommended_age || package.recommended_weeks ? `
-                        <div class="mb-2">
-                            <small class="text-muted">
-                                <i class="fas fa-info-circle me-1"></i>
-                                ${package.recommended_age || package.recommended_weeks}
-                            </small>
-                        </div>
-                    ` : ''}
-                    
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            ${package.is_customizable ? '<span class="badge bg-info">Customizable</span>' : ''}
-                            ${!package.is_active ? '<span class="badge bg-secondary">Inactive</span>' : ''}
-                        </div>
-                        <small class="text-muted">#${package.display_order}</small>
-                    </div>
-                </div>
-                
-                <div class="card-footer">
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button class="btn btn-outline-primary btn-sm" onclick="editPackage('${package.id}')">
-                            <i class="fas fa-edit me-1"></i>Edit
-                        </button>
-                        <button class="btn btn-primary btn-sm" onclick="customizePackage('${package.id}')">
-                            <i class="fas fa-cog me-1"></i>Customize
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
-
-function filterPackages(category) {
-    // Update active button
-    document.querySelectorAll('[data-category]').forEach(btn => {
-        btn.classList.remove('active');
-    });
-    document.querySelector(`[data-category="${category}"]`).classList.add('active');
-    
-    // Filter package cards
-    const cards = document.querySelectorAll('.package-card');
-    cards.forEach(card => {
-        if (category === 'all' || card.dataset.category === category) {
-            card.style.display = '';
-        } else {
-            card.style.display = 'none';
-        }
-    });
-}
-
-function openPackageModal(packageId = null) {
-    currentPackageId = packageId;
-    const modal = document.getElementById('packageModal');
-    const form = document.getElementById('packageForm');
-    const title = document.getElementById('packageModalLabel');
-    
-    if (packageId) {
-        title.textContent = 'Edit Package';
-        loadPackageData(packageId);
-    } else {
-        title.textContent = 'Create New Package';
-        form.reset();
-    }
-}
-
-function loadPackageData(packageId) {
-    fetch(`/api/packages/${packageId}`, {
-        credentials: 'include'
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const package = data.package;
-                
-                document.getElementById('packageName').value = package.name || '';
-                document.getElementById('packageCategory').value = package.category || '';
-                document.getElementById('packageDescription').value = package.description || '';
-                document.getElementById('basePrice').value = package.base_price || '';
-                document.getElementById('durationMinutes').value = package.duration_minutes || '';
-                document.getElementById('isCustomizable').checked = package.is_customizable;
-                document.getElementById('includes').value = (package.includes || []).join('\n');
-                document.getElementById('requirements').value = (package.requirements || []).join('\n');
-                document.getElementById('recommendedAge').value = package.recommended_age || '';
-                document.getElementById('recommendedWeeks').value = package.recommended_weeks || '';
-                document.getElementById('optimalTiming').value = package.optimal_timing || '';
-                document.getElementById('displayOrder').value = package.display_order || 0;
-                document.getElementById('isFeatured').checked = package.is_featured;
-                document.getElementById('isActive').checked = package.is_active;
-            }
-        })
-        .catch(error => {
-            console.error('Error loading package data:', error);
-            showAlert('Error loading package data', 'danger');
-        });
-}
-
+// Define editPackage function for the Edit buttons
 function editPackage(packageId) {
-    openPackageModal(packageId);
-    const modal = new bootstrap.Modal(document.getElementById('packageModal'));
-    modal.show();
+    console.log('Edit package:', packageId);
+    alert('Edit package: ' + packageId);
 }
+
 
 function customizePackage(packageId) {
     // Open package customization modal (similar to client customization)

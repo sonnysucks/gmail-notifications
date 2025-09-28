@@ -820,7 +820,25 @@ def correspondence():
 @login_required
 def packages():
     """Package management page"""
-    return render_template('packages.html')
+    return render_template('packages_clean.html')
+
+@app.route('/packages-simple')
+@login_required
+def packages_simple():
+    """Simple packages test page"""
+    return render_template('packages_simple.html')
+
+@app.route('/packages-debug')
+@login_required
+def packages_debug():
+    """Packages debug test page"""
+    return render_template('packages_debug.html')
+
+@app.route('/packages-minimal')
+@login_required
+def packages_minimal():
+    """Minimal packages test page"""
+    return render_template('packages_minimal.html')
 
 @app.route('/api/client-packet/<client_id>')
 @login_required

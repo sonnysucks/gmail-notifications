@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Simple Packages Test{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Simple Packages Test</h1>
+    
+    <div id="testDiv">
+        <p>Initial content</p>
+    </div>
+    
+    <div id="packagesGrid">
+        <p>Packages will load here</p>
+    </div>
+</div>
+
+<script>
+console.log('Simple test script starting...');
+
+// Test 1: Basic DOM manipulation
+const testDiv = document.getElementById('testDiv');
+if (testDiv) {
+    testDiv.innerHTML = '<div class="alert alert-success">✅ DOM manipulation works!</div>';
+    console.log('Test 1 passed: DOM manipulation');
+} else {
+    console.error('Test 1 failed: testDiv not found');
+}
+
+// Test 2: Grid element
+const grid = document.getElementById('packagesGrid');
+if (grid) {
+    grid.innerHTML = '<div class="alert alert-info">✅ Grid element found!</div>';
+    console.log('Test 2 passed: Grid element found');
+} else {
+    console.error('Test 2 failed: Grid element not found');
+}
+
+// Test 3: API call
+fetch('/api/packages', {
+    credentials: 'include'
+})
+.then(response => {
+    console.log('API response status:', response.status);
+    return response.json();
+})
+.then(data => {
+    console.log('API data:', data);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-success">✅ API works! Found ' + data.packages.length + ' packages</div>';
+    }
+})
+.catch(error => {
+    console.error('API error:', error);
+    if (grid) {
+        grid.innerHTML = '<div class="alert alert-danger">❌ API error: ' + error.message + '</div>';
+    }
+});
+</script>
+{% endblock %}
