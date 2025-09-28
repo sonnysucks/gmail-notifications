@@ -331,6 +331,18 @@ class CRMManager:
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
             
+            # Update children_names and children_birth_dates from children_info
+            if client.children_info:
+                names = [child.get('name', '') for child in client.children_info]
+                dates = [child.get('birth_date', '') for child in client.children_info]
+                client.children_names = ','.join(names)
+                client.children_birth_dates = ','.join(dates)
+                client.children_count = len(client.children_info)
+            else:
+                client.children_names = ''
+                client.children_birth_dates = ''
+                client.children_count = 0
+            
             cursor.execute('''
                 UPDATE clients SET
                     name = ?, email = ?, phone = ?, address = ?, children_count = ?,

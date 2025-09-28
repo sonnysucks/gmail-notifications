@@ -525,8 +525,27 @@ def edit_appointment(appointment_id):
 @login_required
 def clients():
     """Client management"""
+    from datetime import datetime
     clients = crm_manager.get_all_clients()
-    return render_template('clients.html', clients=clients)
+    
+    # Convert date strings to datetime objects for template
+    for client in clients:
+        if hasattr(client, 'children_info') and client.children_info:
+            for child in client.children_info:
+                if child.get('birth_date'):
+                    try:
+                        child['birth_date'] = datetime.fromisoformat(child['birth_date'])
+                    except (ValueError, TypeError):
+                        child['birth_date'] = None
+        
+        if hasattr(client, 'due_date') and client.due_date:
+            try:
+                if isinstance(client.due_date, str):
+                    client.due_date = datetime.fromisoformat(client.due_date)
+            except (ValueError, TypeError):
+                client.due_date = None
+    
+    return render_template('clients.html', clients=clients, now=datetime.now())
 
 @app.route('/clients/new', methods=['GET', 'POST'])
 @login_required
@@ -576,9 +595,25 @@ def edit_client(client_id):
     if request.method == 'POST':
         try:
             client_data = request.get_json()
-            updated_client = crm_manager.update_client(client_id, client_data)
-            flash('Client updated successfully!', 'success')
-            return jsonify({'success': True})
+            # Update the existing client object with new data
+            for key, value in client_data.items():
+                if key == 'children':
+                    # Map 'children' to 'children_info'
+                    client.children_info = value
+                elif hasattr(client, key):
+                    setattr(client, key, value)
+            
+            # Update the timestamp
+            from datetime import datetime
+            client.updated_at = datetime.now()
+            
+            success = crm_manager.update_client(client)
+            if success:
+                flash('Client updated successfully!', 'success')
+                return jsonify({'success': True})
+            else:
+                flash('Error updating client', 'error')
+                return jsonify({'success': False, 'error': 'Failed to update client'})
         except Exception as e:
             flash(f'Error updating client: {str(e)}', 'error')
             return jsonify({'success': False, 'error': str(e)})

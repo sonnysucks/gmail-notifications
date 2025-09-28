@@ -113,6 +113,7 @@
                                         <small class="text-muted">
                                             Birthday: <span id="clientBirthday"></span>
                                         </small>
+                                        <div class="mt-1" id="clientBirthdayCountdown"></div>
                                     </div>
                                 </div>
                             </div>
@@ -297,8 +298,10 @@ function loadClients() {
     fetch('/api/clients')
         .then(response => response.json())
         .then(data => {
+            console.log('API response:', data);
             if (data.success) {
                 clients = data.clients;
+                console.log('Loaded clients:', clients);
                 const clientSelect = document.getElementById('clientSelect');
                 clientSelect.innerHTML = '<option value="">Choose a client...</option>';
                 
@@ -308,6 +311,8 @@ function loadClients() {
                     option.textContent = client.name;
                     clientSelect.appendChild(option);
                 });
+            } else {
+                console.error('API error:', data.error);
             }
         })
         .catch(error => {
@@ -317,7 +322,10 @@ function loadClients() {
 
 function loadClientFamily() {
     const clientId = document.getElementById('clientSelect').value;
+    console.log('Selected client ID:', clientId);
+    console.log('Available clients:', clients);
     const client = clients.find(c => c.id == clientId);
+    console.log('Found client:', client);
     
     if (!client) {
         // Hide all displays
@@ -335,10 +343,13 @@ function loadClientFamily() {
     }
     
     // Show children ages if they have children
+    console.log('Client children_info:', client.children_info);
     if (client.children_info && Array.isArray(client.children_info) && client.children_info.length > 0) {
+        console.log('Displaying children ages for', client.children_info.length, 'children');
         displayChildrenAges(client);
         document.getElementById('childrenAgesDisplay').classList.remove('d-none');
     } else {
+        console.log('No children to display');
         document.getElementById('childrenAgesDisplay').classList.add('d-none');
     }
 }
@@ -352,12 +363,31 @@ function calculateAndDisplayClientAge(client) {
     const ageInMonths = Math.floor(ageInDays / 30.44);
     const ageInYears = Math.floor(ageInDays / 365.25);
     
+    // Calculate days until next birthday
+    const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+    if (nextBirthday < today) {
+        nextBirthday.setFullYear(today.getFullYear() + 1);
+    }
+    const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+    
     document.getElementById('clientName').textContent = client.name;
     document.getElementById('clientAgeDays').textContent = ageInDays;
     document.getElementById('clientAgeWeeks').textContent = ageInWeeks;
     document.getElementById('clientAgeMonths').textContent = ageInMonths;
     document.getElementById('clientAgeYears').textContent = ageInYears;
     document.getElementById('clientBirthday').textContent = birthDate.toLocaleDateString();
+    
+    // Add birthday countdown
+    const birthdayCountdown = document.getElementById('clientBirthdayCountdown');
+    if (birthdayCountdown) {
+        if (daysUntilBirthday === 0) {
+            birthdayCountdown.innerHTML = '<span class="badge bg-success">🎉 Birthday Today!</span>';
+        } else if (daysUntilBirthday === 1) {
+            birthdayCountdown.innerHTML = '<span class="badge bg-warning">🎂 Birthday Tomorrow!</span>';
+        } else {
+            birthdayCountdown.innerHTML = `<span class="badge bg-info">${daysUntilBirthday} days until birthday</span>`;
+        }
+    }
 }
 
 function displayChildrenAges(client) {
@@ -374,6 +404,23 @@ function displayChildrenAges(client) {
             const ageInMonths = Math.floor(ageInDays / 30.44);
             const ageInYears = Math.floor(ageInDays / 365.25);
             
+            // Calculate days until next birthday
+            const nextBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+            if (nextBirthday < today) {
+                nextBirthday.setFullYear(today.getFullYear() + 1);
+            }
+            const daysUntilBirthday = Math.ceil((nextBirthday - today) / (1000 * 60 * 60 * 24));
+            
+            // Create birthday countdown badge
+            let birthdayBadge = '';
+            if (daysUntilBirthday === 0) {
+                birthdayBadge = '<span class="badge bg-success ms-2">🎉 Birthday Today!</span>';
+            } else if (daysUntilBirthday === 1) {
+                birthdayBadge = '<span class="badge bg-warning ms-2">🎂 Birthday Tomorrow!</span>';
+            } else {
+                birthdayBadge = `<span class="badge bg-info ms-2">${daysUntilBirthday} days until birthday</span>`;
+            }
+            
             const childCard = document.createElement('div');
             childCard.className = 'card bg-light mb-2';
             childCard.innerHTML = `
@@ -381,6 +428,7 @@ function displayChildrenAges(client) {
                     <h6 class="card-title">
                         <i class="fas fa-baby me-2"></i>
                         ${child.name}
+                        ${birthdayBadge}
                     </h6>
                     <div class="row">
                         <div class="col-md-3">
