@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  snapstudio:
+    build: .
+    container_name: snapstudio-app
+    ports:
+      - "5001:5001"
+    volumes:
+      # Persist data between container restarts
+      - snapstudio_data:/app/data
+      - snapstudio_logs:/app/logs
+      - snapstudio_backups:/app/backups
+      - snapstudio_exports:/app/exports
+      - snapstudio_uploads:/app/uploads
+      # Optional: Mount config file for customization
+      # - ./config.yaml:/app/config.yaml:ro
+    environment:
+      - FLASK_ENV=production
+      - FLASK_RUN_HOST=0.0.0.0
+      - FLASK_RUN_PORT=5001
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  snapstudio_data:
+    driver: local
+  snapstudio_logs:
+    driver: local
+  snapstudio_backups:
+    driver: local
+  snapstudio_exports:
+    driver: local
+  snapstudio_uploads:
+    driver: local

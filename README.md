@@ -385,37 +385,6 @@ chmod +x verify_setup.py
 python verify_setup.py
 ```
 
-#### **8. Troubleshooting Python Issues**
-
-**Common Python Issues**:
-
-1. **Multiple Python versions**:
-   ```bash
-   # Check which Python is being used
-   which python
-   which python3
-   
-   # Use specific version
-   python3.9 -m venv venv
-   ```
-
-2. **Permission issues**:
-   ```bash
-   # Fix permissions
-   chmod +x venv/bin/activate
-   chmod +x *.py
-   ```
-
-3. **Virtual environment not activating**:
-   ```bash
-   # Check if virtual environment exists
-   ls -la venv/bin/
-   
-   # Recreate if needed
-   rm -rf venv
-   python -m venv venv
-   source venv/bin/activate
-   ```
 
 4. **Package installation issues**:
    ```bash
@@ -431,128 +400,141 @@ python verify_setup.py
 
 ## 📦 **Installation**
 
-### **Quick Installation (Recommended)**
+### **Prerequisites**
 
-Choose your platform and run the appropriate installation script:
+Before installing SnapStudio, you need to have Podman installed on your system:
 
 #### **macOS**
 ```bash
-git clone <your-repo-url>
-cd SnapStudio
-chmod +x install_macos.sh
-./install_macos.sh
+# Install Podman using Homebrew
+brew install podman
+
+# Initialize and start Podman machine
+podman machine init
+podman machine start
 ```
 
-#### **Linux**
+#### **Linux (Ubuntu/Debian)**
 ```bash
-git clone <your-repo-url>
-cd SnapStudio
-chmod +x install_linux.sh
-./install_linux.sh
+# Install Podman
+sudo apt update
+sudo apt install podman
+
+# Start Podman service
+sudo systemctl start podman
+sudo systemctl enable podman
+```
+
+#### **Linux (Fedora/CentOS/RHEL)**
+```bash
+# Install Podman
+sudo dnf install podman
+
+# Start Podman service
+sudo systemctl start podman
+sudo systemctl enable podman
 ```
 
 #### **Windows**
-```cmd
+```bash
+# Install Podman using Chocolatey
+choco install podman
+
+# Or download from: https://podman.io/getting-started/installation
+```
+
+### **SnapStudio Installation**
+
+SnapStudio is designed to run in a containerized environment using Podman:
+
+#### **Quick Start with Podman**
+```bash
+# Clone the repository
 git clone <your-repo-url>
 cd SnapStudio
-install_windows.bat
+
+# Build and run with Podman
+./podman_build.sh
+./podman_run.sh
+
+# Access the application
+# Open browser to: http://localhost:5001
+# Login: admin / admin123
 ```
 
-### **Manual Installation**
-
-If you prefer to install manually or the scripts don't work:
-
-#### **Prerequisites**
-- **Python 3.8+** (required)
-- **pip** (usually comes with Python)
-- **Git** (for cloning the repository)
-
-#### **Step-by-Step Installation**
-
-1. **Clone the repository**:
+#### **Podman Commands**
 ```bash
-git clone <your-repo-url>
-cd SnapStudio
+# Build the Podman image
+./podman_build.sh
+
+# Run the container
+./podman_run.sh
+
+# Or use Podman Compose
+podman-compose up -d
+
+# View logs
+podman logs -f snapstudio-app
+
+# Stop the container
+podman-compose down
 ```
 
-2. **Create virtual environment**:
-```bash
-# macOS/Linux
-python3 -m venv venv
-source venv/bin/activate
+#### **Podman Features**
+- **Port**: Exposed on port 5001
+- **Data Persistence**: Volumes for data, logs, backups, exports, and uploads
+- **Health Checks**: Automatic health monitoring
+- **Security**: Runs as non-root user
+- **Auto-restart**: Container restarts automatically on failure
 
-# Windows
-python -m venv venv
-venv\Scripts\activate
-```
 
-3. **Install dependencies**:
-```bash
-pip install -r requirements.txt
-```
-
-4. **Create necessary directories**:
-```bash
-mkdir -p data logs backups exports uploads temp
-```
-
-5. **Set up configuration**:
-```bash
-cp config.example.yaml config.yaml
-# Edit config.yaml with your settings
-```
-
-6. **Run the application**:
-```bash
-# Web Application (Recommended)
-python web_app.py
-
-# CLI Application (Legacy)
-python main.py --help
-```
 
 ### **Access the Application**
+
 - **Web Interface**: Open browser to `http://localhost:5001`
 - **Default Login**: `admin` / `admin123`
 
-### **Troubleshooting Installation**
+### **Troubleshooting**
 
 #### **Common Issues**
 
-1. **Python not found**:
-   - **macOS**: Install Python 3.8+ from [python.org](https://www.python.org/downloads/) or use Homebrew: `brew install python3`
+1. **Podman not found**:
+   - **macOS**: Install using Homebrew: `brew install podman`
    - **Linux**: Use your package manager (apt, yum, dnf, pacman)
-   - **Windows**: Download from [python.org](https://www.python.org/downloads/) and check "Add Python to PATH"
+   - **Windows**: Download from [podman.io](https://podman.io/getting-started/installation)
 
-2. **Permission denied (macOS/Linux)**:
+2. **Podman machine not running (macOS)**:
    ```bash
-   chmod +x install_macos.sh  # or install_linux.sh
+   podman machine init
+   podman machine start
    ```
 
-3. **Virtual environment issues**:
+3. **Permission denied**:
    ```bash
-   # Remove and recreate
-   rm -rf venv
-   python3 -m venv venv
-   source venv/bin/activate
+   chmod +x podman_build.sh podman_run.sh
    ```
 
-4. **Dependencies fail to install**:
+4. **Container fails to start**:
    ```bash
-   # Upgrade pip first
-   pip install --upgrade pip
-   pip install -r requirements.txt
+   # Check logs
+   podman logs snapstudio-app
+   
+   # Rebuild image
+   ./podman_build.sh
    ```
 
 5. **Port already in use**:
-   - Change port in `web_app.py` (line 1725): `port=5002`
-   - Or kill the process using port 5001
+   - Change the port mapping in `podman_run.sh` or `docker-compose.yml`
+   - Use `lsof -i :5001` to find what's using the port
 
-#### **Platform-Specific Notes**
-
-- **macOS**: May need to install Xcode command line tools: `xcode-select --install`
-- **Linux**: May need to install `python3-venv` package
-- **Windows**: Use Command Prompt or PowerShell as Administrator if needed
+6. **Data persistence issues**:
+   ```bash
+   # Check volumes
+   podman volume ls
+   
+   # Inspect volume
+   podman volume inspect snapstudio_data
+   ```
 
 ### **Google Cloud Setup (Optional)**
 

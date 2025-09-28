@@ -87,7 +87,8 @@ except ImportError:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sonny/SnapStudio/data/web_app.db'
+# Use absolute path for container compatibility
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////app/data/web_app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
@@ -1711,7 +1712,15 @@ def internal_error(error):
 if __name__ == '__main__':
     # Create database tables
     with app.app_context():
-        db.create_all()
+        try:
+            print("Creating database tables...")
+            db.create_all()
+            print("Database tables created successfully")
+        except Exception as e:
+            print(f"Error creating database tables: {e}")
+            import traceback
+            traceback.print_exc()
+            exit(1)
         
         # Initialize CRM database
         try:
@@ -1721,11 +1730,17 @@ if __name__ == '__main__':
             print(f"Warning: Could not initialize CRM database: {e}")
         
         # Create default admin user if none exists
-        if not User.query.filter_by(username='admin').first():
-            admin_user = User(username='admin', email='admin@example.com', role='admin')
-            admin_user.set_password('admin123')
-            db.session.add(admin_user)
-            db.session.commit()
-            print("Default admin user created: username='admin', password='admin123'")
+        try:
+            if not User.query.filter_by(username='admin').first():
+                admin_user = User(username='admin', email='admin@example.com', role='admin')
+                admin_user.set_password('admin123')
+                db.session.add(admin_user)
+                db.session.commit()
+                print("Default admin user created: username='admin', password='admin123'")
+        except Exception as e:
+            print(f"Warning: Could not create default admin user: {e}")
     
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    # Get port from environment variable or default to 5001 for local development
+    port = int(os.environ.get('FLASK_RUN_PORT', 5001))
+    debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=port)
