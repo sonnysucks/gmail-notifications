@@ -87,7 +87,7 @@ except ImportError:
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key-here')
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sonny/gmail-notifications/data/web_app.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/sonny/SnapStudio/data/web_app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Initialize extensions
@@ -809,6 +809,12 @@ def backup_restore():
 def tools():
     """Tools page with age calculator and other utilities"""
     return render_template('tools.html')
+
+@app.route('/about')
+@login_required
+def about():
+    """About Us page"""
+    return render_template('about.html')
 
 @app.route('/correspondence')
 @login_required

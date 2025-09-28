@@ -2,7 +2,7 @@
 ## Photography Scheduler Project
 
 **Project ID**: `photography-scheduler`  
-**Repository**: `gmail-notifications`  
+**Repository**: `SnapStudio`  
 **Started**: December 2024  
 **Status**: Active Development
 

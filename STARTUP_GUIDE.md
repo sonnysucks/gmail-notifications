@@ -3,7 +3,7 @@
 
 **Project**: Gmail Photography Appointment Scheduler with CRM  
 **Specialization**: Baby Photography (Maternity, Newborn, Milestone, Smash Cake, Birthday)  
-**Repository**: `gmail-notifications`  
+**Repository**: `SnapStudio`  
 **Last Updated**: August 2025
 
 ---
@@ -52,10 +52,10 @@
 cd ~/projects  # or wherever you keep your projects
 
 # Clone the repository
-git clone https://github.com/yourusername/gmail-notifications.git
+git clone https://github.com/yourusername/SnapStudio.git
 
 # Navigate into the project directory
-cd gmail-notifications
+cd SnapStudio
 
 # Verify the clone was successful
 ls -la
@@ -126,7 +126,7 @@ which python
 
 **Expected Output:**
 ```
-/Users/username/projects/gmail-notifications/venv/bin/python
+/Users/username/projects/SnapStudio/venv/bin/python
 ```
 
 ### **Step 3: Install Dependencies**

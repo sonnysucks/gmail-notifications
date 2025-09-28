@@ -34,7 +34,7 @@
 ```bash
 # 1. Clone and setup
 git clone <repository-url>
-cd gmail-notifications
+cd SnapStudio
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -126,7 +126,7 @@ appointments:
 ### **Current Architecture (Web Application)**
 
 ```
-gmail-notifications/
+SnapStudio/
 ├── web_app.py                 # Flask web application (main entry point)
 ├── run_web_app.py            # Web app launcher
 ├── main.py                   # CLI application (legacy)

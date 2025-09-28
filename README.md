@@ -15,6 +15,7 @@ A comprehensive **web-based** appointment scheduling and Customer Relationship M
 - **📈 Analytics**: Revenue tracking, session statistics, client metrics
 - **💾 Backup & Restore**: Complete system backup and data management
 - **⚙️ Configuration**: Comprehensive business setup and customization
+- **ℹ️ About Us**: Company information, contact details, and future app announcements
 
 ## 📸 **Professional Photography Services**
 
@@ -121,47 +122,457 @@ This system is **designed for professional photographers** specializing in:
 
 ## 🛠️ **Prerequisites**
 
-- Python 3.8+
+### **Required**
+- **Python 3.8+** (required for all features)
+- **Git** (for cloning the repository)
+
+### **Optional (for Gmail/Calendar integration)**
 - Google Cloud Platform account
 - Gmail API enabled
 - Google Calendar API enabled
 - OAuth 2.0 credentials
 
+## 🐍 **Python Environment Configuration**
+
+### **Recommended Python Setup**
+
+#### **1. Python Version Management**
+
+**macOS (using pyenv - Recommended)**:
+```bash
+# Install pyenv
+brew install pyenv
+
+# Install Python 3.9 or 3.10
+pyenv install 3.9.18
+pyenv install 3.10.13
+
+# Set global Python version
+pyenv global 3.9.18
+
+# Verify installation
+python --version
+```
+
+**Linux (using pyenv)**:
+```bash
+# Install pyenv
+curl https://pyenv.run | bash
+
+# Add to shell profile
+echo 'export PYENV_ROOT="$HOME/.pyenv"' >> ~/.bashrc
+echo 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc
+echo 'eval "$(pyenv init -)"' >> ~/.bashrc
+
+# Restart shell or source profile
+source ~/.bashrc
+
+# Install Python
+pyenv install 3.9.18
+pyenv global 3.9.18
+```
+
+**Windows (using pyenv-win)**:
+```powershell
+# Install pyenv-win
+git clone https://github.com/pyenv-win/pyenv-win.git %USERPROFILE%\.pyenv
+
+# Add to PATH (add to System Environment Variables)
+# PYENV = %USERPROFILE%\.pyenv\pyenv-win\
+# PYENV_ROOT = %USERPROFILE%\.pyenv\pyenv-win\
+# PYENV_HOME = %USERPROFILE%\.pyenv\pyenv-win\
+
+# Install Python
+pyenv install 3.9.18
+pyenv global 3.9.18
+```
+
+#### **2. Virtual Environment Best Practices**
+
+**Always use virtual environments** to avoid dependency conflicts:
+
+```bash
+# Create virtual environment
+python -m venv venv
+
+# Activate virtual environment
+# macOS/Linux:
+source venv/bin/activate
+
+# Windows:
+venv\Scripts\activate
+
+# Verify you're in the virtual environment
+which python  # Should show path to venv/bin/python
+```
+
+#### **3. Environment Variables (Optional)**
+
+Create a `.env` file for sensitive configuration:
+
+```bash
+# Create .env file
+cat > .env << EOF
+# Database
+DATABASE_URL=sqlite:///data/web_app.db
+
+# Flask
+SECRET_KEY=your-secret-key-here
+FLASK_ENV=development
+FLASK_DEBUG=True
+
+# Google APIs (optional)
+GOOGLE_APPLICATION_CREDENTIALS=credentials.json
+
+# Email (optional)
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-app-password
+EOF
+```
+
+#### **4. Python Path Configuration**
+
+**macOS/Linux** - Add to `~/.bashrc` or `~/.zshrc`:
+```bash
+# Add Python to PATH if needed
+export PATH="/usr/local/bin/python3:$PATH"
+
+# Add pip to PATH
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+**Windows** - Add to System Environment Variables:
+```
+PATH = C:\Python39\;C:\Python39\Scripts\;%PATH%
+```
+
+#### **5. IDE/Editor Configuration**
+
+**VS Code** - Create `.vscode/settings.json`:
+```json
+{
+    "python.defaultInterpreterPath": "./venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": true,
+    "python.formatting.provider": "black",
+    "python.testing.pytestEnabled": true
+}
+```
+
+**PyCharm**:
+1. File → Settings → Project → Python Interpreter
+2. Add interpreter → Existing environment
+3. Select `./venv/bin/python` (or `venv\Scripts\python.exe` on Windows)
+
+#### **6. Development Dependencies (Optional)**
+
+For development, install additional tools:
+
+```bash
+# Activate virtual environment first
+source venv/bin/activate
+
+# Install development dependencies
+pip install black flake8 pytest pytest-cov
+
+# Configure black (code formatter)
+echo "[tool.black]
+line-length = 88
+target-version = ['py38']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''" > pyproject.toml
+```
+
+#### **7. Environment Verification**
+
+Create a verification script to check your setup:
+
+```bash
+# Create verify_setup.py
+cat > verify_setup.py << 'EOF'
+#!/usr/bin/env python3
+"""Verify SnapStudio setup and dependencies."""
+
+import sys
+import subprocess
+import importlib
+
+def check_python_version():
+    """Check Python version."""
+    version = sys.version_info
+    if version.major == 3 and version.minor >= 8:
+        print(f"✅ Python {version.major}.{version.minor}.{version.micro} - OK")
+        return True
+    else:
+        print(f"❌ Python {version.major}.{version.minor}.{version.micro} - Need Python 3.8+")
+        return False
+
+def check_dependencies():
+    """Check required dependencies."""
+    required = [
+        'flask', 'sqlalchemy', 'yaml', 'google.auth', 
+        'google.oauth2', 'googleapiclient', 'werkzeug'
+    ]
+    
+    missing = []
+    for dep in required:
+        try:
+            importlib.import_module(dep)
+            print(f"✅ {dep} - OK")
+        except ImportError:
+            print(f"❌ {dep} - Missing")
+            missing.append(dep)
+    
+    return len(missing) == 0
+
+def check_directories():
+    """Check required directories."""
+    import os
+    required_dirs = ['data', 'logs', 'backups', 'exports', 'uploads', 'temp']
+    
+    for dir_name in required_dirs:
+        if os.path.exists(dir_name):
+            print(f"✅ {dir_name}/ - OK")
+        else:
+            print(f"❌ {dir_name}/ - Missing")
+            return False
+    return True
+
+def main():
+    """Run all checks."""
+    print("🔍 Verifying SnapStudio Setup")
+    print("=" * 40)
+    
+    checks = [
+        check_python_version(),
+        check_dependencies(),
+        check_directories()
+    ]
+    
+    if all(checks):
+        print("\n🎉 All checks passed! SnapStudio is ready to use.")
+        return 0
+    else:
+        print("\n❌ Some checks failed. Please fix the issues above.")
+        return 1
+
+if __name__ == "__main__":
+    sys.exit(main())
+EOF
+
+# Make it executable
+chmod +x verify_setup.py
+
+# Run verification
+python verify_setup.py
+```
+
+#### **8. Troubleshooting Python Issues**
+
+**Common Python Issues**:
+
+1. **Multiple Python versions**:
+   ```bash
+   # Check which Python is being used
+   which python
+   which python3
+   
+   # Use specific version
+   python3.9 -m venv venv
+   ```
+
+2. **Permission issues**:
+   ```bash
+   # Fix permissions
+   chmod +x venv/bin/activate
+   chmod +x *.py
+   ```
+
+3. **Virtual environment not activating**:
+   ```bash
+   # Check if virtual environment exists
+   ls -la venv/bin/
+   
+   # Recreate if needed
+   rm -rf venv
+   python -m venv venv
+   source venv/bin/activate
+   ```
+
+4. **Package installation issues**:
+   ```bash
+   # Upgrade pip
+   pip install --upgrade pip
+   
+   # Clear pip cache
+   pip cache purge
+   
+   # Install with verbose output
+   pip install -r requirements.txt -v
+   ```
+
 ## 📦 **Installation**
 
-### **Web Application (Recommended)**
+### **Quick Installation (Recommended)**
 
-1. **Clone and setup**:
+Choose your platform and run the appropriate installation script:
+
+#### **macOS**
 ```bash
 git clone <your-repo-url>
 cd SnapStudio
+chmod +x install_macos.sh
+./install_macos.sh
+```
+
+#### **Linux**
+```bash
+git clone <your-repo-url>
+cd SnapStudio
+chmod +x install_linux.sh
+./install_linux.sh
+```
+
+#### **Windows**
+```cmd
+git clone <your-repo-url>
+cd SnapStudio
+install_windows.bat
+```
+
+### **Manual Installation**
+
+If you prefer to install manually or the scripts don't work:
+
+#### **Prerequisites**
+- **Python 3.8+** (required)
+- **pip** (usually comes with Python)
+- **Git** (for cloning the repository)
+
+#### **Step-by-Step Installation**
+
+1. **Clone the repository**:
+```bash
+git clone <your-repo-url>
+cd SnapStudio
+```
+
+2. **Create virtual environment**:
+```bash
+# macOS/Linux
 python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate
+
+# Windows
+python -m venv venv
+venv\Scripts\activate
+```
+
+3. **Install dependencies**:
+```bash
 pip install -r requirements.txt
 ```
 
-2. **Run the web application**:
+4. **Create necessary directories**:
 ```bash
-python run_web_app.py
+mkdir -p data logs backups exports uploads temp
 ```
 
-3. **Access the application**:
-   - Open browser to: `http://localhost:5001`
-   - Login: `admin` / `admin123`
-
-### **CLI Application (Legacy)**
-
-1. **Configure the application**:
+5. **Set up configuration**:
 ```bash
 cp config.example.yaml config.yaml
-# Edit config.yaml with your baby photography business settings
+# Edit config.yaml with your settings
 ```
 
-2. **Set up Google Cloud credentials** (optional):
-   - Create a project in Google Cloud Console
-   - Enable Gmail API and Google Calendar API
-   - Create OAuth 2.0 credentials
-   - Download the credentials JSON file and save as `credentials.json`
+6. **Run the application**:
+```bash
+# Web Application (Recommended)
+python web_app.py
+
+# CLI Application (Legacy)
+python main.py --help
+```
+
+### **Access the Application**
+- **Web Interface**: Open browser to `http://localhost:5001`
+- **Default Login**: `admin` / `admin123`
+
+### **Troubleshooting Installation**
+
+#### **Common Issues**
+
+1. **Python not found**:
+   - **macOS**: Install Python 3.8+ from [python.org](https://www.python.org/downloads/) or use Homebrew: `brew install python3`
+   - **Linux**: Use your package manager (apt, yum, dnf, pacman)
+   - **Windows**: Download from [python.org](https://www.python.org/downloads/) and check "Add Python to PATH"
+
+2. **Permission denied (macOS/Linux)**:
+   ```bash
+   chmod +x install_macos.sh  # or install_linux.sh
+   ```
+
+3. **Virtual environment issues**:
+   ```bash
+   # Remove and recreate
+   rm -rf venv
+   python3 -m venv venv
+   source venv/bin/activate
+   ```
+
+4. **Dependencies fail to install**:
+   ```bash
+   # Upgrade pip first
+   pip install --upgrade pip
+   pip install -r requirements.txt
+   ```
+
+5. **Port already in use**:
+   - Change port in `web_app.py` (line 1725): `port=5002`
+   - Or kill the process using port 5001
+
+#### **Platform-Specific Notes**
+
+- **macOS**: May need to install Xcode command line tools: `xcode-select --install`
+- **Linux**: May need to install `python3-venv` package
+- **Windows**: Use Command Prompt or PowerShell as Administrator if needed
+
+### **Google Cloud Setup (Optional)**
+
+For Gmail and Google Calendar integration:
+
+1. **Create Google Cloud Project**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+
+2. **Enable APIs**:
+   - Enable Gmail API
+   - Enable Google Calendar API
+
+3. **Create OAuth 2.0 Credentials**:
+   - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client ID"
+   - Download the JSON file and save as `credentials.json`
+
+4. **Configure in SnapStudio**:
+   - Place `credentials.json` in the SnapStudio directory
+   - The app will handle OAuth flow automatically
 
 ## ⚙️ **Configuration for Professional Photography**
 
@@ -188,6 +599,7 @@ Edit `config.yaml` to configure:
    - **Analytics**: View business performance and revenue
    - **Setup**: Configure business settings and preferences
    - **Backup & Restore**: Manage system backups
+   - **About Us**: Company information and future app announcements
 
 ### **CLI Application Usage (Legacy)**
 
@@ -367,14 +779,21 @@ MIT License - see LICENSE file for details
 
 ## 🆘 **Support**
 
+### **Contact Information**
+- **Company**: SnapApp Development
+- **Email**: snapappdevelopment@gmail.com
+- **App**: SnapStudio
+
 For support and questions:
 1. Check the logs for error messages
 2. Verify your configuration
 3. Test with the provided test scripts
-4. Open an issue in the repository
+4. Contact us at snapappdevelopment@gmail.com
+5. Open an issue in the repository
 
 ## 🔮 **Roadmap for Professional Photography**
 
+- **Personal Photobooth App**: Coming soon - personal photobooth application for events and parties
 - **Web Interface**: React/Vue.js web application
 - **Mobile App**: iOS/Android mobile applications
 - **Advanced Analytics**: Machine learning insights for client behavior

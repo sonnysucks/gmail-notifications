@@ -55,7 +55,7 @@ python web_app.py
 ```
 
 ### 3. Access the Application
-Open your browser and navigate to: `http://localhost:5000`
+Open your browser and navigate to: `http://localhost:5001`
 
 ### 4. Default Login
 - **Username**: `admin`
@@ -91,6 +91,12 @@ The web application is built with:
 - Calendar and business hours setup
 - Baby photography specific settings
 - CRM and marketing configuration
+
+### **About Us**
+- Company information and branding
+- Contact details and support information
+- Future app announcements (Personal Photobooth App)
+- Social media links and company updates
 
 ### **Appointment Management**
 - Comprehensive appointment creation forms
@@ -176,6 +182,7 @@ The web application is built with:
 
 ## 🚀 Future Enhancements
 
+- **Personal Photobooth App**: Coming soon - personal photobooth application for events and parties
 - **Mobile App**: Native iOS and Android applications
 - **Advanced Analytics**: Machine learning insights
 - **Payment Integration**: Stripe/PayPal integration
@@ -187,6 +194,11 @@ The web application is built with:
 
 ## 🆘 Support
 
+### **Contact Information**
+- **Company**: SnapApp Development
+- **Email**: snapappdevelopment@gmail.com
+- **App**: SnapStudio
+
 ### **Common Issues**
 1. **Port Already in Use**: Change the port in `web_app.py`
 2. **Database Errors**: Check file permissions in the `data/` directory
@@ -197,6 +209,7 @@ The web application is built with:
 - Verify your configuration settings
 - Ensure all dependencies are installed correctly
 - Check file permissions and directory structure
+- Contact us at snapappdevelopment@gmail.com for support
 
 ## 📄 License
 

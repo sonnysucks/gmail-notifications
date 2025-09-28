@@ -14,7 +14,7 @@ This guide will walk you through setting up the Gmail Photography Appointment Sc
 ```bash
 # Clone the repository
 git clone <your-repo-url>
-cd gmail-notifications
+cd SnapStudio
 
 # Create a virtual environment (recommended)
 python -m venv venv

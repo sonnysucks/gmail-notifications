@@ -42,6 +42,7 @@ A comprehensive appointment scheduling and Customer Relationship Management (CRM
 - ✅ **Appointment Scheduling**: Full appointment management with milestone tracking
 - ✅ **Session-Based Authentication**: Secure login system
 - ✅ **Responsive Design**: Bootstrap 5 with mobile-friendly interface
+- ✅ **About Us Page**: Company information, contact details, and future app announcements
 - ✅ **Legacy CLI Interface**: Command-line interface still functional
 - ✅ **Google Calendar Integration**: Any calendar support
 - ✅ **Gmail Integration**: Email scanning and communication
@@ -231,6 +232,7 @@ python main.py crm update-client "client_id" --due-date "YYYY-MM-DD"
 - 🔄 Marketing campaign management
 
 ### **Planned Features**
+- 📋 Personal Photobooth App (coming soon)
 - 📋 Mobile application (iOS/Android)
 - 📋 Payment integration (Stripe/PayPal)
 - 📋 Multi-location support
@@ -265,7 +267,8 @@ SnapStudio/
 │   ├── calendar.html     # Interactive calendar
 │   ├── clients.html      # Client management
 │   ├── analytics.html    # Business analytics
-│   └── backup_restore.html # Backup management
+│   ├── backup_restore.html # Backup management
+│   └── about.html        # About Us page
 ├── static/                # CSS, JavaScript, assets
 ├── config/                # Configuration management
 ├── gmail/                 # Gmail API integration

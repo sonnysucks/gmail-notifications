@@ -10,8 +10,8 @@
 ### **1. Clone & Setup**
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/gmail-notifications.git
-cd gmail-notifications
+git clone https://github.com/yourusername/SnapStudio.git
+cd SnapStudio
 
 # Create virtual environment
 python3 -m venv venv

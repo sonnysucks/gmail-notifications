@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}About Us - {{ business.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-info-circle text-primary me-2"></i>
+                    About Us
+                </h1>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <!-- Company Information Card -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-building me-2"></i>
+                        SnapStudio
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary">Company Information</h5>
+                            <p class="mb-3">
+                                <strong>App Name:</strong> SnapStudio<br>
+                                <strong>Company:</strong> SnapApp Development<br>
+                                <strong>Email:</strong> 
+                                <a href="mailto:snapappdevelopment@gmail.com" class="text-decoration-none">
+                                    snapappdevelopment@gmail.com
+                                </a>
+                            </p>
+                            
+                            <h5 class="text-primary mt-4">About SnapStudio</h5>
+                            <p>
+                                SnapStudio is a comprehensive photography business management system designed specifically 
+                                for professional photographers. Our platform streamlines appointment scheduling, client 
+                                management, and business operations to help photographers focus on what they do best - 
+                                capturing beautiful moments.
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-4 mb-3">
+                                    <i class="fas fa-camera-retro text-primary" style="font-size: 3rem;"></i>
+                                </div>
+                                <h6 class="text-muted">Professional Photography Solutions</h6>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coming Soon Section -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-rocket me-2"></i>
+                        Coming Soon
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="text-success">Personal Photobooth App</h5>
+                            <p class="mb-3">
+                                We're excited to announce that we're currently developing a personal photobooth application! 
+                                This new app will bring the fun and convenience of photobooths directly to your events, 
+                                parties, and special occasions.
+                            </p>
+                            
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Stay tuned!</strong> More details about our upcoming photobooth app will be 
+                                announced soon. Follow us on social media for the latest updates.
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <div class="bg-light rounded p-3 mb-3">
+                                    <i class="fas fa-camera text-success" style="font-size: 2.5rem;"></i>
+                                </div>
+                                <small class="text-muted">Personal Photobooth</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Section -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h4 class="card-title mb-0">
+                        <i class="fas fa-share-alt me-2"></i>
+                        Connect With Us
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <p class="mb-4">
+                        Follow us on social media to stay updated on new features, upcoming apps, and photography tips!
+                    </p>
+                    
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="text-center">
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                    <i class="fab fa-facebook-f"></i>
+                                </div>
+                                <h6>Facebook</h6>
+                                <small class="text-muted">Coming Soon</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="text-center">
+                                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                    <i class="fab fa-twitter"></i>
+                                </div>
+                                <h6>Twitter</h6>
+                                <small class="text-muted">Coming Soon</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="text-center">
+                                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                    <i class="fab fa-instagram"></i>
+                                </div>
+                                <h6>Instagram</h6>
+                                <small class="text-muted">Coming Soon</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="text-center">
+                                <div class="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width: 60px; height: 60px;">
+                                    <i class="fab fa-github"></i>
+                                </div>
+                                <h6>GitHub</h6>
+                                <small class="text-muted">Coming Soon</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            <i class="fas fa-envelope me-2"></i>
+                            For immediate support or inquiries, contact us at 
+                            <a href="mailto:snapappdevelopment@gmail.com" class="text-decoration-none">
+                                snapappdevelopment@gmail.com
+                            </a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
