@@ -514,6 +514,24 @@ def edit_appointment(appointment_id):
 def clients():
     """Client management"""
     clients = crm_manager.get_all_clients()
+    
+    # Fix birth_date format for children_info
+    for client in clients:
+        if hasattr(client, 'children_info') and client.children_info:
+            for child in client.children_info:
+                if child.get('birth_date'):
+                    # If it's already a datetime object, leave it as is
+                    if isinstance(child['birth_date'], datetime):
+                        continue
+                    # If it's a string, convert to datetime
+                    elif isinstance(child['birth_date'], str):
+                        try:
+                            child['birth_date'] = datetime.strptime(child['birth_date'], '%Y-%m-%d')
+                        except ValueError:
+                            child['birth_date'] = None
+                    else:
+                        child['birth_date'] = None
+    
     return render_template('clients.html', clients=clients, now=datetime.now())
 
 @app.route('/clients/new', methods=['GET', 'POST'])
