@@ -1,0 +1,38 @@
+# SnapStudio Podman/Docker Compose for Cloudflare Deployment
+# Professional Photography Business Management System
+
+version: '3.8'
+
+services:
+  snapstudio:
+    build: .
+    container_name: snapstudio-app
+    ports:
+      - "5001:5001"
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=sqlite:////app/data/web_app.db
+      - SECRET_KEY=${SECRET_KEY:-your-secret-key-change-in-production}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+      - ./exports:/app/exports
+      - ./backups:/app/backups
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  cloudflare-tunnel:
+    image: cloudflare/cloudflared:latest
+    container_name: snapstudio-tunnel
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    depends_on:
+      - snapstudio
+    restart: unless-stopped
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN}

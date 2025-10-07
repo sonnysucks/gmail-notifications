@@ -1,0 +1,190 @@
+# SnapStudio Cloudflare Terraform Configuration
+# Fully automated deployment with Infrastructure as Code
+
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+    digitalocean = {
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
+# Configure providers
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+provider "digitalocean" {
+  token = var.do_token
+}
+
+# Variables
+variable "domain" {
+  description = "Domain name for SnapStudio"
+  type        = string
+}
+
+variable "do_token" {
+  description = "Digital Ocean API token"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_email" {
+  description = "Cloudflare account email"
+  type        = string
+}
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
+  type        = string
+}
+
+variable "ssh_key_fingerprint" {
+  description = "SSH key fingerprint for Digital Ocean"
+  type        = string
+}
+
+# Digital Ocean Droplet
+resource "digitalocean_droplet" "snapstudio" {
+  image    = "ubuntu-22-04-x64"
+  name     = "snapstudio-${var.domain}"
+  region   = "nyc3"
+  size     = "s-1vcpu-1gb"  # $6/month
+  ssh_keys = [var.ssh_key_fingerprint]
+
+  user_data = templatefile("${path.module}/user_data.sh", {
+    domain = var.domain
+  })
+
+  tags = ["snapstudio", "production"]
+}
+
+# Cloudflare Zone
+data "cloudflare_zone" "main" {
+  name = var.domain
+}
+
+# Cloudflare Tunnel
+resource "cloudflare_tunnel" "snapstudio" {
+  account_id = var.cloudflare_account_id
+  name       = "snapstudio-${var.domain}"
+  secret     = base64encode(random_password.tunnel_secret.result)
+}
+
+# Random password for tunnel
+resource "random_password" "tunnel_secret" {
+  length  = 64
+  special = true
+}
+
+# Cloudflare Tunnel Configuration
+resource "cloudflare_tunnel_config" "snapstudio" {
+  tunnel_id  = cloudflare_tunnel.snapstudio.id
+  account_id = var.cloudflare_account_id
+
+  config {
+    ingress_rule {
+      hostname = var.domain
+      service  = "http://${digitalocean_droplet.snapstudio.ipv4_address}:5001"
+    }
+    
+    ingress_rule {
+      hostname = "www.${var.domain}"
+      service  = "http://${digitalocean_droplet.snapstudio.ipv4_address}:5001"
+    }
+    
+    ingress_rule {
+      service = "http_status:404"
+    }
+  }
+}
+
+# DNS Records
+resource "cloudflare_record" "snapstudio" {
+  zone_id = data.cloudflare_zone.main.id
+  name    = var.domain
+  value   = digitalocean_droplet.snapstudio.ipv4_address
+  type    = "A"
+  ttl     = 1
+}
+
+resource "cloudflare_record" "snapstudio_www" {
+  zone_id = data.cloudflare_zone.main.id
+  name    = "www"
+  value   = digitalocean_droplet.snapstudio.ipv4_address
+  type    = "A"
+  ttl     = 1
+}
+
+# Cloudflare Security Rules
+resource "cloudflare_ruleset" "snapstudio_security" {
+  zone_id  = data.cloudflare_zone.main.id
+  name     = "SnapStudio Security Rules"
+  description = "Security rules for SnapStudio application"
+  kind     = "zone"
+  phase    = "http_request_firewall_custom"
+
+  rules {
+    action = "block"
+    expression = "(http.request.uri.path eq \"/login\" and cf.threat_score gt 14)"
+    description = "Block high threat score login attempts"
+  }
+
+  rules {
+    action = "challenge"
+    expression = "(http.request.uri.path contains \"/api/\" and cf.bot_management.score lt 30)"
+    description = "Challenge suspicious API requests"
+  }
+}
+
+# Rate Limiting Rules
+resource "cloudflare_ruleset" "snapstudio_rate_limit" {
+  zone_id  = data.cloudflare_zone.main.id
+  name     = "SnapStudio Rate Limiting"
+  description = "Rate limiting rules for SnapStudio"
+  kind     = "zone"
+  phase    = "http_ratelimit"
+
+  rules {
+    action = "block"
+    expression = "(http.request.uri.path eq \"/login\")"
+    ratelimit {
+      characteristics = ["cf.connecting_ip"]
+      period = 60
+      requests_per_period = 5
+      mitigation_timeout = 300
+    }
+    description = "Rate limit login attempts"
+  }
+}
+
+# Outputs
+output "droplet_ip" {
+  value = digitalocean_droplet.snapstudio.ipv4_address
+}
+
+output "tunnel_id" {
+  value = cloudflare_tunnel.snapstudio.id
+}
+
+output "domain_url" {
+  value = "https://${var.domain}"
+}
+

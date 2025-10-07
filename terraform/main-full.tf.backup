@@ -1,0 +1,149 @@
+# SnapStudio Cloudflare-Only Terraform Configuration
+# Deploy SnapStudio using Cloudflare Workers and D1 database
+
+terraform {
+  required_version = ">= 1.0"
+  required_providers {
+    cloudflare = {
+      source  = "cloudflare/cloudflare"
+      version = "~> 4.0"
+    }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.0"
+    }
+  }
+}
+
+# Configure Cloudflare provider
+provider "cloudflare" {
+  api_token = var.cloudflare_api_token
+}
+
+# Variables
+variable "domain" {
+  description = "Domain name for SnapStudio"
+  type        = string
+}
+
+variable "cloudflare_api_token" {
+  description = "Cloudflare API token"
+  type        = string
+  sensitive   = true
+}
+
+variable "cloudflare_account_id" {
+  description = "Cloudflare account ID"
+  type        = string
+}
+
+# Cloudflare Zone
+data "cloudflare_zone" "main" {
+  name = var.domain
+}
+
+# Cloudflare D1 Database
+resource "cloudflare_d1_database" "snapstudio" {
+  account_id = var.cloudflare_account_id
+  name       = "snapstudio-db"
+}
+
+# Cloudflare R2 Bucket for file storage
+resource "cloudflare_r2_bucket" "snapstudio_assets" {
+  account_id = var.cloudflare_account_id
+  name       = "snapstudio-assets"
+  location   = "WNAM"
+}
+
+# Cloudflare Worker Script
+resource "cloudflare_worker_script" "snapstudio" {
+  account_id = var.cloudflare_account_id
+  name       = "snapstudio-worker"
+  content    = file("${path.module}/worker.js")
+}
+
+# Cloudflare Worker Route
+resource "cloudflare_worker_route" "snapstudio" {
+  zone_id     = data.cloudflare_zone.main.id
+  pattern     = "${var.domain}/*"
+  script_name = cloudflare_worker_script.snapstudio.name
+}
+
+# Cloudflare Worker Route for www
+resource "cloudflare_worker_route" "snapstudio_www" {
+  zone_id     = data.cloudflare_zone.main.id
+  pattern     = "www.${var.domain}/*"
+  script_name = cloudflare_worker_script.snapstudio.name
+}
+
+# DNS Records (CNAME to Cloudflare Workers)
+resource "cloudflare_record" "snapstudio" {
+  zone_id = data.cloudflare_zone.main.id
+  name    = var.domain
+  content = "${var.domain}.workers.dev"
+  type    = "CNAME"
+  ttl     = 1
+}
+
+resource "cloudflare_record" "snapstudio_www" {
+  zone_id = data.cloudflare_zone.main.id
+  name    = "www"
+  content = "${var.domain}.workers.dev"
+  type    = "CNAME"
+  ttl     = 1
+}
+
+# Cloudflare Security Rules
+resource "cloudflare_ruleset" "snapstudio_security" {
+  zone_id  = data.cloudflare_zone.main.id
+  name     = "SnapStudio Security Rules"
+  description = "Security rules for SnapStudio application"
+  kind     = "zone"
+  phase    = "http_request_firewall_custom"
+
+  rules {
+    action = "block"
+    expression = "(http.request.uri.path eq \"/login\" and cf.threat_score gt 14)"
+    description = "Block high threat score login attempts"
+  }
+
+  rules {
+    action = "challenge"
+    expression = "(http.request.uri.path contains \"/api/\" and cf.bot_management.score lt 30)"
+    description = "Challenge suspicious API requests"
+  }
+}
+
+# Rate Limiting Rules
+resource "cloudflare_ruleset" "snapstudio_rate_limit" {
+  zone_id  = data.cloudflare_zone.main.id
+  name     = "SnapStudio Rate Limiting"
+  description = "Rate limiting rules for SnapStudio"
+  kind     = "zone"
+  phase    = "http_ratelimit"
+
+  rules {
+    action = "block"
+    expression = "(http.request.uri.path eq \"/login\")"
+    ratelimit {
+      characteristics = ["cf.connecting_ip"]
+      period = 60
+      requests_per_period = 5
+      mitigation_timeout = 300
+    }
+    description = "Rate limit login attempts"
+  }
+}
+
+# Outputs
+output "domain_url" {
+  value = "https://${var.domain}"
+}
+
+output "database_id" {
+  value = cloudflare_d1_database.snapstudio.id
+}
+
+output "worker_url" {
+  value = "https://${var.domain}.workers.dev"
+}

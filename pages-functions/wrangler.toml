@@ -1,0 +1,9 @@
+name = "snapstudio-pages"
+compatibility_date = "2024-10-07"
+
+[pages]
+build = { command = "echo 'Building...'", cwd = "." }
+
+[[pages.functions]]
+pattern = "*"
+python = true

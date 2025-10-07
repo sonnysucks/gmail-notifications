@@ -1,0 +1,9 @@
+tunnel: 6413ac9d-3106-4f64-8a71-6b5ea1d66cca
+credentials-file: ~/.cloudflared/6413ac9d-3106-4f64-8a71-6b5ea1d66cca.json
+
+ingress:
+  - hostname: snapstudio.cc
+    service: http://localhost:5001
+  - hostname: www.snapstudio.cc
+    service: http://localhost:5001
+  - service: http_status:404

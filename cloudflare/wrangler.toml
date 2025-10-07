@@ -1,0 +1,18 @@
+# SnapStudio Cloudflare Workers Configuration
+# Professional Photography Business Management System
+
+name = "snapstudio-worker"
+main = "worker-enhanced.js"
+compatibility_date = "2024-10-07"
+
+# Deploy to your custom domain
+routes = [
+  { pattern = "snapstudio.cc/*", zone_name = "snapstudio.cc" },
+  { pattern = "www.snapstudio.cc/*", zone_name = "snapstudio.cc" }
+]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "snapstudio-db"
+database_id = "3c0d0b5c-9523-4c73-9872-0145f1221302"

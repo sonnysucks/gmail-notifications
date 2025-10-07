@@ -1,0 +1,20 @@
+# SnapStudio Cloudflare Pages Python Deployment
+# Professional Photography Business Management System
+
+name = "snapstudio-pages"
+compatibility_date = "2024-10-07"
+
+# Pages configuration
+pages_build_output_dir = "dist"
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "snapstudio-db"
+database_id = "3c0d0b5c-9523-4c73-9872-0145f1221302"
+
+# Environment variables
+[env.production.vars]
+SECRET_KEY = "your-secret-key-here"
+DATABASE_URL = "sqlite:///snapstudio.db"
+ENVIRONMENT = "production"
