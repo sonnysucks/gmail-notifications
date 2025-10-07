@@ -514,7 +514,7 @@ def edit_appointment(appointment_id):
 def clients():
     """Client management"""
     clients = crm_manager.get_all_clients()
-    return render_template('clients.html', clients=clients)
+    return render_template('clients.html', clients=clients, now=datetime.now())
 
 @app.route('/clients/new', methods=['GET', 'POST'])
 @login_required
